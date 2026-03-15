@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BasinSync — Azure SQL Schema Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #1B3A5C;
+  --navy2:   #2C5282;
+  --navy-dim:#EBF2FA;
+  --amber:   #D97706;
+  --amber-bg:#FEF3C7;
+  --lime:    #16A34A;
+  --lime-bg: #DCFCE7;
+  --red:     #DC2626;
+  --red-bg:  #FEE2E2;
+  --sky:     #0284C7;
+  --sky-bg:  #E0F2FE;
+  --purple:  #7C3AED;
+  --purple-bg:#EDE9FE;
+  --bg:      #F5F3EE;
+  --bg2:     #EDEBE6;
+  --surface: #FFFFFF;
+  --border:  #DDD8D0;
+  --text:    #1A1A1A;
+  --text-2:  #374151;
+  --text-3:  #6B7280;
+  --text-4:  #9CA3AF;
+  --font-h:  'Barlow Condensed', sans-serif;
+  --font-b:  'Nunito Sans', sans-serif;
+  --font-m:  'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-b); background: var(--bg); color: var(--text); font-size: 14px; }
+
+/* ── HEADER ── */
+.header {
+  background: var(--navy);
+  color: white;
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 3px solid var(--amber);
+}
+.header-brand { font-family: var(--font-h); font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+.header-brand span { color: var(--amber); }
+.header-sub { font-size: 12px; color: rgba(255,255,255,0.6); font-family: var(--font-m); }
+.header-badge { background: var(--amber); color: white; font-family: var(--font-h); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 3px; letter-spacing: 0.5px; }
+
+/* ── PHASE TABS ── */
+.phase-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  gap: 4px;
+  position: sticky;
+  top: 56px;
+  z-index: 90;
+  overflow-x: auto;
+}
+.phase-tab {
+  padding: 14px 18px 12px;
+  font-family: var(--font-h);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  user-select: none;
+}
+.phase-tab:hover { color: var(--navy); background: var(--navy-dim); }
+.phase-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+.phase-tab .tab-badge {
+  display: inline-block;
+  background: var(--bg2);
+  color: var(--text-3);
+  font-family: var(--font-m);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  margin-left: 6px;
+}
+.phase-tab.active .tab-badge { background: var(--navy-dim); color: var(--navy); }
+
+/* ── MAIN LAYOUT ── */
+.main { display: flex; min-height: calc(100vh - 100px); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 100px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 16px 0;
+}
+.sidebar-section { padding: 0 16px; margin-bottom: 4px; }
+.sidebar-label {
+  font-family: var(--font-m);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 4px 4px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: var(--font-m);
+  color: var(--text-2);
+  transition: all 0.12s;
+  border: 1px solid transparent;
+}
+.sidebar-item:hover { background: var(--bg); color: var(--navy); }
+.sidebar-item.active { background: var(--navy-dim); color: var(--navy); border-color: rgba(27,58,92,0.15); font-weight: 500; }
+.sidebar-item .si-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sidebar-item .si-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-4);
+}
+
+/* ── CONTENT ── */
+.content { flex: 1; padding: 28px 32px; overflow: auto; }
+
+/* ── PHASE PAGE ── */
+.phase-page { display: none; }
+.phase-page.active { display: block; }
+
+.phase-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+.phase-title {
+  font-family: var(--font-h);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: 0.5px;
+}
+.phase-desc { font-size: 13.5px; color: var(--text-3); margin-top: 4px; max-width: 600px; line-height: 1.6; }
+.phase-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-b);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-navy { background: var(--navy); color: white; }
+.btn-navy:hover { background: var(--navy2); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
+.btn-outline:hover { background: var(--bg2); }
+.btn-amber { background: var(--amber); color: white; }
+.btn-amber:hover { opacity: 0.9; }
+
+/* ── VIEW SWITCHER ── */
+.view-switcher {
+  display: flex;
+  gap: 0;
+  background: var(--bg2);
+  border-radius: 4px;
+  padding: 2px;
+  margin-bottom: 20px;
+}
+.view-btn {
+  padding: 6px 14px;
+  font-family: var(--font-b);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.12s;
+  border: none;
+  background: transparent;
+}
+.view-btn.active { background: white; color: var(--navy); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* ── TABLE CARDS ── */
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.table-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.table-card.highlighted { border-color: var(--navy); }
+.table-card-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.table-card-header.phase-a { background: linear-gradient(135deg, #1B3A5C 0%, #2C5282 100%); color: white; }
+.table-card-header.phase-b { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); color: white; }
+.table-card-header.phase-c { background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%); color: white; }
+.table-card-header.phase-d { background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); color: white; }
+.table-card-header.phase-e { background: linear-gradient(135deg, #D97706 0%, #B45309 100%); color: white; }
+.table-name {
+  font-family: var(--font-m);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.table-meta { display: flex; gap: 6px; align-items: center; }
+.table-badge {
+  font-size: 10px;
+  font-family: var(--font-m);
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+}
+.col-list { padding: 0; }
+.col-row {
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--bg2);
+  gap: 8px;
+  font-size: 12px;
+  transition: background 0.1s;
+}
+.col-row:last-child { border-bottom: none; }
+.col-row:hover { background: var(--bg); }
+.col-icon { width: 16px; font-size: 11px; color: var(--text-4); flex-shrink: 0; }
+.col-name { font-family: var(--font-m); font-weight: 500; color: var(--navy); flex: 1; }
+.col-type { font-family: var(--font-m); font-size: 11px; color: var(--sky); min-width: 130px; }
+.col-tags { display: flex; gap: 4px; flex-shrink: 0; }
+.col-tag {
+  font-size: 9px;
+  font-family: var(--font-m);
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  letter-spacing: 0.3px;
+}
+.tag-pk  { background: var(--amber-bg); color: var(--amber); }
+.tag-fk  { background: var(--sky-bg); color: var(--sky); }
+.tag-nn  { background: var(--bg2); color: var(--text-3); }
+.tag-idx { background: var(--lime-bg); color: var(--lime); }
+.tag-enum { background: var(--purple-bg); color: var(--purple); }
+.tag-ck  { background: var(--red-bg); color: var(--red); }
+
+/* ── FK RELATIONSHIP LINES ── */
+.fk-map {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.fk-map-title {
+  font-family: var(--font-h);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.fk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--bg2);
+}
+.fk-row:last-child { border-bottom: none; }
+.fk-from { font-family: var(--font-m); color: var(--navy); font-weight: 500; }
+.fk-arrow { color: var(--text-4); font-size: 16px; }
+.fk-to { font-family: var(--font-m); color: var(--sky); }
+.fk-constraint { font-family: var(--font-m); font-size: 10px; color: var(--text-4); margin-left: auto; }
+
+/* ── DDL CODE BLOCK ── */
+.ddl-block {
+  background: #0D1117;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  border: 1px solid #30363D;
+}
+.ddl-block pre {
+  font-family: var(--font-m);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: #E6EDF3;
+  white-space: pre;
+}
+.sql-kw  { color: #FF7B72; }
+.sql-type { color: #79C0FF; }
+.sql-str  { color: #A5D6FF; }
+.sql-cmt  { color: #8B949E; font-style: italic; }
+.sql-num  { color: #F2CC60; }
+.sql-fn   { color: #D2A8FF; }
+.sql-tbl  { color: #7EE787; }
+.sql-col  { color: #E6EDF3; }
+.sql-const { color: #FFA657; }
+
+/* ── SAMPLE DATA TABLE ── */
+.sample-table-wrap { overflow-x: auto; margin-bottom: 20px; }
+.sample-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sample-table th {
+  font-family: var(--font-m);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  background: var(--bg2);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.sample-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--bg2);
+  font-family: var(--font-m);
+  white-space: nowrap;
+  color: var(--text-2);
+}
+.sample-table tr:last-child td { border-bottom: none; }
+.sample-table tr:hover td { background: var(--bg); }
+.mono-val { font-family: var(--font-m); }
+.val-pk  { color: var(--amber); font-weight: 600; }
+.val-fk  { color: var(--sky); }
+.val-enum-cap { color: var(--navy); font-weight: 500; }
+.val-enum-opx { color: var(--purple); font-weight: 500; }
+.val-enum-ok  { color: var(--lime); font-weight: 500; }
+.val-enum-warn{ color: var(--amber); font-weight: 500; }
+.val-enum-err { color: var(--red); font-weight: 500; }
+.val-amt  { font-family: var(--font-m); text-align: right; }
+.val-ts   { color: var(--text-3); font-size: 10.5px; }
+
+/* ── SECTION DIVIDER ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 20px;
+}
+.section-divider-label {
+  font-family: var(--font-h);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ── INFO CALLOUT ── */
+.callout {
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.callout-navy { background: var(--navy-dim); border-left: 3px solid var(--navy); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-red   { background: var(--red-bg); border-left: 3px solid var(--red); }
+.callout-lime  { background: var(--lime-bg); border-left: 3px solid var(--lime); }
+.callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.callout strong { font-weight: 700; }
+
+/* ── ERD DIAGRAM (Phase E) ── */
+.erd-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  overflow: auto;
+  margin-bottom: 20px;
+}
+.erd-canvas {
+  width: 100%;
+  min-height: 400px;
+  position: relative;
+}
+.erd-table-box {
+  position: absolute;
+  background: white;
+  border: 2px solid;
+  border-radius: 4px;
+  min-width: 160px;
+  font-size: 11px;
+}
+.erd-table-box .erd-th {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 10px;
+  color: white;
+  border-radius: 2px 2px 0 0;
+}
+.erd-table-box .erd-td {
+  padding: 3px 10px;
+  font-family: var(--font-m);
+  font-size: 10px;
+  border-bottom: 1px solid var(--bg2);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.erd-table-box .erd-td:last-child { border-bottom: none; }
+.erd-table-box .erd-key { color: var(--amber); font-size: 9px; }
+.erd-table-box .erd-fk { color: var(--sky); font-size: 9px; }
+
+/* ── RLS MATRIX ── */
+.rls-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.rls-table th {
+  background: var(--navy);
+  color: white;
+  font-family: var(--font-h);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 14px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.rls-table th:first-child { text-align: left; }
+.rls-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--bg2);
+  border-right: 1px solid var(--bg2);
+  text-align: center;
+  font-size: 16px;
+}
+.rls-table td:first-child { text-align: left; font-family: var(--font-m); font-size: 12px; color: var(--navy); font-weight: 500; }
+.rls-table tr:last-child td { border-bottom: none; }
+
+/* ── INDEX TABLE ── */
+.idx-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.idx-table th {
+  font-family: var(--font-m);
+  font-size: 10px;
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.idx-table td { padding: 7px 14px; border-bottom: 1px solid var(--bg2); font-family: var(--font-m); }
+.idx-table tr:last-child td { border-bottom: none; }
+.idx-clustered { color: var(--amber); font-weight: 600; }
+.idx-nonclustered { color: var(--sky); }
+
+/* ── TOAST ── */
+.toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--navy);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: var(--font-b);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.2s ease;
+  transition: opacity 0.3s;
+}
+.toast-lime { border-left: 4px solid var(--lime); }
+.toast-amber { border-left: 4px solid var(--amber); }
+@keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ── COPY BUTTON ── */
+.copy-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-m);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  float: right;
+  margin-bottom: 8px;
+  transition: all 0.15s;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+
+/* ── SCROLLABLE ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div>
+    <div class="header-brand">BAIN<span>SYNC</span></div>
+    <div class="header-sub">Azure SQL Schema Design · Progress Claim Automation</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-family:var(--font-m);font-size:11px;color:rgba(255,255,255,0.5);">T-SQL · Azure SQL Database</span>
+    <div class="header-badge">5 PHASES · 18 TABLES</div>
+  </div>
+</div>
+
+<!-- ── PHASE TABS ── -->
+<div class="phase-nav">
+  <div class="phase-tab active" onclick="switchPhase('a',this)" id="tab-a">
+    Phase A — Core Claims <span class="tab-badge">4 tables</span>
+  </div>
+  <div class="phase-tab" onclick="switchPhase('b',this)" id="tab-b">
+    Phase B — Validation &amp; Audit <span class="tab-badge">4 tables</span>
+  </div>
+  <div class="phase-tab" onclick="switchPhase('c',this)" id="tab-c">
+    Phase C — PM Workflow <span class="tab-badge">4 tables</span>
+  </div>
+  <div class="phase-tab" onclick="switchPhase('d',this)" id="tab-d">
+    Phase D — Financial &amp; Reporting <span class="tab-badge">3 tables</span>
+  </div>
+  <div class="phase-tab" onclick="switchPhase('e',this)" id="tab-e">
+    Phase E — Views, RLS &amp; Indexes <span class="tab-badge">5 views + RLS</span>
+  </div>
+</div>
+
+<!-- ── MAIN LAYOUT ── -->
+<div class="main">
+
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar" id="sidebar">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- ── CONTENT AREA ── -->
+  <div class="content">
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PHASE A                                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="phase-page active" id="phase-a">
+      <div class="phase-header">
+        <div>
+          <div class="phase-title">Phase A — Core Claim Tables</div>
+          <div class="phase-desc">Foundation layer. Every other table references these four. Must be deployed first — all FKs chain from <code style="font-family:var(--font-m);background:var(--bg2);padding:2px 6px;border-radius:3px;">vendors</code> and <code style="font-family:var(--font-m);background:var(--bg2);padding:2px 6px;border-radius:3px;">projects</code>.</div>
+        </div>
+        <div class="phase-actions">
+          <button class="btn btn-outline" onclick="setView('a','schema')">Schema</button>
+          <button class="btn btn-outline" onclick="setView('a','ddl')">DDL</button>
+          <button class="btn btn-outline" onclick="setView('a','data')">Sample Data</button>
+        </div>
+      </div>
+
+      <div class="callout callout-amber">
+        <div class="callout-icon">⚖️</div>
+        <div><strong>SOPA Constraint:</strong> The <code style="font-family:var(--font-m);">sopa_deadline</code> on <code style="font-family:var(--font-m);">claim_headers</code> is calculated by Azure Function 2 at ingestion time — 10 business days from submission for IPART NSW (15 for ESC VIC). This column is immutable after write.</div>
+      </div>
+
+      <!-- VIEW: SCHEMA -->
+      <div id="view-a-schema">
+        <div class="view-switcher">
+          <button class="view-btn active" onclick="setView('a','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('a','ddl')">💾 DDL Script</button>
+          <button class="view-btn" onclick="setView('a','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="tables-grid">
+
+          <!-- vendors -->
+          <div class="table-card" id="tcard-vendors">
+            <div class="table-card-header phase-a">
+              <div class="table-name">vendors</div>
+              <div class="table-meta">
+                <span class="table-badge">8 cols</span>
+                <span class="table-badge">ROOT</span>
+              </div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">vendor_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">vendor_code</div><div class="col-type">CHAR(3) NOT NULL</div><div class="col-tags"><span class="col-tag tag-nn">UQ</span><span class="col-tag tag-idx">IDX</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">registered_name</div><div class="col-type">NVARCHAR(200) NOT NULL</div><div class="col-tags"><span class="col-tag tag-nn">NN</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">abn</div><div class="col-type">CHAR(11) NOT NULL</div><div class="col-tags"><span class="col-tag tag-nn">UQ</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">azure_ad_vendor_id</div><div class="col-type">NVARCHAR(100)</div><div class="col-tags"><span class="col-tag tag-nn">UQ</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">tier</div><div class="col-type">TINYINT NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">1-3</span><span class="col-tag tag-ck">CK</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">gst_registered</div><div class="col-type">BIT NOT NULL DEFAULT 1</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">status</div><div class="col-type">VARCHAR(20) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+            </div>
+          </div>
+
+          <!-- projects -->
+          <div class="table-card" id="tcard-projects">
+            <div class="table-card-header phase-a">
+              <div class="table-name">projects</div>
+              <div class="table-meta">
+                <span class="table-badge">9 cols</span>
+                <span class="table-badge">ROOT</span>
+              </div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">project_wbs</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">project_name</div><div class="col-type">NVARCHAR(300) NOT NULL</div><div class="col-tags"><span class="col-tag tag-nn">NN</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">utility_name</div><div class="col-type">NVARCHAR(100) NOT NULL</div><div class="col-tags"><span class="col-tag tag-nn">NN</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">contract_value</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">monthly_cap</div><div class="col-type">DECIMAL(14,2)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">regulator</div><div class="col-type">VARCHAR(20) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">sopa_window_days</div><div class="col-type">TINYINT NOT NULL DEFAULT 10</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">pm_routing_key</div><div class="col-type">VARCHAR(50) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">capex_opex_profile</div><div class="col-type">VARCHAR(20) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+            </div>
+          </div>
+
+          <!-- claim_headers -->
+          <div class="table-card" id="tcard-claim_headers">
+            <div class="table-card-header phase-a">
+              <div class="table-name">claim_headers</div>
+              <div class="table-meta">
+                <span class="table-badge">15 cols</span>
+                <span class="table-badge">CORE</span>
+              </div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">vendor_id</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→vendors</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">project_wbs</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→projects</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_period</div><div class="col-type">CHAR(7) NOT NULL</div><div class="col-tags"><span class="col-tag tag-idx">IDX</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">submission_timestamp</div><div class="col-type">DATETIME2(0) NOT NULL</div><div class="col-tags"><span class="col-tag tag-idx">IDX↓</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">sopa_deadline</div><div class="col-type">DATE NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_status</div><div class="col-type">VARCHAR(20) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span><span class="col-tag tag-idx">IDX</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_ex_gst</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_gst</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_inc_gst</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">pm_id</div><div class="col-type">INT</div><div class="col-tags"><span class="col-tag tag-fk">FK→pm_routing</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">azure_validation_id</div><div class="col-type">VARCHAR(30)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">advisory_flags</div><div class="col-type">NVARCHAR(MAX)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">blob_storage_url</div><div class="col-type">NVARCHAR(500)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">created_at</div><div class="col-type">DATETIME2(0) DEFAULT GETUTCDATE()</div></div>
+            </div>
+          </div>
+
+          <!-- claim_lines -->
+          <div class="table-card" id="tcard-claim_lines">
+            <div class="table-card-header phase-a">
+              <div class="table-name">claim_lines</div>
+              <div class="table-meta">
+                <span class="table-badge">17 cols</span>
+                <span class="table-badge">DETAIL</span>
+              </div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">line_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span><span class="col-tag tag-idx">IDX</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">line_sequence</div><div class="col-type">SMALLINT NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">wbs_element</div><div class="col-type">VARCHAR(50) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">sap_cost_element</div><div class="col-type">VARCHAR(10)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">capex_opex_flag</div><div class="col-type">CHAR(3) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">CAP/OPX</span><span class="col-tag tag-ck">CK</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">description</div><div class="col-type">NVARCHAR(500) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">uom</div><div class="col-type">VARCHAR(10) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">contract_qty</div><div class="col-type">DECIMAL(14,3)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">contract_rate</div><div class="col-type">DECIMAL(14,2)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">prev_claimed_pct</div><div class="col-type">DECIMAL(5,4) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">this_claim_pct</div><div class="col-type">DECIMAL(5,4) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">this_claim_amt_ex</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">gst_amt</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">this_claim_amt_inc</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">invoice_ref</div><div class="col-type">NVARCHAR(100)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">rate_anomaly_flag</div><div class="col-type">BIT NOT NULL DEFAULT 0</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FK Map -->
+        <div class="fk-map">
+          <div class="fk-map-title">Foreign Key Relationships — Phase A</div>
+          <div class="fk-row"><span class="fk-from">claim_headers.vendor_id</span><span class="fk-arrow">→</span><span class="fk-to">vendors.vendor_id</span><span class="fk-constraint">ON DELETE RESTRICT</span></div>
+          <div class="fk-row"><span class="fk-from">claim_headers.project_wbs</span><span class="fk-arrow">→</span><span class="fk-to">projects.project_wbs</span><span class="fk-constraint">ON DELETE RESTRICT</span></div>
+          <div class="fk-row"><span class="fk-from">claim_lines.claim_id</span><span class="fk-arrow">→</span><span class="fk-to">claim_headers.claim_id</span><span class="fk-constraint">ON DELETE CASCADE</span></div>
+        </div>
+      </div>
+
+      <!-- VIEW: DDL -->
+      <div id="view-a-ddl" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('a','schema')">📐 Schema Cards</button>
+          <button class="view-btn active" onclick="setView('a','ddl')">💾 DDL Script</button>
+          <button class="view-btn" onclick="setView('a','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="ddl-block">
+          <button class="copy-btn" onclick="copyDDL('ddl-a')">Copy DDL</button>
+          <pre id="ddl-a"><span class="sql-cmt">-- ═══════════════════════════════════════════════════════════════════
+-- BasinSync · Azure SQL Schema · Phase A — Core Claim Tables
+-- Deploy Order: 1.vendors → 2.projects → 3.claim_headers → 4.claim_lines
+-- T-SQL / Azure SQL Database
+-- ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.vendors</span> (
+    <span class="sql-col">vendor_id</span>           <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">vendor_code</span>         <span class="sql-type">CHAR(3)                        NOT NULL</span>,
+    <span class="sql-col">registered_name</span>     <span class="sql-type">NVARCHAR(200)                  NOT NULL</span>,
+    <span class="sql-col">abn</span>                 <span class="sql-type">CHAR(11)                       NOT NULL</span>,
+    <span class="sql-col">azure_ad_vendor_id</span>  <span class="sql-type">NVARCHAR(100)</span>,
+    <span class="sql-col">tier</span>                <span class="sql-type">TINYINT                        NOT NULL</span>,
+    <span class="sql-col">gst_registered</span>     <span class="sql-type">BIT           DEFAULT 1        NOT NULL</span>,
+    <span class="sql-col">status</span>             <span class="sql-type">VARCHAR(20)   DEFAULT 'ACTIVE' NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_vendors</span>         <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">vendor_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_vendor_code</span>     <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">vendor_code</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_vendor_abn</span>      <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">abn</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_vendor_tier</span>     <span class="sql-kw">CHECK</span>       (<span class="sql-col">tier</span> <span class="sql-kw">IN</span> (<span class="sql-num">1</span>,<span class="sql-num">2</span>,<span class="sql-num">3</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_vendor_status</span>   <span class="sql-kw">CHECK</span>       (<span class="sql-col">status</span> <span class="sql-kw">IN</span> (<span class="sql-str">'ACTIVE'</span>,<span class="sql-str">'SUSPENDED'</span>,<span class="sql-str">'MONITOR'</span>,<span class="sql-str">'INACTIVE'</span>))
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.projects</span> (
+    <span class="sql-col">project_wbs</span>         <span class="sql-type">VARCHAR(30)   NOT NULL</span>,
+    <span class="sql-col">project_name</span>        <span class="sql-type">NVARCHAR(300) NOT NULL</span>,
+    <span class="sql-col">utility_name</span>        <span class="sql-type">NVARCHAR(100) NOT NULL</span>,
+    <span class="sql-col">contract_value</span>      <span class="sql-type">DECIMAL(14,2) NOT NULL</span>,
+    <span class="sql-col">monthly_cap</span>         <span class="sql-type">DECIMAL(14,2)</span>,
+    <span class="sql-col">regulator</span>           <span class="sql-type">VARCHAR(20)   NOT NULL</span>,
+    <span class="sql-col">sopa_window_days</span>    <span class="sql-type">TINYINT       DEFAULT 10 NOT NULL</span>,
+    <span class="sql-col">pm_routing_key</span>      <span class="sql-type">VARCHAR(50)   NOT NULL</span>,
+    <span class="sql-col">capex_opex_profile</span>  <span class="sql-type">VARCHAR(20)   NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_projects</span>          <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">project_wbs</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_projects_regulator</span> <span class="sql-kw">CHECK</span>       (<span class="sql-col">regulator</span> <span class="sql-kw">IN</span> (<span class="sql-str">'IPART_NSW'</span>,<span class="sql-str">'ESC_VIC'</span>,<span class="sql-str">'ESCOSA_SA'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_projects_capex</span>     <span class="sql-kw">CHECK</span>       (<span class="sql-col">capex_opex_profile</span> <span class="sql-kw">IN</span> (<span class="sql-str">'CAP_HEAVY'</span>,<span class="sql-str">'OPX_HEAVY'</span>,<span class="sql-str">'MIXED'</span>))
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.claim_headers</span> (
+    <span class="sql-col">claim_id</span>             <span class="sql-type">VARCHAR(30)     NOT NULL</span>,    <span class="sql-cmt">-- GS-YYYY-MM-VND-SEQ</span>
+    <span class="sql-col">vendor_id</span>            <span class="sql-type">INT             NOT NULL</span>,
+    <span class="sql-col">project_wbs</span>          <span class="sql-type">VARCHAR(30)     NOT NULL</span>,
+    <span class="sql-col">claim_period</span>         <span class="sql-type">CHAR(7)         NOT NULL</span>,    <span class="sql-cmt">-- YYYY-MM</span>
+    <span class="sql-col">submission_timestamp</span> <span class="sql-type">DATETIME2(0)    NOT NULL</span>,
+    <span class="sql-col">sopa_deadline</span>        <span class="sql-type">DATE            NOT NULL</span>,    <span class="sql-cmt">-- immutable after write</span>
+    <span class="sql-col">claim_status</span>         <span class="sql-type">VARCHAR(20)     NOT NULL</span>,
+    <span class="sql-col">total_ex_gst</span>         <span class="sql-type">DECIMAL(14,2)   NOT NULL</span>,
+    <span class="sql-col">total_gst</span>            <span class="sql-type">DECIMAL(14,2)   NOT NULL</span>,
+    <span class="sql-col">total_inc_gst</span>        <span class="sql-type">DECIMAL(14,2)   NOT NULL</span>,
+    <span class="sql-col">pm_id</span>                <span class="sql-type">INT</span>,
+    <span class="sql-col">azure_validation_id</span>  <span class="sql-type">VARCHAR(30)</span>,                <span class="sql-cmt">-- AZF-VAL-YYYYMMDD-XXXXX</span>
+    <span class="sql-col">advisory_flags</span>       <span class="sql-type">NVARCHAR(MAX)</span>,              <span class="sql-cmt">-- JSON array of rule advisories</span>
+    <span class="sql-col">blob_storage_url</span>     <span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-col">created_at</span>           <span class="sql-type">DATETIME2(0)    DEFAULT GETUTCDATE()</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_claim_headers</span>    <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">claim_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_claim_status</span>     <span class="sql-kw">CHECK</span>       (<span class="sql-col">claim_status</span> <span class="sql-kw">IN</span> (
+        <span class="sql-str">'RECEIVED'</span>,<span class="sql-str">'FN1_RUNNING'</span>,<span class="sql-str">'FN1_BLOCKED'</span>,<span class="sql-str">'FN2_RUNNING'</span>,
+        <span class="sql-str">'FN2_FAILED'</span>,<span class="sql-str">'PM_REVIEW'</span>,<span class="sql-str">'PM_QUERIED'</span>,<span class="sql-str">'APPROVED'</span>,
+        <span class="sql-str">'REJECTED'</span>,<span class="sql-str">'PAID'</span>,<span class="sql-str">'ESCALATED'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_claims_vendor</span>    <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">vendor_id</span>)   <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.vendors</span>  (<span class="sql-col">vendor_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_claims_project</span>   <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">project_wbs</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.projects</span> (<span class="sql-col">project_wbs</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.claim_lines</span> (
+    <span class="sql-col">line_id</span>              <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">claim_id</span>             <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">line_sequence</span>        <span class="sql-type">SMALLINT                       NOT NULL</span>,
+    <span class="sql-col">wbs_element</span>          <span class="sql-type">VARCHAR(50)                    NOT NULL</span>,
+    <span class="sql-col">sap_cost_element</span>     <span class="sql-type">VARCHAR(10)</span>,
+    <span class="sql-col">capex_opex_flag</span>      <span class="sql-type">CHAR(3)                        NOT NULL</span>,
+    <span class="sql-col">description</span>          <span class="sql-type">NVARCHAR(500)                  NOT NULL</span>,
+    <span class="sql-col">uom</span>                  <span class="sql-type">VARCHAR(10)                    NOT NULL</span>,
+    <span class="sql-col">contract_qty</span>         <span class="sql-type">DECIMAL(14,3)</span>,
+    <span class="sql-col">contract_rate</span>        <span class="sql-type">DECIMAL(14,2)</span>,
+    <span class="sql-col">prev_claimed_pct</span>     <span class="sql-type">DECIMAL(5,4)                   NOT NULL</span>,
+    <span class="sql-col">this_claim_pct</span>       <span class="sql-type">DECIMAL(5,4)                   NOT NULL</span>,
+    <span class="sql-col">this_claim_amt_ex</span>    <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">gst_amt</span>              <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">this_claim_amt_inc</span>   <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">invoice_ref</span>          <span class="sql-type">NVARCHAR(100)</span>,
+    <span class="sql-col">rate_anomaly_flag</span>    <span class="sql-type">BIT           DEFAULT 0        NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_claim_lines</span>       <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">line_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_claim_line_seq</span>    <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">claim_id</span>, <span class="sql-col">line_sequence</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_capex_opex</span>        <span class="sql-kw">CHECK</span>       (<span class="sql-col">capex_opex_flag</span> <span class="sql-kw">IN</span> (<span class="sql-str">'CAP'</span>,<span class="sql-str">'OPX'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_gst_calc</span>          <span class="sql-kw">CHECK</span>       (<span class="sql-fn">ABS</span>(<span class="sql-col">gst_amt</span> - (<span class="sql-col">this_claim_amt_ex</span> * <span class="sql-num">0.10</span>)) &lt; <span class="sql-num">0.02</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_lines_claim</span>       <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">ON DELETE CASCADE</span>
+);
+
+<span class="sql-cmt">-- Indexes</span>
+<span class="sql-kw">CREATE INDEX</span> <span class="sql-const">IX_claims_vendor_status</span>  <span class="sql-kw">ON</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">vendor_id</span>, <span class="sql-col">claim_status</span>);
+<span class="sql-kw">CREATE INDEX</span> <span class="sql-const">IX_claims_project_period</span> <span class="sql-kw">ON</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">project_wbs</span>, <span class="sql-col">claim_period</span>);
+<span class="sql-kw">CREATE INDEX</span> <span class="sql-const">IX_claims_submitted_desc</span> <span class="sql-kw">ON</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">submission_timestamp</span> <span class="sql-kw">DESC</span>);
+<span class="sql-kw">CREATE INDEX</span> <span class="sql-const">IX_lines_claim_id</span>        <span class="sql-kw">ON</span> <span class="sql-tbl">dbo.claim_lines</span>   (<span class="sql-col">claim_id</span>);</pre>
+        </div>
+      </div>
+
+      <!-- VIEW: SAMPLE DATA -->
+      <div id="view-a-data" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('a','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('a','ddl')">💾 DDL Script</button>
+          <button class="view-btn active" onclick="setView('a','data')">🗃️ Sample Data</button>
+        </div>
+
+        <div class="section-divider"><div class="section-divider-label">vendors — 7 rows</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>vendor_id</th><th>vendor_code</th><th>registered_name</th><th>abn</th><th>tier</th><th>gst_registered</th><th>status</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">1</td><td>ABE</td><td>Abergeldie Contractors Pty Ltd</td><td>47 004 533 519</td><td>1</td><td>1</td><td class="val-enum-ok">ACTIVE</td></tr>
+              <tr><td class="val-pk">2</td><td>JHG</td><td>John Holland Group Pty Ltd</td><td>11 004 282 268</td><td>1</td><td>1</td><td class="val-enum-ok">ACTIVE</td></tr>
+              <tr><td class="val-pk">3</td><td>CPB</td><td>CPB Contractors Pty Ltd</td><td>98 000 070 090</td><td>1</td><td>1</td><td class="val-enum-ok">ACTIVE</td></tr>
+              <tr><td class="val-pk">4</td><td>BMD</td><td>BMD Constructions Pty Ltd</td><td>70 010 060 800</td><td>2</td><td>1</td><td class="val-enum-ok">ACTIVE</td></tr>
+              <tr><td class="val-pk">5</td><td>DWN</td><td>Downer EDI Engineering</td><td>59 008 717 970</td><td>1</td><td>1</td><td class="val-enum-ok">ACTIVE</td></tr>
+              <tr><td class="val-pk">6</td><td>STN</td><td>Stantec Australia Pty Ltd</td><td>90 085 169 402</td><td>2</td><td>1</td><td class="val-enum-ok">ACTIVE</td></tr>
+              <tr><td class="val-pk">7</td><td>GRP</td><td>GreenPipe Pty Ltd</td><td>23 441 987 002</td><td>3</td><td>1</td><td class="val-enum-warn">MONITOR</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-divider"><div class="section-divider-label">projects — 4 rows</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>project_wbs</th><th>utility_name</th><th>contract_value</th><th>monthly_cap</th><th>regulator</th><th>sopa_window_days</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">PRJ-USC-AWRC</td><td>Sydney Water Corporation</td><td class="val-amt">3,200,000.00</td><td class="val-amt">320,000.00</td><td>IPART_NSW</td><td>10</td></tr>
+              <tr><td class="val-pk">PRJ-MW-WTP-PTA</td><td>Melbourne Water Corporation</td><td class="val-amt">5,800,000.00</td><td class="val-amt">580,000.00</td><td>ESC_VIC</td><td>15</td></tr>
+              <tr><td class="val-pk">PRJ-MW-YYWTP-UP</td><td>Melbourne Water Corporation</td><td class="val-amt">1,400,000.00</td><td class="val-amt">140,000.00</td><td>ESC_VIC</td><td>15</td></tr>
+              <tr><td class="val-pk">PRJ-HW-BWWTW-H2S</td><td>Hunter Water Corporation</td><td class="val-amt">1,800,000.00</td><td class="val-amt">180,000.00</td><td>IPART_NSW</td><td>10</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-divider"><div class="section-divider-label">claim_headers — 4 rows</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>claim_id</th><th>vendor_id</th><th>project_wbs</th><th>claim_period</th><th>submission_timestamp</th><th>sopa_deadline</th><th>claim_status</th><th>total_inc_gst</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">GS-2026-02-ABE-007</td><td class="val-fk">1</td><td class="val-fk">PRJ-USC-AWRC</td><td>2026-02</td><td class="val-ts">2026-02-13 11:42:00</td><td class="val-ts">2026-02-27</td><td class="val-enum-warn">PM_REVIEW</td><td class="val-amt">535,920.00</td></tr>
+              <tr><td class="val-pk">GS-2026-02-JHG-008</td><td class="val-fk">2</td><td class="val-fk">PRJ-USC-AWRC</td><td>2026-02</td><td class="val-ts">2026-02-13 10:15:00</td><td class="val-ts">2026-02-27</td><td class="val-enum-err">ESCALATED</td><td class="val-amt">1,364,880.00</td></tr>
+              <tr><td class="val-pk">GS-2026-02-CPB-004</td><td class="val-fk">3</td><td class="val-fk">PRJ-MW-WTP-PTA</td><td>2026-02</td><td class="val-ts">2026-02-12 09:30:00</td><td class="val-ts">2026-03-04</td><td class="val-enum-ok">APPROVED</td><td class="val-amt">2,310,000.00</td></tr>
+              <tr><td class="val-pk">GS-2026-02-BMD-003</td><td class="val-fk">4</td><td class="val-fk">PRJ-HW-BWWTW-H2S</td><td>2026-02</td><td class="val-ts">2026-02-12 14:22:00</td><td class="val-ts">2026-02-26</td><td class="val-enum-ok">APPROVED</td><td class="val-amt">228,800.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-divider"><div class="section-divider-label">claim_lines — 3 sample rows from GS-2026-02-ABE-007</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>line_id</th><th>claim_id</th><th>seq</th><th>wbs_element</th><th>capex_opex_flag</th><th>description</th><th>uom</th><th>this_claim_pct</th><th>this_claim_amt_ex</th><th>gst_amt</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">1</td><td class="val-fk">GS-2026-02-ABE-007</td><td>1</td><td>PRJ-USC-AWRC.CIV.WP-001</td><td class="val-enum-cap">CAP</td><td>Bulk earthworks — AWRC Stage 2</td><td>m³</td><td>0.1500</td><td class="val-amt">159,375.00</td><td class="val-amt">15,937.50</td></tr>
+              <tr><td class="val-pk">2</td><td class="val-fk">GS-2026-02-ABE-007</td><td>2</td><td>PRJ-USC-AWRC.MEC.WP-001</td><td class="val-enum-cap">CAP</td><td>Crane hire — 50t framed</td><td>hrs</td><td>0.2000</td><td class="val-amt">76,800.00</td><td class="val-amt">7,680.00</td></tr>
+              <tr><td class="val-pk">3</td><td class="val-fk">GS-2026-02-ABE-007</td><td>3</td><td>PRJ-USC-AWRC.OPX.MNT-001</td><td class="val-enum-opx">OPX</td><td>Site establishment maintenance</td><td>wk</td><td>0.2500</td><td class="val-amt">18,750.00</td><td class="val-amt">1,875.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- END PHASE A -->
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PHASE B                                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="phase-page" id="phase-b">
+      <div class="phase-header">
+        <div>
+          <div class="phase-title">Phase B — Validation &amp; Audit Tables</div>
+          <div class="phase-desc">Every Azure Function execution, rule result, and claim status change is permanently recorded here. The <code style="font-family:var(--font-m);background:var(--bg2);padding:2px 6px;border-radius:3px;">audit_trail</code> table has a DDL-level constraint preventing UPDATE and DELETE — a SOPA legal requirement.</div>
+        </div>
+        <div class="phase-actions">
+          <button class="btn btn-outline" onclick="setView('b','schema')">Schema</button>
+          <button class="btn btn-outline" onclick="setView('b','ddl')">DDL</button>
+          <button class="btn btn-outline" onclick="setView('b','data')">Sample Data</button>
+        </div>
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-icon">🔒</div>
+        <div><strong>Legal Immutability:</strong> The <code style="font-family:var(--font-m);">audit_trail</code> table is append-only by DDL constraint. No application role may UPDATE or DELETE. Violations are logged to Azure Monitor. This is non-negotiable under SOPA — the audit trail must be tamper-proof.</div>
+      </div>
+
+      <div id="view-b-schema">
+        <div class="view-switcher">
+          <button class="view-btn active" onclick="setView('b','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('b','ddl')">💾 DDL Script</button>
+          <button class="view-btn" onclick="setView('b','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="tables-grid">
+
+          <!-- validation_runs -->
+          <div class="table-card">
+            <div class="table-card-header phase-b">
+              <div class="table-name">validation_runs</div>
+              <div class="table-meta"><span class="table-badge">10 cols</span><span class="table-badge">FN1 LOG</span></div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">run_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span><span class="col-tag tag-idx">IDX</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">triggered_at</div><div class="col-type">DATETIME2(3) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_rules</div><div class="col-type">TINYINT NOT NULL DEFAULT 9</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">passed</div><div class="col-type">TINYINT NOT NULL DEFAULT 0</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">warned</div><div class="col-type">TINYINT NOT NULL DEFAULT 0</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">blocked</div><div class="col-type">TINYINT NOT NULL DEFAULT 0</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">advisory</div><div class="col-type">TINYINT NOT NULL DEFAULT 0</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">overall_result</div><div class="col-type">VARCHAR(10) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">runtime_ms</div><div class="col-type">INT</div></div>
+            </div>
+          </div>
+
+          <!-- validation_rule_results -->
+          <div class="table-card">
+            <div class="table-card-header phase-b">
+              <div class="table-name">validation_rule_results</div>
+              <div class="table-meta"><span class="table-badge">7 cols</span><span class="table-badge">RULE DETAIL</span></div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">result_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">run_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→validation_runs</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">rule_number</div><div class="col-type">TINYINT NOT NULL</div><div class="col-tags"><span class="col-tag tag-ck">CK 1-9</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">rule_name</div><div class="col-type">VARCHAR(60) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">result</div><div class="col-type">VARCHAR(10) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">detail_json</div><div class="col-type">NVARCHAR(MAX)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">affected_rows</div><div class="col-type">SMALLINT</div></div>
+            </div>
+          </div>
+
+          <!-- audit_trail -->
+          <div class="table-card">
+            <div class="table-card-header phase-b">
+              <div class="table-name">audit_trail</div>
+              <div class="table-meta"><span class="table-badge">9 cols</span><span class="table-badge">🔒 IMMUTABLE</span></div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">audit_id</div><div class="col-type">BIGINT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span><span class="col-tag tag-idx">IDX</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">changed_at</div><div class="col-type">DATETIME2(3) DEFAULT GETUTCDATE()</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">changed_by</div><div class="col-type">NVARCHAR(100) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">from_status</div><div class="col-type">VARCHAR(20)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">to_status</div><div class="col-type">VARCHAR(20) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">reason</div><div class="col-type">NVARCHAR(500)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">ip_address</div><div class="col-type">VARCHAR(45)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">session_id</div><div class="col-type">NVARCHAR(100)</div></div>
+            </div>
+          </div>
+
+          <!-- support_notes -->
+          <div class="table-card">
+            <div class="table-card-header phase-b">
+              <div class="table-name">support_notes</div>
+              <div class="table-meta"><span class="table-badge">6 cols</span><span class="table-badge">ADVISORY</span></div>
+            </div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">note_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">added_by</div><div class="col-type">NVARCHAR(100) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">added_at</div><div class="col-type">DATETIME2(0) DEFAULT GETUTCDATE()</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">note_text</div><div class="col-type">NVARCHAR(2000) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">visible_to_pm</div><div class="col-type">BIT NOT NULL DEFAULT 1</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-b-ddl" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('b','schema')">📐 Schema Cards</button>
+          <button class="view-btn active" onclick="setView('b','ddl')">💾 DDL Script</button>
+          <button class="view-btn" onclick="setView('b','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="ddl-block">
+          <button class="copy-btn" onclick="copyDDL('ddl-b')">Copy DDL</button>
+          <pre id="ddl-b"><span class="sql-cmt">-- Phase B — Validation &amp; Audit Tables
+-- Deploy after Phase A. All tables reference claim_headers.</span>
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.validation_runs</span> (
+    <span class="sql-col">run_id</span>          <span class="sql-type">VARCHAR(30)   NOT NULL</span>,    <span class="sql-cmt">-- AZF-VAL-YYYYMMDD-XXXXX</span>
+    <span class="sql-col">claim_id</span>        <span class="sql-type">VARCHAR(30)   NOT NULL</span>,
+    <span class="sql-col">triggered_at</span>    <span class="sql-type">DATETIME2(3)  NOT NULL</span>,
+    <span class="sql-col">total_rules</span>     <span class="sql-type">TINYINT       DEFAULT 9  NOT NULL</span>,
+    <span class="sql-col">passed</span>          <span class="sql-type">TINYINT       DEFAULT 0  NOT NULL</span>,
+    <span class="sql-col">warned</span>          <span class="sql-type">TINYINT       DEFAULT 0  NOT NULL</span>,
+    <span class="sql-col">blocked</span>         <span class="sql-type">TINYINT       DEFAULT 0  NOT NULL</span>,
+    <span class="sql-col">advisory</span>        <span class="sql-type">TINYINT       DEFAULT 0  NOT NULL</span>,
+    <span class="sql-col">overall_result</span>  <span class="sql-type">VARCHAR(10)   NOT NULL</span>,
+    <span class="sql-col">runtime_ms</span>      <span class="sql-type">INT</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_validation_runs</span>   <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">run_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_val_result</span>        <span class="sql-kw">CHECK</span>       (<span class="sql-col">overall_result</span> <span class="sql-kw">IN</span> (<span class="sql-str">'PASS'</span>,<span class="sql-str">'WARN'</span>,<span class="sql-str">'BLOCK'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_val_claim</span>         <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.validation_rule_results</span> (
+    <span class="sql-col">result_id</span>    <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">run_id</span>       <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">rule_number</span>  <span class="sql-type">TINYINT                        NOT NULL</span>,
+    <span class="sql-col">rule_name</span>    <span class="sql-type">VARCHAR(60)                    NOT NULL</span>,
+    <span class="sql-col">result</span>       <span class="sql-type">VARCHAR(10)                    NOT NULL</span>,
+    <span class="sql-col">detail_json</span>  <span class="sql-type">NVARCHAR(MAX)</span>,
+    <span class="sql-col">affected_rows</span><span class="sql-type">SMALLINT</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_rule_results</span>   <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">result_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_run_rule</span>       <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">run_id</span>, <span class="sql-col">rule_number</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_rule_number</span>    <span class="sql-kw">CHECK</span>       (<span class="sql-col">rule_number</span> <span class="sql-kw">BETWEEN</span> <span class="sql-num">1</span> <span class="sql-kw">AND</span> <span class="sql-num">9</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_rule_result</span>    <span class="sql-kw">CHECK</span>       (<span class="sql-col">result</span> <span class="sql-kw">IN</span> (<span class="sql-str">'PASS'</span>,<span class="sql-str">'WARN'</span>,<span class="sql-str">'BLOCK'</span>,<span class="sql-str">'ADVISORY'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_rr_run</span>         <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">run_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.validation_runs</span> (<span class="sql-col">run_id</span>)
+);
+
+<span class="sql-cmt">-- ⚠️ IMMUTABLE TABLE — SOPA LEGAL REQUIREMENT
+-- No UPDATE or DELETE permitted. Enforced at DB role level.
+-- See: DENY UPDATE, DELETE ON dbo.audit_trail TO [gridsync_app_role]</span>
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.audit_trail</span> (
+    <span class="sql-col">audit_id</span>    <span class="sql-type">BIGINT        IDENTITY(1,1)         NOT NULL</span>,
+    <span class="sql-col">claim_id</span>    <span class="sql-type">VARCHAR(30)                          NOT NULL</span>,
+    <span class="sql-col">changed_at</span>  <span class="sql-type">DATETIME2(3)  DEFAULT GETUTCDATE()   NOT NULL</span>,
+    <span class="sql-col">changed_by</span>  <span class="sql-type">NVARCHAR(100)                        NOT NULL</span>,
+    <span class="sql-col">from_status</span> <span class="sql-type">VARCHAR(20)</span>,
+    <span class="sql-col">to_status</span>   <span class="sql-type">VARCHAR(20)                          NOT NULL</span>,
+    <span class="sql-col">reason</span>      <span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-col">ip_address</span>  <span class="sql-type">VARCHAR(45)</span>,
+    <span class="sql-col">session_id</span>  <span class="sql-type">NVARCHAR(100)</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_audit_trail</span> <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">audit_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_audit_claim</span> <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>)
+);
+
+<span class="sql-cmt">-- Deny mutating permissions at the DB role level</span>
+<span class="sql-kw">DENY</span> <span class="sql-fn">UPDATE</span>, <span class="sql-fn">DELETE</span> <span class="sql-kw">ON</span> <span class="sql-tbl">dbo.audit_trail</span> <span class="sql-kw">TO</span> [gridsync_app_role];
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.support_notes</span> (
+    <span class="sql-col">note_id</span>       <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">claim_id</span>      <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">added_by</span>      <span class="sql-type">NVARCHAR(100)                  NOT NULL</span>,
+    <span class="sql-col">added_at</span>      <span class="sql-type">DATETIME2(0)  DEFAULT GETUTCDATE()</span>,
+    <span class="sql-col">note_text</span>     <span class="sql-type">NVARCHAR(2000)                 NOT NULL</span>,
+    <span class="sql-col">visible_to_pm</span> <span class="sql-type">BIT           DEFAULT 1        NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_support_notes</span>  <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">note_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_notes_claim</span>    <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>)
+);</pre>
+        </div>
+      </div>
+
+      <div id="view-b-data" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('b','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('b','ddl')">💾 DDL Script</button>
+          <button class="view-btn active" onclick="setView('b','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="section-divider"><div class="section-divider-label">validation_runs — 2 rows</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>run_id</th><th>claim_id</th><th>triggered_at</th><th>total_rules</th><th>passed</th><th>warned</th><th>blocked</th><th>overall_result</th><th>runtime_ms</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">AZF-VAL-20260213-A8F2C</td><td class="val-fk">GS-2026-02-ABE-007</td><td class="val-ts">2026-02-13 11:42:03.214</td><td>9</td><td>8</td><td>1</td><td>0</td><td class="val-enum-warn">WARN</td><td>2841</td></tr>
+              <tr><td class="val-pk">AZF-VAL-20260213-B3D9E</td><td class="val-fk">GS-2026-02-JHG-008</td><td class="val-ts">2026-02-13 10:15:07.882</td><td>9</td><td>9</td><td>0</td><td>0</td><td class="val-enum-ok">PASS</td><td>1944</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="section-divider"><div class="section-divider-label">audit_trail — sample rows (append-only)</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>audit_id</th><th>claim_id</th><th>changed_at</th><th>changed_by</th><th>from_status</th><th>to_status</th><th>reason</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">1</td><td class="val-fk">GS-2026-02-ABE-007</td><td class="val-ts">2026-02-13 11:42:00.000</td><td>AzureFunction/gridsync-fn1</td><td>—</td><td class="val-enum-warn">RECEIVED</td><td>Blob Storage trigger</td></tr>
+              <tr><td class="val-pk">2</td><td class="val-fk">GS-2026-02-ABE-007</td><td class="val-ts">2026-02-13 11:42:03.214</td><td>AzureFunction/gridsync-fn1</td><td>RECEIVED</td><td class="val-enum-warn">FN1_RUNNING</td><td>Validation started</td></tr>
+              <tr><td class="val-pk">3</td><td class="val-fk">GS-2026-02-ABE-007</td><td class="val-ts">2026-02-13 11:42:06.055</td><td>AzureFunction/gridsync-fn2</td><td>FN1_RUNNING</td><td class="val-enum-warn">PM_REVIEW</td><td>Rule 8 advisory: 97% of monthly cap</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- END PHASE B -->
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PHASE C                                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="phase-page" id="phase-c">
+      <div class="phase-header">
+        <div>
+          <div class="phase-title">Phase C — PM Workflow Tables</div>
+          <div class="phase-desc">The four tables that power the PM portal: routing, line-item decisions, formal Payment Schedules, and vendor query responses. The <code style="font-family:var(--font-m);background:var(--bg2);padding:2px 6px;border-radius:3px;">payment_schedules</code> table generates the official SOPA Payment Schedule document.</div>
+        </div>
+        <div class="phase-actions">
+          <button class="btn btn-outline" onclick="setView('c','schema')">Schema</button>
+          <button class="btn btn-outline" onclick="setView('c','ddl')">DDL</button>
+          <button class="btn btn-outline" onclick="setView('c','data')">Sample Data</button>
+        </div>
+      </div>
+      <div id="view-c-schema">
+        <div class="view-switcher">
+          <button class="view-btn active" onclick="setView('c','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('c','ddl')">💾 DDL Script</button>
+          <button class="view-btn" onclick="setView('c','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="tables-grid">
+          <div class="table-card">
+            <div class="table-card-header phase-c"><div class="table-name">pm_routing</div><div class="table-meta"><span class="table-badge">8 cols</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">pm_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">project_wbs</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→projects</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">pm_name</div><div class="col-type">NVARCHAR(100) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">pm_email</div><div class="col-type">NVARCHAR(200) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">utility</div><div class="col-type">NVARCHAR(100) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">escalation_contact</div><div class="col-type">NVARCHAR(200)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">sopa_warning_days</div><div class="col-type">TINYINT DEFAULT 3 NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">sopa_critical_days</div><div class="col-type">TINYINT DEFAULT 1 NOT NULL</div></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-card-header phase-c"><div class="table-name">pm_decisions</div><div class="table-meta"><span class="table-badge">8 cols</span><span class="table-badge">LINE-ITEM</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">decision_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">line_id</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_lines</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">pm_id</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→pm_routing</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">decision</div><div class="col-type">VARCHAR(10) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">reason_code</div><div class="col-type">VARCHAR(20)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">reason_text</div><div class="col-type">NVARCHAR(500)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">decided_at</div><div class="col-type">DATETIME2(0) DEFAULT GETUTCDATE()</div></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-card-header phase-c"><div class="table-name">payment_schedules</div><div class="table-meta"><span class="table-badge">8 cols</span><span class="table-badge">SOPA DOC</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">ps_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span><span class="col-tag tag-nn">UQ</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">issued_by</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→pm_routing</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">issued_at</div><div class="col-type">DATETIME2(0) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">scheduled_amount</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">withheld_amount</div><div class="col-type">DECIMAL(14,2) DEFAULT 0</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">withheld_reason</div><div class="col-type">NVARCHAR(500)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">sopa_compliant</div><div class="col-type">BIT NOT NULL DEFAULT 1</div></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-card-header phase-c"><div class="table-name">query_responses</div><div class="table-meta"><span class="table-badge">7 cols</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">response_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">decision_id</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→pm_decisions</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">responded_by</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→vendors</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">responded_at</div><div class="col-type">DATETIME2(0) DEFAULT GETUTCDATE()</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">response_text</div><div class="col-type">NVARCHAR(2000) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">revised_amount</div><div class="col-type">DECIMAL(14,2)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">supporting_doc_url</div><div class="col-type">NVARCHAR(500)</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="view-c-ddl" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('c','schema')">📐 Schema Cards</button>
+          <button class="view-btn active" onclick="setView('c','ddl')">💾 DDL Script</button>
+          <button class="view-btn" onclick="setView('c','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="ddl-block">
+          <button class="copy-btn" onclick="copyDDL('ddl-c')">Copy DDL</button>
+          <pre id="ddl-c"><span class="sql-cmt">-- Phase C — PM Workflow Tables. Deploy after Phase A.</span>
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.pm_routing</span> (
+    <span class="sql-col">pm_id</span>                <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">project_wbs</span>          <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">pm_name</span>              <span class="sql-type">NVARCHAR(100)                  NOT NULL</span>,
+    <span class="sql-col">pm_email</span>             <span class="sql-type">NVARCHAR(200)                  NOT NULL</span>,
+    <span class="sql-col">utility</span>              <span class="sql-type">NVARCHAR(100)                  NOT NULL</span>,
+    <span class="sql-col">escalation_contact</span>   <span class="sql-type">NVARCHAR(200)</span>,
+    <span class="sql-col">sopa_warning_days</span>    <span class="sql-type">TINYINT       DEFAULT 3        NOT NULL</span>,
+    <span class="sql-col">sopa_critical_days</span>   <span class="sql-type">TINYINT       DEFAULT 1        NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_pm_routing</span>    <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">pm_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_pmr_project</span>   <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">project_wbs</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.projects</span> (<span class="sql-col">project_wbs</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.pm_decisions</span> (
+    <span class="sql-col">decision_id</span>  <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">claim_id</span>     <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">line_id</span>      <span class="sql-type">INT                            NOT NULL</span>,
+    <span class="sql-col">pm_id</span>        <span class="sql-type">INT                            NOT NULL</span>,
+    <span class="sql-col">decision</span>     <span class="sql-type">VARCHAR(10)                    NOT NULL</span>,
+    <span class="sql-col">reason_code</span>  <span class="sql-type">VARCHAR(20)</span>,
+    <span class="sql-col">reason_text</span>  <span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-col">decided_at</span>   <span class="sql-type">DATETIME2(0)  DEFAULT GETUTCDATE()</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_pm_decisions</span>    <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">decision_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_pm_line_decision</span> <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">claim_id</span>, <span class="sql-col">line_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_decision</span>        <span class="sql-kw">CHECK</span>       (<span class="sql-col">decision</span> <span class="sql-kw">IN</span> (<span class="sql-str">'APPROVED'</span>,<span class="sql-str">'QUERIED'</span>,<span class="sql-str">'REJECTED'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_pmd_claim</span>       <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_pmd_line</span>        <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">line_id</span>)  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_lines</span>   (<span class="sql-col">line_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_pmd_pm</span>          <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">pm_id</span>)    <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.pm_routing</span>    (<span class="sql-col">pm_id</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.payment_schedules</span> (
+    <span class="sql-col">ps_id</span>             <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">claim_id</span>          <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">issued_by</span>         <span class="sql-type">INT                            NOT NULL</span>,
+    <span class="sql-col">issued_at</span>         <span class="sql-type">DATETIME2(0)                   NOT NULL</span>,
+    <span class="sql-col">scheduled_amount</span>  <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">withheld_amount</span>   <span class="sql-type">DECIMAL(14,2) DEFAULT 0</span>,
+    <span class="sql-col">withheld_reason</span>   <span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-col">document_url</span>      <span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-col">sopa_compliant</span>    <span class="sql-type">BIT           DEFAULT 1        NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_payment_schedules</span>  <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">ps_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_ps_claim</span>           <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">claim_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_ps_claim</span>           <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>)  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_ps_pm</span>              <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">issued_by</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.pm_routing</span>    (<span class="sql-col">pm_id</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.query_responses</span> (
+    <span class="sql-col">response_id</span>       <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">decision_id</span>       <span class="sql-type">INT                            NOT NULL</span>,
+    <span class="sql-col">responded_by</span>      <span class="sql-type">INT                            NOT NULL</span>,
+    <span class="sql-col">responded_at</span>      <span class="sql-type">DATETIME2(0)  DEFAULT GETUTCDATE()</span>,
+    <span class="sql-col">response_text</span>     <span class="sql-type">NVARCHAR(2000)                 NOT NULL</span>,
+    <span class="sql-col">revised_amount</span>    <span class="sql-type">DECIMAL(14,2)</span>,
+    <span class="sql-col">supporting_doc_url</span><span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_query_responses</span>   <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">response_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_qr_decision</span>       <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">decision_id</span>)  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.pm_decisions</span> (<span class="sql-col">decision_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_qr_vendor</span>         <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">responded_by</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.vendors</span>      (<span class="sql-col">vendor_id</span>)
+);</pre>
+        </div>
+      </div>
+      <div id="view-c-data" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('c','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('c','ddl')">💾 DDL Script</button>
+          <button class="view-btn active" onclick="setView('c','data')">🗃️ Sample Data</button>
+        </div>
+        <div class="section-divider"><div class="section-divider-label">pm_routing — 4 rows</div><div class="section-divider-line"></div></div>
+        <div class="sample-table-wrap">
+          <table class="sample-table">
+            <thead><tr><th>pm_id</th><th>project_wbs</th><th>pm_name</th><th>utility</th><th>sopa_warning_days</th><th>sopa_critical_days</th></tr></thead>
+            <tbody>
+              <tr><td class="val-pk">1</td><td class="val-fk">PRJ-USC-AWRC</td><td>James Reilly</td><td>Sydney Water Corporation</td><td>3</td><td>1</td></tr>
+              <tr><td class="val-pk">2</td><td class="val-fk">PRJ-MW-WTP-PTA</td><td>Sarah Chen</td><td>Melbourne Water Corporation</td><td>3</td><td>1</td></tr>
+              <tr><td class="val-pk">3</td><td class="val-fk">PRJ-MW-YYWTP-UP</td><td>David Kim</td><td>Melbourne Water Corporation</td><td>3</td><td>1</td></tr>
+              <tr><td class="val-pk">4</td><td class="val-fk">PRJ-HW-BWWTW-H2S</td><td>Michael O'Brien</td><td>Hunter Water Corporation</td><td>3</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- END PHASE C -->
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PHASE D                                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="phase-page" id="phase-d">
+      <div class="phase-header">
+        <div>
+          <div class="phase-title">Phase D — Financial &amp; Reporting Tables</div>
+          <div class="phase-desc">Variation register, monthly budget snapshots for Power BI, and SOPA escalation logs. These are the analytics layer — read-heavy, write once per event.</div>
+        </div>
+        <div class="phase-actions">
+          <button class="btn btn-outline" onclick="setView('d','schema')">Schema</button>
+          <button class="btn btn-outline" onclick="setView('d','ddl')">DDL</button>
+        </div>
+      </div>
+      <div id="view-d-schema">
+        <div class="view-switcher">
+          <button class="view-btn active" onclick="setView('d','schema')">📐 Schema Cards</button>
+          <button class="view-btn" onclick="setView('d','ddl')">💾 DDL Script</button>
+        </div>
+        <div class="tables-grid">
+          <div class="table-card">
+            <div class="table-card-header phase-d"><div class="table-name">variation_register</div><div class="table-meta"><span class="table-badge">11 cols</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">variation_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">project_wbs</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→projects</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">vendor_id</div><div class="col-type">INT NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→vendors</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">variation_type</div><div class="col-type">VARCHAR(3) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">EOT/VO/PCG</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">description</div><div class="col-type">NVARCHAR(500) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">claimed_amount</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">approved_amount</div><div class="col-type">DECIMAL(14,2)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">status</div><div class="col-type">VARCHAR(20) NOT NULL</div><div class="col-tags"><span class="col-tag tag-enum">ENUM</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">submitted_at</div><div class="col-type">DATETIME2(0) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">decided_at</div><div class="col-type">DATETIME2(0)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">reference_doc_url</div><div class="col-type">NVARCHAR(500)</div></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-card-header phase-d"><div class="table-name">budget_snapshots</div><div class="table-meta"><span class="table-badge">9 cols</span><span class="table-badge">POWER BI</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">snapshot_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">project_wbs</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→projects</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">snapshot_month</div><div class="col-type">CHAR(7) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">contract_value</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_claimed_to_date</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_approved_to_date</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">total_paid_to_date</div><div class="col-type">DECIMAL(14,2) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">ytd_capex</div><div class="col-type">DECIMAL(14,2) NOT NULL DEFAULT 0</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">ytd_opex</div><div class="col-type">DECIMAL(14,2) NOT NULL DEFAULT 0</div></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-card-header phase-d"><div class="table-name">sopa_escalations</div><div class="table-meta"><span class="table-badge">7 cols</span><span class="table-badge">DAY 12</span></div></div>
+            <div class="col-list">
+              <div class="col-row"><div class="col-icon">🔑</div><div class="col-name">escalation_id</div><div class="col-type">INT IDENTITY(1,1)</div><div class="col-tags"><span class="col-tag tag-pk">PK</span></div></div>
+              <div class="col-row"><div class="col-icon">🔗</div><div class="col-name">claim_id</div><div class="col-type">VARCHAR(30) NOT NULL</div><div class="col-tags"><span class="col-tag tag-fk">FK→claim_headers</span></div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">escalated_at</div><div class="col-type">DATETIME2(0) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">escalated_to</div><div class="col-type">NVARCHAR(200) NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">days_remaining</div><div class="col-type">TINYINT NOT NULL</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">resolved_at</div><div class="col-type">DATETIME2(0)</div></div>
+              <div class="col-row"><div class="col-icon"></div><div class="col-name">resolved_by</div><div class="col-type">NVARCHAR(100)</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="view-d-ddl" style="display:none;">
+        <div class="view-switcher">
+          <button class="view-btn" onclick="setView('d','schema')">📐 Schema Cards</button>
+          <button class="view-btn active" onclick="setView('d','ddl')">💾 DDL Script</button>
+        </div>
+        <div class="ddl-block">
+          <button class="copy-btn" onclick="copyDDL('ddl-d')">Copy DDL</button>
+          <pre id="ddl-d"><span class="sql-cmt">-- Phase D — Financial &amp; Reporting Tables. Deploy after Phase A.</span>
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.variation_register</span> (
+    <span class="sql-col">variation_id</span>     <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">project_wbs</span>      <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">vendor_id</span>        <span class="sql-type">INT                            NOT NULL</span>,
+    <span class="sql-col">variation_type</span>   <span class="sql-type">VARCHAR(3)                     NOT NULL</span>,
+    <span class="sql-col">description</span>      <span class="sql-type">NVARCHAR(500)                  NOT NULL</span>,
+    <span class="sql-col">claimed_amount</span>   <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">approved_amount</span>  <span class="sql-type">DECIMAL(14,2)</span>,
+    <span class="sql-col">status</span>           <span class="sql-type">VARCHAR(20)   DEFAULT 'PENDING' NOT NULL</span>,
+    <span class="sql-col">submitted_at</span>     <span class="sql-type">DATETIME2(0)                   NOT NULL</span>,
+    <span class="sql-col">decided_at</span>       <span class="sql-type">DATETIME2(0)</span>,
+    <span class="sql-col">reference_doc_url</span><span class="sql-type">NVARCHAR(500)</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_variation</span>       <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">variation_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_variation_type</span>  <span class="sql-kw">CHECK</span>       (<span class="sql-col">variation_type</span> <span class="sql-kw">IN</span> (<span class="sql-str">'EOT'</span>,<span class="sql-str">'VO'</span>,<span class="sql-str">'PCG'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">CK_variation_status</span> <span class="sql-kw">CHECK</span>       (<span class="sql-col">status</span> <span class="sql-kw">IN</span> (<span class="sql-str">'PENDING'</span>,<span class="sql-str">'APPROVED'</span>,<span class="sql-str">'REJECTED'</span>,<span class="sql-str">'WITHDRAWN'</span>)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_var_project</span>     <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">project_wbs</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.projects</span> (<span class="sql-col">project_wbs</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_var_vendor</span>      <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">vendor_id</span>)   <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.vendors</span>  (<span class="sql-col">vendor_id</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.budget_snapshots</span> (
+    <span class="sql-col">snapshot_id</span>            <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">project_wbs</span>            <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">snapshot_month</span>         <span class="sql-type">CHAR(7)                        NOT NULL</span>,
+    <span class="sql-col">contract_value</span>         <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">total_claimed_to_date</span>  <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">total_approved_to_date</span> <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">total_paid_to_date</span>     <span class="sql-type">DECIMAL(14,2)                  NOT NULL</span>,
+    <span class="sql-col">ytd_capex</span>              <span class="sql-type">DECIMAL(14,2) DEFAULT 0        NOT NULL</span>,
+    <span class="sql-col">ytd_opex</span>               <span class="sql-type">DECIMAL(14,2) DEFAULT 0        NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_budget_snapshots</span>    <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">snapshot_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">UQ_snapshot_month</span>      <span class="sql-kw">UNIQUE</span>      (<span class="sql-col">project_wbs</span>, <span class="sql-col">snapshot_month</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_snap_project</span>        <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">project_wbs</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.projects</span> (<span class="sql-col">project_wbs</span>)
+);
+
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dbo.sopa_escalations</span> (
+    <span class="sql-col">escalation_id</span>  <span class="sql-type">INT           IDENTITY(1,1)  NOT NULL</span>,
+    <span class="sql-col">claim_id</span>       <span class="sql-type">VARCHAR(30)                    NOT NULL</span>,
+    <span class="sql-col">escalated_at</span>   <span class="sql-type">DATETIME2(0)                   NOT NULL</span>,
+    <span class="sql-col">escalated_to</span>   <span class="sql-type">NVARCHAR(200)                  NOT NULL</span>,
+    <span class="sql-col">days_remaining</span> <span class="sql-type">TINYINT                        NOT NULL</span>,
+    <span class="sql-col">resolved_at</span>    <span class="sql-type">DATETIME2(0)</span>,
+    <span class="sql-col">resolved_by</span>    <span class="sql-type">NVARCHAR(100)</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">PK_sopa_escalations</span>   <span class="sql-kw">PRIMARY KEY</span> (<span class="sql-col">escalation_id</span>),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-const">FK_esc_claim</span>           <span class="sql-kw">FOREIGN KEY</span> (<span class="sql-col">claim_id</span>) <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dbo.claim_headers</span> (<span class="sql-col">claim_id</span>)
+);</pre>
+        </div>
+      </div>
+    </div>
+    <!-- END PHASE D -->
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PHASE E                                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="phase-page" id="phase-e">
+      <div class="phase-header">
+        <div>
+          <div class="phase-title">Phase E — Views, RLS &amp; Index Strategy</div>
+          <div class="phase-desc">5 Power BI views, Row-Level Security policy by role, and the full index strategy. This phase also consolidates the final deployment order DDL.</div>
+        </div>
+      </div>
+
+      <div class="callout callout-navy">
+        <div class="callout-icon">🛡</div>
+        <div><strong>Row-Level Security:</strong> Azure AD group membership drives RLS. Vendor role sees only their <code style="font-family:var(--font-m);">vendor_id</code>. PM role sees only their <code style="font-family:var(--font-m);">project_wbs</code> assignments. Support sees all rows. Finance sees approved/paid only. Predicates applied as FILTER policies on each table.</div>
+      </div>
+
+      <!-- VIEWS -->
+      <div class="section-divider"><div class="section-divider-label">Power BI Views — 5 views</div><div class="section-divider-line"></div></div>
+      <div class="tables-grid">
+        <div class="table-card"><div class="table-card-header phase-e"><div class="table-name">vw_claim_summary</div><div class="table-meta"><span class="table-badge">VIEW</span></div></div>
+          <div class="col-list">
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_id, vendor_code, project_wbs</div><div class="col-type" style="font-size:10px;color:var(--text-3);">claim_headers ⋈ vendors</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_period, sopa_deadline, days_remaining</div><div class="col-type" style="font-size:10px;color:var(--text-3);">DATEDIFF(DAY, GETDATE(), sopa_deadline)</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_status, total_inc_gst, advisory_flags</div><div class="col-type" style="font-size:10px;color:var(--text-3);">Direct columns</div></div>
+          </div>
+        </div>
+        <div class="table-card"><div class="table-card-header phase-e"><div class="table-name">vw_capex_opex_split</div><div class="table-meta"><span class="table-badge">VIEW</span></div></div>
+          <div class="col-list">
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_id, project_wbs, claim_period</div><div class="col-type" style="font-size:10px;color:var(--text-3);">claim_headers</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">total_capex, total_opex</div><div class="col-type" style="font-size:10px;color:var(--text-3);">SUM grouped by capex_opex_flag</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">capex_pct, opex_pct</div><div class="col-type" style="font-size:10px;color:var(--text-3);">DECIMAL(5,4) ratios</div></div>
+          </div>
+        </div>
+        <div class="table-card"><div class="table-card-header phase-e"><div class="table-name">vw_sopa_dashboard</div><div class="table-meta"><span class="table-badge">VIEW</span></div></div>
+          <div class="col-list">
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">All PM_REVIEW and ESCALATED claims</div><div class="col-type" style="font-size:10px;color:var(--text-3);">WHERE claim_status IN (...)</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">days_remaining, sopa_risk_band</div><div class="col-type" style="font-size:10px;color:var(--text-3);">CASE &lt;=1 CRITICAL, &lt;=3 URGENT, else OK</div></div>
+          </div>
+        </div>
+        <div class="table-card"><div class="table-card-header phase-e"><div class="table-name">vw_vendor_ytd</div><div class="table-meta"><span class="table-badge">VIEW</span></div></div>
+          <div class="col-list">
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">vendor_id, vendor_code, registered_name</div><div class="col-type" style="font-size:10px;color:var(--text-3);">vendors</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">ytd_claimed, ytd_approved, ytd_paid</div><div class="col-type" style="font-size:10px;color:var(--text-3);">SUM by calendar year</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">claim_count, approval_rate</div><div class="col-type" style="font-size:10px;color:var(--text-3);">COUNT, DECIMAL(5,4)</div></div>
+          </div>
+        </div>
+        <div class="table-card"><div class="table-card-header phase-e"><div class="table-name">vw_pm_workload</div><div class="table-meta"><span class="table-badge">VIEW</span></div></div>
+          <div class="col-list">
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">pm_id, pm_name, utility</div><div class="col-type" style="font-size:10px;color:var(--text-3);">pm_routing</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">pending_claims, critical_count, urgent_count</div><div class="col-type" style="font-size:10px;color:var(--text-3);">COUNT grouped by sopa_risk_band</div></div>
+            <div class="col-row"><div class="col-icon"></div><div class="col-name">avg_decision_days</div><div class="col-type" style="font-size:10px;color:var(--text-3);">AVG(DATEDIFF(DAY, submission, decided_at))</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RLS MATRIX -->
+      <div class="section-divider"><div class="section-divider-label">Row-Level Security Matrix</div><div class="section-divider-line"></div></div>
+      <table class="rls-table">
+        <thead><tr><th>Table / View</th><th>Vendor Role</th><th>PM Role</th><th>Support Role</th><th>Finance Role</th></tr></thead>
+        <tbody>
+          <tr><td>claim_headers</td><td>✅ own vendor_id only</td><td>✅ own project_wbs only</td><td>✅ all</td><td>✅ APPROVED/PAID only</td></tr>
+          <tr><td>claim_lines</td><td>✅ via claim_id filter</td><td>✅ via claim_id filter</td><td>✅ all</td><td>✅ approved claims only</td></tr>
+          <tr><td>audit_trail</td><td>❌ no access</td><td>✅ own projects only</td><td>✅ all</td><td>❌ no access</td></tr>
+          <tr><td>support_notes</td><td>❌ no access</td><td>✅ visible_to_pm=1 only</td><td>✅ all</td><td>❌ no access</td></tr>
+          <tr><td>payment_schedules</td><td>✅ own claims only</td><td>✅ own projects only</td><td>✅ all</td><td>✅ all</td></tr>
+          <tr><td>budget_snapshots</td><td>❌ no access</td><td>✅ own projects only</td><td>✅ all</td><td>✅ all</td></tr>
+          <tr><td>vw_sopa_dashboard</td><td>❌ no access</td><td>✅ own projects only</td><td>✅ all</td><td>❌ no access</td></tr>
+        </tbody>
+      </table>
+
+      <!-- INDEX STRATEGY -->
+      <div class="section-divider"><div class="section-divider-label">Index Strategy</div><div class="section-divider-line"></div></div>
+      <table class="idx-table">
+        <thead><tr><th>Index Name</th><th>Table</th><th>Columns</th><th>Type</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td class="idx-clustered">PK_claim_headers</td><td>claim_headers</td><td>claim_id</td><td class="idx-clustered">CLUSTERED</td><td>All FK joins use claim_id. Clustered for sequential reads.</td></tr>
+          <tr><td class="idx-nonclustered">IX_claims_project_period</td><td>claim_headers</td><td>project_wbs, claim_period</td><td class="idx-nonclustered">NONCLUSTERED</td><td>PM portal: filter by project + month. Covers 80% of PM queries.</td></tr>
+          <tr><td class="idx-nonclustered">IX_claims_vendor_status</td><td>claim_headers</td><td>vendor_id, claim_status</td><td class="idx-nonclustered">NONCLUSTERED</td><td>Vendor portal: show vendor's own claims filtered by status.</td></tr>
+          <tr><td class="idx-nonclustered">IX_claims_submitted_desc</td><td>claim_headers</td><td>submission_timestamp DESC</td><td class="idx-nonclustered">NONCLUSTERED</td><td>Support portal: most recent claims at top. DESC for time-ordered reads.</td></tr>
+          <tr><td class="idx-nonclustered">IX_lines_claim_id</td><td>claim_lines</td><td>claim_id</td><td class="idx-nonclustered">NONCLUSTERED</td><td>Line-item review: fetch all lines for a claim. Hot path on PM approval.</td></tr>
+          <tr><td class="idx-nonclustered">IX_audit_claim_id</td><td>audit_trail</td><td>claim_id, changed_at DESC</td><td class="idx-nonclustered">NONCLUSTERED</td><td>Audit history page: all events for one claim in time order.</td></tr>
+          <tr><td class="idx-nonclustered">IX_snapshot_month</td><td>budget_snapshots</td><td>project_wbs, snapshot_month</td><td class="idx-nonclustered">NONCLUSTERED</td><td>Power BI monthly trend queries. Composite covers both dimensions.</td></tr>
+        </tbody>
+      </table>
+
+      <!-- DEPLOY ORDER DDL -->
+      <div class="section-divider"><div class="section-divider-label">Full Deployment Order</div><div class="section-divider-line"></div></div>
+      <div class="ddl-block">
+        <pre><span class="sql-cmt">-- BasinSync Azure SQL — Full Deployment Order
+-- Run each phase in sequence. FK constraints require referenced tables first.
+
+-- ── PHASE A ─────────────────────────────────────────────────────────</span>
+<span class="sql-num">1.</span>  dbo.vendors
+<span class="sql-num">2.</span>  dbo.projects
+<span class="sql-num">3.</span>  dbo.claim_headers    <span class="sql-cmt">-- FK → vendors, projects</span>
+<span class="sql-num">4.</span>  dbo.claim_lines      <span class="sql-cmt">-- FK → claim_headers (CASCADE)</span>
+
+<span class="sql-cmt">-- ── PHASE B ─────────────────────────────────────────────────────────</span>
+<span class="sql-num">5.</span>  dbo.validation_runs        <span class="sql-cmt">-- FK → claim_headers</span>
+<span class="sql-num">6.</span>  dbo.validation_rule_results<span class="sql-cmt">-- FK → validation_runs</span>
+<span class="sql-num">7.</span>  dbo.audit_trail            <span class="sql-cmt">-- FK → claim_headers | DENY UPDATE/DELETE</span>
+<span class="sql-num">8.</span>  dbo.support_notes          <span class="sql-cmt">-- FK → claim_headers</span>
+
+<span class="sql-cmt">-- ── PHASE C ─────────────────────────────────────────────────────────</span>
+<span class="sql-num">9.</span>  dbo.pm_routing             <span class="sql-cmt">-- FK → projects</span>
+<span class="sql-num">10.</span> dbo.pm_decisions           <span class="sql-cmt">-- FK → claim_headers, claim_lines, pm_routing</span>
+<span class="sql-num">11.</span> dbo.payment_schedules      <span class="sql-cmt">-- FK → claim_headers, pm_routing</span>
+<span class="sql-num">12.</span> dbo.query_responses        <span class="sql-cmt">-- FK → pm_decisions, vendors</span>
+
+<span class="sql-cmt">-- ── PHASE D ─────────────────────────────────────────────────────────</span>
+<span class="sql-num">13.</span> dbo.variation_register     <span class="sql-cmt">-- FK → projects, vendors</span>
+<span class="sql-num">14.</span> dbo.budget_snapshots       <span class="sql-cmt">-- FK → projects</span>
+<span class="sql-num">15.</span> dbo.sopa_escalations       <span class="sql-cmt">-- FK → claim_headers</span>
+
+<span class="sql-cmt">-- ── PHASE E ─────────────────────────────────────────────────────────</span>
+<span class="sql-num">16.</span> CREATE INDEXES              <span class="sql-cmt">-- All non-clustered indexes</span>
+<span class="sql-num">17.</span> CREATE VIEWS                <span class="sql-cmt">-- 5 Power BI views</span>
+<span class="sql-num">18.</span> APPLY RLS POLICIES          <span class="sql-cmt">-- CREATE SECURITY POLICY per table</span>
+<span class="sql-num">19.</span> INSERT SAMPLE DATA          <span class="sql-cmt">-- 7 vendors, 4 projects, 10 claims</span></pre>
+      </div>
+    </div>
+    <!-- END PHASE E -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ── SIDEBAR DEFINITIONS ────────────────────────────────────────────
+const sidebarDefs = {
+  a: [
+    { label: 'PHASE A TABLES' },
+    { id: 'tcard-vendors',        name: 'vendors',        count: '8 cols' },
+    { id: 'tcard-projects',       name: 'projects',       count: '9 cols' },
+    { id: 'tcard-claim_headers',  name: 'claim_headers',  count: '15 cols' },
+    { id: 'tcard-claim_lines',    name: 'claim_lines',    count: '17 cols' },
+  ],
+  b: [
+    { label: 'PHASE B TABLES' },
+    { id: 'tcard-valruns',    name: 'validation_runs',        count: '10 cols' },
+    { id: 'tcard-ruleresults',name: 'validation_rule_results', count: '7 cols' },
+    { id: 'tcard-audit',      name: 'audit_trail',            count: '9 cols' },
+    { id: 'tcard-notes',      name: 'support_notes',          count: '6 cols' },
+  ],
+  c: [
+    { label: 'PHASE C TABLES' },
+    { id: 'tcard-pmrouting',  name: 'pm_routing',          count: '8 cols' },
+    { id: 'tcard-pmdecisions',name: 'pm_decisions',         count: '8 cols' },
+    { id: 'tcard-payscheds',  name: 'payment_schedules',    count: '9 cols' },
+    { id: 'tcard-qresp',      name: 'query_responses',      count: '7 cols' },
+  ],
+  d: [
+    { label: 'PHASE D TABLES' },
+    { id: 'tcard-vareg',      name: 'variation_register',   count: '11 cols' },
+    { id: 'tcard-budsnap',    name: 'budget_snapshots',      count: '9 cols' },
+    { id: 'tcard-sopaesc',    name: 'sopa_escalations',     count: '7 cols' },
+  ],
+  e: [
+    { label: 'VIEWS' },
+    { name: 'vw_claim_summary',     count: 'VIEW' },
+    { name: 'vw_capex_opex_split',  count: 'VIEW' },
+    { name: 'vw_sopa_dashboard',    count: 'VIEW' },
+    { name: 'vw_vendor_ytd',        count: 'VIEW' },
+    { name: 'vw_pm_workload',       count: 'VIEW' },
+    { label: 'POLICIES' },
+    { name: 'RLS Security Policy',  count: '4 roles' },
+    { name: 'Index Strategy',       count: '7 idx' },
+    { name: 'Deploy Order',         count: '19 steps' },
+  ]
+};
+
+function buildSidebar(phase) {
+  const sidebar = document.getElementById('sidebar');
+  const defs = sidebarDefs[phase] || [];
+  sidebar.innerHTML = defs.map(d => {
+    if (d.label) return `<div class="sidebar-section"><div class="sidebar-label">${d.label}</div></div>`;
+    const color = { a:'#1B3A5C', b:'#7C3AED', c:'#0284C7', d:'#16A34A', e:'#D97706' }[phase];
+    return `<div class="sidebar-section"><div class="sidebar-item" onclick="scrollToCard('${d.id||''}')">
+      <div class="si-dot" style="background:${color};"></div>
+      <span style="font-size:11.5px;">${d.name}</span>
+      <span class="si-count">${d.count}</span>
+    </div></div>`;
+  }).join('');
+}
+
+// ── PHASE SWITCHING ───────────────────────────────────────────────
+let currentPhase = 'a';
+function switchPhase(phase, tab) {
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.phase-page').forEach(p => p.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById('phase-' + phase).classList.add('active');
+  currentPhase = phase;
+  buildSidebar(phase);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── VIEW SWITCHING ────────────────────────────────────────────────
+function setView(phase, view) {
+  const views = ['schema', 'ddl', 'data'];
+  views.forEach(v => {
+    const el = document.getElementById('view-' + phase + '-' + v);
+    if (el) el.style.display = (v === view) ? 'block' : 'none';
+  });
+}
+
+// ── SCROLL TO CARD ────────────────────────────────────────────────
+function scrollToCard(id) {
+  if (!id) return;
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.borderColor = 'var(--amber)';
+    setTimeout(() => { el.style.borderColor = ''; }, 1500);
+  }
+}
+
+// ── COPY DDL ──────────────────────────────────────────────────────
+function copyDDL(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✅', 'DDL copied to clipboard', 'lime');
+  }).catch(() => {
+    showToast('⚠️', 'Copy failed — select text manually', 'amber');
+  });
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(icon, msg, type) {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+buildSidebar('a');
+</script>
+</body>
+</html>

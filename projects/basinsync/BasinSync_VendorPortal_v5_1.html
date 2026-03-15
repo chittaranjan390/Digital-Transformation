@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BasinSync — Vendor Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #F5F3EE;
+  --bg2:         #EDEBE4;
+  --surface:     #FFFFFF;
+  --surface2:    #F9F8F5;
+  --border:      #DDD9CF;
+  --border2:     #C8C3B5;
+  --navy:        #1B3A5C;
+  --navy2:       #2E5A8A;
+  --navy-dim:    rgba(27,58,92,0.08);
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --amber-mid:   #FDE68A;
+  --amber-dim:   rgba(217,119,6,0.10);
+  --lime:        #16A34A;
+  --lime-light:  #DCFCE7;
+  --lime-dim:    rgba(22,163,74,0.10);
+  --red:         #DC2626;
+  --red-light:   #FEE2E2;
+  --red-dim:     rgba(220,38,38,0.10);
+  --sky:         #0284C7;
+  --sky-light:   #E0F2FE;
+  --sky-dim:     rgba(2,132,199,0.10);
+  --orange:      #EA580C;
+  --text:        #1C1917;
+  --text-2:      #44403C;
+  --text-3:      #78716C;
+  --text-4:      #A8A29E;
+  --font-d:      'Barlow Condensed', sans-serif;
+  --font-b:      'Nunito Sans', sans-serif;
+  --font-m:      'IBM Plex Mono', monospace;
+  --r:           8px;
+  --shadow:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.14);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--font-b); font-size:14px; min-height:100vh; }
+
+/* ── SCREENS ─────────────────────────────────────────────────────────── */
+.screen { display:none !important; }
+.screen.active { display:block !important; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ══════════════════════════════════════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════════════════════════════════════ */
+#screen-login {
+  min-height:100vh;
+  grid-template-columns: 1fr 480px;
+}
+#screen-login.active { display:grid !important; }
+
+.login-left {
+  background: var(--navy);
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding:48px;
+}
+.login-left::before {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 30%, rgba(217,119,6,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(45,90,138,0.4) 0%, transparent 60%);
+}
+.login-grid {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.login-brand { position:relative; z-index:1; }
+.login-logo {
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--font-d); font-size:26px; font-weight:800;
+  color:#FFF; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;
+}
+.login-logo-mark {
+  width:44px; height:44px; border-radius:10px;
+  background:linear-gradient(135deg, #D97706, #EA580C);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+  box-shadow: 0 4px 12px rgba(217,119,6,0.4);
+}
+.login-tagline { color:rgba(255,255,255,0.55); font-size:13px; letter-spacing:0.3px; }
+
+.login-hero { position:relative; z-index:1; }
+.login-hero-title {
+  font-family:var(--font-d); font-size:52px; font-weight:800;
+  color:#FFF; line-height:1.05; letter-spacing:0.5px; margin-bottom:20px;
+  text-transform:uppercase;
+}
+.login-hero-title em { color:var(--amber); font-style:normal; }
+.login-hero-sub { color:rgba(255,255,255,0.6); font-size:15px; line-height:1.7; max-width:440px; }
+
+.login-stats { position:relative; z-index:1; display:flex; gap:32px; }
+.login-stat-val {
+  font-family:var(--font-d); font-size:28px; font-weight:800;
+  color:var(--amber); line-height:1;
+}
+.login-stat-lbl { font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; letter-spacing:0.5px; font-family:var(--font-m); }
+
+.login-right {
+  background:var(--surface); display:flex; flex-direction:column;
+  justify-content:center; padding:56px 48px;
+  border-left:1px solid var(--border);
+}
+.login-right-title {
+  font-family:var(--font-d); font-size:28px; font-weight:700;
+  letter-spacing:0.5px; text-transform:uppercase; color:var(--navy);
+  margin-bottom:6px;
+}
+.login-right-sub { color:var(--text-3); font-size:13px; margin-bottom:36px; }
+
+.login-sopa-notice {
+  background:var(--amber-light); border:1px solid var(--amber-mid);
+  border-left:3px solid var(--amber);
+  border-radius:var(--r); padding:12px 14px; margin-bottom:28px;
+  font-size:12px; color:#92400E; line-height:1.6;
+}
+.login-sopa-notice strong { display:block; margin-bottom:2px; font-size:12.5px; }
+
+.sso-btn {
+  width:100%; padding:14px 20px; border-radius:var(--r);
+  background:var(--navy); color:#FFF; border:none; cursor:pointer;
+  font-family:var(--font-d); font-size:16px; font-weight:700;
+  letter-spacing:0.8px; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  transition:all 0.2s; margin-bottom:12px;
+  box-shadow: var(--shadow-md);
+}
+.sso-btn:hover { background:#264E7A; transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+.sso-btn-icon { width:22px; height:22px; background:#FFF; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+
+.login-help { text-align:center; font-size:12px; color:var(--text-4); margin-top:24px; }
+.login-help a { color:var(--navy2); text-decoration:none; font-weight:600; }
+.login-footer { margin-top:auto; padding-top:32px; }
+.login-footer-text { font-size:11px; color:var(--text-4); line-height:1.6; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PORTAL SHELL (post-login)
+══════════════════════════════════════════════════════════════════════ */
+.portal { min-height:100vh; display:flex; flex-direction:column; }
+
+/* TOPBAR */
+.topbar {
+  height:56px; background:var(--navy);
+  display:flex; align-items:center; padding:0 24px; gap:0;
+  position:sticky; top:0; z-index:300;
+  box-shadow: 0 2px 8px rgba(27,58,92,0.3);
+}
+.topbar-logo {
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-d); font-size:18px; font-weight:800;
+  color:#FFF; letter-spacing:1px; text-transform:uppercase; margin-right:32px;
+}
+.topbar-logo-mark {
+  width:30px; height:30px; border-radius:7px;
+  background:linear-gradient(135deg,#D97706,#EA580C);
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.topbar-logo em { color:#FCD34D; font-style:normal; }
+.topbar-tag {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.7); font-family:var(--font-m); font-size:10px;
+  padding:2px 8px; border-radius:4px; letter-spacing:0.5px;
+}
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.topbar-sopa {
+  background:rgba(217,119,6,0.2); border:1px solid rgba(217,119,6,0.4);
+  color:#FCD34D; font-family:var(--font-m); font-size:10.5px;
+  padding:4px 12px; border-radius:20px; cursor:pointer;
+  display:flex; align-items:center; gap:6px; transition:background 0.15s;
+}
+.topbar-sopa:hover { background:rgba(217,119,6,0.3); }
+.sopa-pulse {
+  width:7px; height:7px; background:#FCD34D; border-radius:50%;
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.topbar-notif {
+  width:32px; height:32px; border-radius:6px;
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; position:relative; font-size:14px; transition:background 0.15s;
+}
+.topbar-notif:hover { background:rgba(255,255,255,0.14); }
+.notif-badge {
+  position:absolute; top:5px; right:5px;
+  width:7px; height:7px; border-radius:50%;
+  background:#F87171; border:1.5px solid var(--navy);
+}
+.topbar-user {
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  padding:4px 8px; border-radius:6px; transition:background 0.15s;
+}
+.topbar-user:hover { background:rgba(255,255,255,0.08); }
+.user-avatar {
+  width:30px; height:30px; border-radius:6px;
+  background:linear-gradient(135deg,#D97706,#EA580C);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-d); font-size:12px; font-weight:700; color:#FFF; letter-spacing:1px;
+}
+.user-info { text-align:right; }
+.user-name { font-size:12px; font-weight:600; color:#FFF; line-height:1.2; }
+.user-company { font-size:10px; color:rgba(255,255,255,0.5); font-family:var(--font-m); }
+
+/* SUBNAV */
+.subnav {
+  height:44px; background:var(--surface); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 24px; gap:2px;
+  position:sticky; top:56px; z-index:200;
+}
+.subnav-item {
+  padding:6px 14px; border-radius:6px; font-size:13px; font-weight:600;
+  color:var(--text-3); cursor:pointer; border:1px solid transparent;
+  transition:all 0.15s; display:flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.subnav-item:hover { color:var(--text); background:var(--bg2); }
+.subnav-item.active { color:var(--navy); background:var(--navy-dim); border-color:rgba(27,58,92,0.2); }
+.subnav-badge {
+  background:var(--amber); color:#FFF;
+  font-size:10px; font-weight:700; font-family:var(--font-m);
+  padding:1px 6px; border-radius:10px;
+}
+.subnav-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* MAIN CONTENT */
+.main { padding:24px; max-width:1400px; margin:0 auto; }
+.page { display:none; }
+.page.active { display:block; animation:fadeIn 0.2s ease; }
+
+/* ── COMPONENTS ──────────────────────────────────────────────────────── */
+.ph { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; }
+.ptitle { font-family:var(--font-d); font-size:22px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--navy); }
+.psub { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.btn-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:8px 16px; border-radius:var(--r); font-size:13px; font-weight:600;
+  cursor:pointer; border:none; transition:all 0.15s; font-family:var(--font-b);
+  white-space:nowrap; text-decoration:none;
+}
+.btn-primary { background:var(--navy); color:#FFF; }
+.btn-primary:hover { background:#264E7A; transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn-amber { background:var(--amber); color:#FFF; }
+.btn-amber:hover { background:#B45309; transform:translateY(-1px); }
+.btn-ghost { background:transparent; border:1px solid var(--border2); color:var(--text-2); }
+.btn-ghost:hover { background:var(--bg2); border-color:var(--text-4); }
+.btn-lime { background:var(--lime-dim); border:1px solid rgba(22,163,74,0.3); color:var(--lime); }
+.btn-lime:hover { background:rgba(22,163,74,0.18); }
+.btn-red { background:var(--red-dim); border:1px solid rgba(220,38,38,0.3); color:var(--red); }
+.btn-red:hover { background:rgba(220,38,38,0.2); }
+.btn-sm { padding:5px 11px; font-size:12px; }
+.btn-xs { padding:3px 8px; font-size:11px; }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;
+  font-family:var(--font-m); white-space:nowrap;
+}
+.badge-amber  { background:var(--amber-light); color:#92400E; border:1px solid var(--amber-mid); }
+.badge-lime   { background:var(--lime-light);  color:#14532D; border:1px solid #BBF7D0; }
+.badge-red    { background:var(--red-light);   color:#991B1B; border:1px solid #FECACA; }
+.badge-sky    { background:var(--sky-light);   color:#075985; border:1px solid #BAE6FD; }
+.badge-navy   { background:var(--navy-dim);    color:var(--navy); border:1px solid rgba(27,58,92,0.2); }
+.badge-muted  { background:var(--bg2); color:var(--text-3); border:1px solid var(--border); }
+.badge-orange { background:#FFF7ED; color:#9A3412; border:1px solid #FDBA74; }
+
+.panel {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.panel-head {
+  padding:14px 18px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.panel-title { font-family:var(--font-d); font-size:14px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); }
+.panel-sub { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.panel-body { padding:18px; }
+
+.tbl { width:100%; border-collapse:collapse; }
+.tbl th { font-family:var(--font-m); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-3); padding:10px 14px; text-align:left; border-bottom:2px solid var(--border); background:var(--surface2); white-space:nowrap; }
+.tbl td { padding:12px 14px; border-bottom:1px solid var(--border); font-size:13px; color:var(--text); vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tr:hover td { background:var(--bg2); cursor:pointer; }
+.tbl td.mono { font-family:var(--font-m); font-size:11.5px; }
+.tbl td.muted { color:var(--text-3); }
+.tbl td.amount { font-family:var(--font-d); font-size:15px; font-weight:700; color:var(--navy); }
+
+.input-group { margin-bottom:14px; }
+.input-label { font-family:var(--font-m); font-size:10.5px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-3); display:block; margin-bottom:6px; }
+.input-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; transition:border-color 0.15s; }
+.input-field:focus { border-color:var(--navy2); box-shadow:0 0 0 3px var(--navy-dim); }
+.input-field[readonly] { background:var(--bg2); color:var(--text-3); cursor:not-allowed; }
+.select-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; cursor:pointer; }
+.textarea-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; resize:vertical; min-height:80px; transition:border-color 0.15s; }
+.textarea-field:focus { border-color:var(--navy2); box-shadow:0 0 0 3px var(--navy-dim); }
+
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.grid12 { display:grid; grid-template-columns:1fr 2fr; gap:16px; align-items:start; }
+.grid21 { display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:start; }
+
+.divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+.prog-wrap { margin-bottom:12px; }
+.prog-label { display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px; }
+.prog-label span:first-child { color:var(--text-2); font-weight:500; }
+.prog-label span:last-child { color:var(--text-3); font-family:var(--font-m); font-size:11px; }
+.prog-track { height:6px; background:var(--bg2); border-radius:4px; overflow:hidden; }
+.prog-bar { height:100%; border-radius:4px; transition:width 0.6s ease; }
+.prog-bar.navy  { background:var(--navy); }
+.prog-bar.amber { background:var(--amber); }
+.prog-bar.lime  { background:var(--lime); }
+.prog-bar.red   { background:var(--red); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   SOPA BANNER
+══════════════════════════════════════════════════════════════════════ */
+.sopa-banner {
+  background:linear-gradient(135deg, var(--navy) 0%, #264E7A 100%);
+  border-radius:var(--r); padding:16px 20px;
+  display:flex; align-items:center; gap:20px; margin-bottom:20px;
+  box-shadow:var(--shadow-md); position:relative; overflow:hidden;
+}
+.sopa-banner::after {
+  content:''; position:absolute; right:0; top:0; bottom:0; width:200px;
+  background:radial-gradient(ellipse at right center, rgba(217,119,6,0.15) 0%, transparent 70%);
+}
+.sopa-clock { text-align:center; flex-shrink:0; }
+.sopa-clock-val {
+  font-family:var(--font-d); font-size:38px; font-weight:800; color:#FCD34D; line-height:1;
+}
+.sopa-clock-lbl { font-family:var(--font-m); font-size:9px; color:rgba(255,255,255,0.5); letter-spacing:1px; margin-top:2px; }
+.sopa-divider { width:1px; height:56px; background:rgba(255,255,255,0.15); flex-shrink:0; }
+.sopa-info { flex:1; }
+.sopa-title { font-family:var(--font-d); font-size:16px; font-weight:700; color:#FFF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.sopa-desc { font-size:12px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.sopa-actions { flex-shrink:0; display:flex; flex-direction:column; gap:6px; position:relative; z-index:1; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAGE: DASHBOARD
+══════════════════════════════════════════════════════════════════════ */
+.stat-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+.stat-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 16px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden;
+}
+.stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:var(--r) var(--r) 0 0; }
+.stat-card.navy::after  { background:var(--navy); }
+.stat-card.amber::after { background:var(--amber); }
+.stat-card.lime::after  { background:var(--lime); }
+.stat-card.red::after   { background:var(--red); }
+.stat-card.sky::after   { background:var(--sky); }
+.stat-lbl { font-family:var(--font-m); font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.stat-val { font-family:var(--font-d); font-size:26px; font-weight:800; line-height:1; }
+.stat-card.navy  .stat-val { color:var(--navy); }
+.stat-card.amber .stat-val { color:var(--amber); }
+.stat-card.lime  .stat-val { color:var(--lime); }
+.stat-card.red   .stat-val { color:var(--red); }
+.stat-card.sky   .stat-val { color:var(--sky); }
+.stat-sub { font-size:11px; color:var(--text-3); margin-top:5px; }
+
+/* PROJECT CARD */
+.project-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:18px 20px;
+  box-shadow:var(--shadow); cursor:pointer;
+  transition:all 0.2s; margin-bottom:12px;
+  display:flex; align-items:flex-start; gap:16px;
+}
+.project-card:hover { border-color:var(--navy2); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.project-card.flagged { border-left:3px solid var(--red); }
+.project-card.pending { border-left:3px solid var(--amber); }
+.project-card.approved { border-left:3px solid var(--lime); }
+.project-icon {
+  width:44px; height:44px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  background:var(--navy-dim); border:1px solid rgba(27,58,92,0.15);
+}
+.project-body { flex:1; }
+.project-name { font-family:var(--font-d); font-size:17px; font-weight:700; color:var(--navy); letter-spacing:0.3px; margin-bottom:2px; }
+.project-wbs { font-family:var(--font-m); font-size:10.5px; color:var(--text-3); margin-bottom:8px; }
+.project-meta { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.project-budget { flex:0 0 220px; }
+.project-right { flex-shrink:0; text-align:right; }
+.project-amount { font-family:var(--font-d); font-size:20px; font-weight:800; color:var(--navy); }
+.project-amount-lbl { font-size:10.5px; color:var(--text-3); font-family:var(--font-m); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAGE: UPLOAD / PROJECT DETAIL
+══════════════════════════════════════════════════════════════════════ */
+.upload-zone {
+  border:2px dashed var(--border2); border-radius:var(--r);
+  padding:40px 20px; text-align:center; cursor:pointer;
+  transition:all 0.2s; background:var(--surface2);
+  margin-bottom:16px;
+}
+.upload-zone:hover { border-color:var(--navy2); background:var(--navy-dim); }
+.upload-zone.drag-over { border-color:var(--amber); background:var(--amber-dim); }
+.upload-icon { font-size:36px; margin-bottom:10px; }
+.upload-title { font-family:var(--font-d); font-size:16px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:6px; color:var(--navy); }
+.upload-sub { font-size:12px; color:var(--text-3); }
+.upload-sub strong { color:var(--amber); }
+
+/* VALIDATION RESULTS */
+.val-section { display:none; }
+.val-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 14px; border-radius:6px; margin-bottom:7px;
+  background:var(--surface2); border:1px solid var(--border);
+  font-size:12.5px; transition:all 0.2s;
+}
+.val-item.pass { border-left:3px solid var(--lime); }
+.val-item.fail { border-left:3px solid var(--red); background:var(--red-light); border-color:#FECACA; }
+.val-item.warn { border-left:3px solid var(--amber); background:var(--amber-light); border-color:var(--amber-mid); }
+.val-icon { font-size:15px; flex-shrink:0; margin-top:1px; }
+.val-text strong { display:block; font-weight:600; margin-bottom:2px; }
+.val-text span { color:var(--text-3); font-size:11.5px; font-family:var(--font-m); }
+.val-action { margin-left:auto; flex-shrink:0; }
+
+/* INLINE EDIT */
+.edit-row {
+  background:var(--red-light); border:1px solid #FECACA;
+  border-left:3px solid var(--red);
+  border-radius:6px; padding:12px 14px; margin-bottom:8px;
+}
+.edit-row-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.edit-row-ref { font-family:var(--font-m); font-size:11px; color:var(--red); font-weight:500; }
+.edit-row-desc { font-size:12.5px; color:var(--text-2); flex:1; }
+.edit-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.edit-field-wrap { }
+.edit-field-lbl { font-family:var(--font-m); font-size:10px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-3); margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.edit-field-lbl .original { color:var(--red); text-decoration:line-through; font-size:9.5px; }
+.edit-input { width:100%; border:1px solid #FECACA; border-radius:5px; padding:7px 10px; font-size:13px; background:#FFF; font-family:var(--font-b); outline:none; color:var(--text); }
+.edit-input:focus { border-color:var(--navy2); box-shadow:0 0 0 3px var(--navy-dim); }
+.edit-input.corrected { border-color:var(--lime); background:var(--lime-light); }
+
+/* SUBMISSION TRACKER */
+.tracker-steps {
+  display:flex; align-items:center; gap:0; margin-bottom:24px; overflow-x:auto; padding-bottom:4px;
+}
+.tracker-step {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  min-width:110px; flex:1; position:relative; cursor:default;
+}
+.tracker-step:not(:last-child)::after {
+  content:''; position:absolute; top:18px; left:calc(50% + 20px); right:calc(-50% + 20px);
+  height:2px; background:var(--border2); z-index:0;
+}
+.tracker-step.done:not(:last-child)::after { background:var(--lime); }
+.tracker-step.active:not(:last-child)::after { background:var(--amber); }
+.step-circle {
+  width:36px; height:36px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:15px;
+  border:2px solid var(--border2); background:var(--surface); z-index:1;
+  font-family:var(--font-m); font-size:12px; font-weight:700; color:var(--text-3);
+  transition:all 0.3s;
+}
+.tracker-step.done .step-circle { background:var(--lime); border-color:var(--lime); color:#FFF; }
+.tracker-step.active .step-circle { background:var(--amber); border-color:var(--amber); color:#FFF; animation:pulse 1.4s infinite; }
+.step-label { font-size:10.5px; font-weight:600; color:var(--text-3); text-align:center; font-family:var(--font-m); letter-spacing:0.3px; }
+.tracker-step.done .step-label { color:var(--lime); }
+.tracker-step.active .step-label { color:var(--amber); }
+.step-date { font-size:9.5px; color:var(--text-4); font-family:var(--font-m); }
+
+/* PAYMENT HISTORY */
+.pay-table { width:100%; border-collapse:collapse; }
+.pay-table thead th { font-family:var(--font-m); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-3); padding:10px 16px; text-align:left; border-bottom:2px solid var(--border); background:var(--surface2); white-space:nowrap; }
+.pay-table thead th.right { text-align:right; }
+.pay-table tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+.pay-table tbody tr:last-child { border-bottom:none; }
+.pay-table tbody tr:hover { background:var(--bg2); cursor:pointer; }
+.pay-table tbody tr.awaiting { background:var(--amber-light); }
+.pay-table td { padding:13px 16px; vertical-align:middle; }
+.pay-month { font-family:var(--font-m); font-size:11px; color:var(--text-3); white-space:nowrap; width:90px; }
+.pay-claim-name { font-size:13px; font-weight:600; color:var(--text); }
+.pay-claim-ref { font-size:11px; color:var(--text-3); font-family:var(--font-m); margin-top:2px; }
+.pay-amount { font-family:var(--font-d); font-size:16px; font-weight:700; color:var(--navy); text-align:right; white-space:nowrap; width:110px; }
+.pay-status-cell { text-align:right; white-space:nowrap; width:130px; }
+.pay-date { font-size:11px; color:var(--text-3); font-family:var(--font-m); text-align:right; white-space:nowrap; width:100px; }
+
+/* PM CARD */
+.pm-card {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r); padding:16px; display:flex; align-items:center; gap:14px;
+}
+.pm-avatar {
+  width:44px; height:44px; border-radius:8px;
+  background:linear-gradient(135deg, var(--navy), var(--navy2));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-d); font-size:16px; font-weight:700; color:#FFF;
+  flex-shrink:0;
+}
+.pm-name { font-weight:700; font-size:14px; color:var(--navy); margin-bottom:2px; }
+.pm-role { font-size:11.5px; color:var(--text-3); font-family:var(--font-m); margin-bottom:6px; }
+.pm-contact { display:flex; gap:8px; }
+
+/* TOAST */
+#toastWrap { position:fixed; bottom:24px; right:24px; z-index:999; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.toast {
+  padding:11px 16px; border-radius:8px; font-size:13px; font-weight:500;
+  display:flex; align-items:center; gap:10px; max-width:360px; font-family:var(--font-b);
+  animation:toastIn 0.25s ease; border:1px solid transparent; box-shadow:var(--shadow-md);
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(10px) scale(0.96); } to { opacity:1; transform:none; } }
+.toast-lime   { background:var(--lime-light); border-color:#BBF7D0; color:#14532D; }
+.toast-amber  { background:var(--amber-light); border-color:var(--amber-mid); color:#92400E; }
+.toast-red    { background:var(--red-light); border-color:#FECACA; color:#991B1B; }
+.toast-navy   { background:var(--sky-light); border-color:#BAE6FD; color:#075985; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; z-index:900; background:rgba(28,25,23,0.5); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; animation:fadeIn 0.18s ease; }
+.modal { background:var(--surface); border:1px solid var(--border2); border-radius:12px; width:480px; max-width:92vw; padding:24px; box-shadow:var(--shadow-lg); }
+.modal-title { font-family:var(--font-d); font-size:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:var(--navy); }
+.modal-sub { font-size:12.5px; color:var(--text-3); margin-bottom:18px; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
+
+/* DEADLINE COUNTDOWN */
+.deadline-card {
+  background:var(--navy); border-radius:var(--r); padding:16px 20px;
+  display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-md);
+}
+.deadline-nums { display:flex; gap:8px; }
+.deadline-unit { text-align:center; }
+.deadline-num { font-family:var(--font-d); font-size:30px; font-weight:800; color:#FCD34D; line-height:1; }
+.deadline-lbl { font-family:var(--font-m); font-size:8px; color:rgba(255,255,255,0.4); letter-spacing:1px; margin-top:2px; }
+.deadline-sep { font-family:var(--font-d); font-size:24px; font-weight:700; color:rgba(255,255,255,0.3); padding-top:2px; }
+.deadline-info { flex:1; }
+.deadline-title { font-family:var(--font-d); font-size:14px; font-weight:700; color:#FFF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
+.deadline-sub { font-size:11.5px; color:rgba(255,255,255,0.55); line-height:1.5; }
+
+/* DETAIL TABLE */
+.detail-table { width:100%; }
+.dt-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
+.dt-row:last-child { border-bottom:none; }
+.dt-key { font-family:var(--font-m); font-size:10.5px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-3); }
+.dt-val { font-size:13px; font-weight:600; color:var(--text); text-align:right; }
+
+/* CHECKLIST */
+.checklist-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:9px 12px; border-radius:6px; margin-bottom:6px;
+  background:var(--surface2); border:1px solid var(--border);
+  cursor:pointer; transition:all 0.15s;
+}
+.checklist-item:hover { background:var(--bg2); }
+.checklist-item.checked { background:var(--lime-light); border-color:#BBF7D0; }
+.check-box { width:18px; height:18px; border-radius:4px; border:2px solid var(--border2); flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.checklist-item.checked .check-box { background:var(--lime); border-color:var(--lime); color:#FFF; font-size:11px; }
+.check-text { font-size:12.5px; flex:1; }
+.check-text strong { display:block; font-weight:600; margin-bottom:1px; }
+.check-text span { font-size:11.5px; color:var(--text-3); }
+
+/* SCROLLBAR */
+
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg2); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-left">
+    <div class="login-grid"></div>
+    <div class="login-brand">
+      <div class="login-logo">
+        <div class="login-logo-mark">💧</div>
+        Basin<em style="color:#FCD34D">Sync</em>
+      </div>
+      <div class="login-tagline">Australian Water Utility Infrastructure Program · Vendor Portal</div>
+    </div>
+    <div class="login-hero">
+      <div class="login-hero-title">
+        Progress<br/>Claims.<br/><em>Automated.</em>
+      </div>
+      <div class="login-hero-sub">
+        Submit monthly progress claims directly against your SAP WBS elements. Real-time SOPA compliance tracking. Instant Azure validation feedback. No more email chains.
+      </div>
+    </div>
+    <div class="login-stats">
+      <div>
+        <div class="login-stat-val">3,600</div>
+        <div class="login-stat-lbl">Active Projects</div>
+      </div>
+      <div>
+        <div class="login-stat-val">200</div>
+        <div class="login-stat-lbl">Vendor Companies</div>
+      </div>
+      <div>
+        <div class="login-stat-val">$2.28B</div>
+        <div class="login-stat-lbl">FY25 Capex Program</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-right-title">Vendor Sign In</div>
+    <div class="login-right-sub">Authenticated via Microsoft Azure Active Directory</div>
+
+    <div class="login-sopa-notice">
+      <strong>⚠ SOPA Compliance Notice</strong>
+      This portal constitutes a valid payment claim under the applicable State Security of Payment Act. Submission timestamps are legally binding. Ensure all mandatory fields and supporting documents are complete before submitting.
+    </div>
+
+    <button class="sso-btn" onclick="doLogin()">
+      <div class="sso-btn-icon">
+        <svg width="14" height="14" viewBox="0 0 21 21" fill="none">
+          <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+          <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+          <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+          <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+        </svg>
+      </div>
+      Sign in with Microsoft
+    </button>
+
+    <div style="text-align:center; font-size:12px; color:var(--text-4); margin:8px 0; letter-spacing:0.3px;">— OR —</div>
+
+    <div class="input-group">
+      <label class="input-label">Email Address</label>
+      <input class="input-field" type="email" placeholder="j.miller@abergeldie.com.au" value="j.miller@abergeldie.com.au"/>
+    </div>
+    <div class="input-group" style="margin-bottom:20px;">
+      <label class="input-label">Password</label>
+      <input class="input-field" type="password" value="••••••••"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:11px;" onclick="doLogin()">Sign In</button>
+
+    <div class="login-help">
+      <p>Portal access issues? <a href="#">Contact your panel administrator</a></p>
+      <p style="margin-top:4px;">First time? <a href="#">Request vendor account</a></p>
+    </div>
+
+    <div class="login-footer">
+      <div class="login-footer-text">
+        ABN verification powered by ATO ABR API · Azure Functions data validation · Hosted on Microsoft Azure Australia East · v1.0.0
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREEN: PORTAL
+══════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-portal">
+<div class="portal">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-mark">💧</div>
+      Basin<em>Sync</em>
+    </div>
+    <div class="topbar-tag">VENDOR PORTAL</div>
+    <div class="topbar-right">
+      <div class="topbar-sopa" onclick="showToast('s','⏱','SOPA window closes 13 Dec 2024 — 8 business days remaining','amber')">
+        <div class="sopa-pulse"></div>
+        SOPA: 8 DAYS REMAINING
+      </div>
+      <div class="topbar-notif" onclick="openModal('notif')">🔔<div class="notif-badge"></div></div>
+      <div class="topbar-user">
+        <div style="text-align:right;">
+          <div class="user-name">James Miller</div>
+          <div class="user-company">Abergeldie · ABN 47 004 533 519</div>
+        </div>
+        <div class="user-avatar">JM</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBNAV -->
+  <div class="subnav">
+    <div class="subnav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)">📋 My Projects</div>
+    <div class="subnav-item" id="nav-upload" onclick="showPage('upload',this)">⬆ Submit Claim</div>
+    <div class="subnav-item" id="nav-queries" onclick="showPage('queries',this)">↩ PM Queries <span class="subnav-badge" style="background:var(--red);">2</span></div>
+    <div class="subnav-item" id="nav-tracker" onclick="showPage('tracker',this)">🔄 Submission Status <span class="subnav-badge">3</span></div>
+    <div class="subnav-item" id="nav-payment" onclick="showPage('payment',this)">💰 Payment History</div>
+    <div class="subnav-item" id="nav-validate" onclick="showPage('validate',this)">⚙ Validation Results</div>
+    <div class="subnav-right">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('template')">⬇ Download Template</button>
+      <button class="btn btn-amber btn-sm" onclick="showPage('upload',document.getElementById('nav-upload'))">⬆ New Claim</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+  <!-- ═══════════════════════════════
+       PAGE: DASHBOARD
+  ═══════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+
+    <!-- SOPA Banner -->
+    <div class="sopa-banner">
+      <div class="sopa-clock" id="sopa-banner-clock">
+        <div class="sopa-clock-val" id="sopa-days-val">08</div>
+        <div class="sopa-clock-lbl">BUS. DAYS LEFT</div>
+      </div>
+      <div class="sopa-divider"></div>
+      <div class="sopa-info">
+        <div class="sopa-title" id="sopa-banner-title">⏱ November 2024 Submission Window Open</div>
+        <div class="sopa-desc" id="sopa-banner-desc">Submit progress claims by <strong style="color:#FCD34D">13 December 2024</strong> to comply with SOPA statutory deadlines. Once submitted, the Superintendent has 15 business days to issue a Payment Schedule. Late submissions forfeit your SOPA entitlements.</div>
+      </div>
+      <div class="sopa-actions">
+        <button class="btn btn-amber btn-sm" onclick="showPage('upload',document.getElementById('nav-upload'))">⬆ Submit Now</button>
+        <button class="btn btn-ghost btn-sm" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)" onclick="openModal('sopa_info')">ⓘ SOPA Guide</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-strip">
+      <div class="stat-card navy" style="cursor:pointer;" onclick="filterProjects('all')" title="Show all projects">
+        <div class="stat-lbl">Active Projects</div>
+        <div class="stat-val">4</div>
+        <div class="stat-sub" id="stat-cycle">Loading…</div>
+      </div>
+      <div class="stat-card amber" style="cursor:pointer;" onclick="filterProjects('pending')" title="Show unsubmitted projects">
+        <div class="stat-lbl">Awaiting Submission</div>
+        <div class="stat-val">2</div>
+        <div class="stat-sub">This month</div>
+      </div>
+      <div class="stat-card lime" style="cursor:pointer;" onclick="filterProjects('approved')" title="Show approved projects">
+        <div class="stat-lbl">Approved This Month</div>
+        <div class="stat-val">1</div>
+        <div class="stat-sub">$487,200 cleared</div>
+      </div>
+      <div class="stat-card red" style="cursor:pointer;" onclick="filterProjects('flagged')" title="Show projects needing correction">
+        <div class="stat-lbl">Needs Correction</div>
+        <div class="stat-val">1</div>
+        <div class="stat-sub">Flagged by Azure</div>
+      </div>
+      <div class="stat-card sky">
+        <div class="stat-lbl">YTD Payments</div>
+        <div class="stat-val">$2.4M</div>
+        <div class="stat-sub" id="stat-fy">FY …</div>
+      </div>
+    </div>
+
+    <div class="ph" id="projects-ph">
+      <div>
+        <div class="ptitle" id="portfolio-title">My Project Portfolio</div>
+        <div class="psub">Abergeldie Contractors Pty Ltd · 4 active projects · Nov 2024</div>
+      </div>
+      <div class="btn-row">
+        <span class="badge badge-amber">2 submissions due</span>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="project-card approved" data-status="approved" onclick="showPage('upload',document.getElementById('nav-upload'));loadProject('USC-AWRC')">
+      <div class="project-icon">🏗</div>
+      <div class="project-body">
+        <div class="project-name">Upper South Creek Advanced Water Recycling Centre</div>
+        <div class="project-wbs">PRJ-USC-AWRC · SEWL · Sydney Water Corporation · John Holland / Abergeldie JV</div>
+        <div class="project-meta">
+          <span class="badge badge-lime" id="badge-usc-awrc">Nov Claim Submitted</span>
+          <span class="badge badge-navy">CAP · Civil + Mechanical</span>
+          <span class="badge badge-muted">IPART (NSW)</span>
+        </div>
+        <div class="prog-wrap" style="margin:0;">
+          <div class="prog-label"><span>Contract Budget</span><span>$2,891,200 / $3,200,000 — 90.4%</span></div>
+          <div class="prog-track"><div class="prog-bar amber" style="width:90.4%"></div></div>
+        </div>
+      </div>
+      <div class="project-right">
+        <div class="project-amount">$487,200</div>
+        <div class="project-amount-lbl">Nov 2024 claim</div>
+        <div style="margin-top:8px;"><span class="badge badge-lime">✅ PM Approved</span></div>
+      </div>
+    </div>
+
+    <div class="project-card flagged" data-status="flagged" onclick="showPage('validate',document.getElementById('nav-validate'))">
+      <div class="project-icon">🔧</div>
+      <div class="project-body">
+        <div class="project-name">Belmont Wastewater Treatment Works — Inlet Works H₂S Management</div>
+        <div class="project-wbs">PRJ-HW-BWWTW-H2S · HW0847 · Hunter Water Corporation · Abergeldie</div>
+        <div class="project-meta">
+          <span class="badge badge-red">⚠ Validation Error — Correction Required</span>
+          <span class="badge badge-navy">CAP · Mechanical + Electrical</span>
+          <span class="badge badge-muted">IPART (NSW)</span>
+        </div>
+        <div class="prog-wrap" style="margin:0;">
+          <div class="prog-label"><span>Contract Budget</span><span>$1,247,400 / $1,800,000 — 69.3%</span></div>
+          <div class="prog-track"><div class="prog-bar navy" style="width:69.3%"></div></div>
+        </div>
+      </div>
+      <div class="project-right">
+        <div class="project-amount">$198,750</div>
+        <div class="project-amount-lbl">Nov 2024 claim</div>
+        <div style="margin-top:8px;"><span class="badge badge-red">2 Errors</span></div>
+      </div>
+    </div>
+
+    <div class="project-card pending" data-status="pending" onclick="showPage('upload',document.getElementById('nav-upload'));loadProject('SFPJV')">
+      <div class="project-icon">💧</div>
+      <div class="project-body">
+        <div class="project-name">Safety Focused Performance JV — Western Treatment Plant Primary Augmentation</div>
+        <div class="project-wbs">PRJ-MW-WTP-PTA · Melbourne Water · SFPJV (Abergeldie + Downer + Stantec)</div>
+        <div class="project-meta">
+          <span class="badge badge-amber" id="badge-wtp">⏳ Nov Claim Not Yet Submitted</span>
+          <span class="badge badge-navy">CAP · Civil + Mechanical</span>
+          <span class="badge badge-muted">ESC (VIC) · PREMO</span>
+        </div>
+        <div class="prog-wrap" style="margin:0;">
+          <div class="prog-label"><span>Contract Budget</span><span>$3,412,800 / $5,800,000 — 58.8%</span></div>
+          <div class="prog-track"><div class="prog-bar lime" style="width:58.8%"></div></div>
+        </div>
+      </div>
+      <div class="project-right">
+        <div class="project-amount" style="color:var(--amber)">—</div>
+        <div class="project-amount-lbl">Not submitted</div>
+        <div style="margin-top:8px;"><button class="btn btn-amber btn-xs">Submit Now</button></div>
+      </div>
+    </div>
+
+    <div class="project-card pending" data-status="pending" onclick="showPage('upload',document.getElementById('nav-upload'))">
+      <div class="project-icon">🌊</div>
+      <div class="project-body">
+        <div class="project-name">Yan Yean Water Treatment Plant Upgrade — Civil & Process Works</div>
+        <div class="project-wbs">PRJ-MW-YYWTP-UP · Melbourne Water · Abergeldie</div>
+        <div class="project-meta">
+          <span class="badge badge-amber" id="badge-yywtp">⏳ Nov Claim Not Yet Submitted</span>
+          <span class="badge badge-navy">CAP · Civil + SCADA</span>
+          <span class="badge badge-muted">ESC (VIC) · PREMO</span>
+        </div>
+        <div class="prog-wrap" style="margin:0;">
+          <div class="prog-label"><span>Contract Budget</span><span>$892,600 / $1,400,000 — 63.8%</span></div>
+          <div class="prog-track"><div class="prog-bar lime" style="width:63.8%"></div></div>
+        </div>
+      </div>
+      <div class="project-right">
+        <div class="project-amount" style="color:var(--amber)">—</div>
+        <div class="project-amount-lbl">Not submitted</div>
+        <div style="margin-top:8px;"><button class="btn btn-amber btn-xs">Submit Now</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       PAGE: UPLOAD / SUBMIT CLAIM
+  ═══════════════════════════════ -->
+  <div class="page" id="page-upload">
+    <div class="ph">
+      <div>
+        <div class="ptitle">Submit Progress Claim</div>
+        <div class="psub">Western Treatment Plant Primary Augmentation · PRJ-MW-WTP-PTA · Nov 2024</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('template')">⬇ Template v1.0</button>
+      </div>
+    </div>
+
+    <!-- Pre-flight checklist -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Pre-Submission Checklist</div>
+          <div class="panel-sub">Complete before uploading — Azure will validate all items</div>
+        </div>
+        <span class="badge badge-amber" id="checklist-status">3 / 6 Complete</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid2" style="gap:8px;">
+          <div class="checklist-item checked" onclick="toggleCheck(this)">
+            <div class="check-box">✓</div>
+            <div class="check-text"><strong>Official template used (v1.0)</strong><span>BasinSync_ProgressClaim_Template_v1.0.xlsx</span></div>
+          </div>
+          <div class="checklist-item checked" onclick="toggleCheck(this)">
+            <div class="check-box">✓</div>
+            <div class="check-text"><strong>WBS codes match contract</strong><span>All line items mapped to PRJ-MW-WTP-PTA WBS</span></div>
+          </div>
+          <div class="checklist-item checked" onclick="toggleCheck(this)">
+            <div class="check-box">✓</div>
+            <div class="check-text"><strong>Capex/Opex flags applied</strong><span>Each line item correctly classified CAP or OPX</span></div>
+          </div>
+          <div class="checklist-item" onclick="toggleCheck(this)">
+            <div class="check-box"></div>
+            <div class="check-text"><strong>Market quotes attached (items >$50K)</strong><span>Required for crane hire, specialist plant</span></div>
+          </div>
+          <div class="checklist-item" onclick="toggleCheck(this)">
+            <div class="check-box"></div>
+            <div class="check-text"><strong>Sub-contractor ABNs verified</strong><span>All sub-contractors listed with valid 11-digit ABN</span></div>
+          </div>
+          <div class="checklist-item" onclick="toggleCheck(this)">
+            <div class="check-box"></div>
+            <div class="check-text"><strong>Claim % does not exceed 100% cumulative</strong><span>Check Column M + Column K ≤ 100%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid21">
+      <div>
+        <!-- Upload zone -->
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Upload Progress Claim File</div>
+              <div class="panel-sub">Azure Functions validates on upload — results shown instantly</div>
+            </div>
+            <span class="badge badge-navy">Nov 2024</span>
+          </div>
+          <div class="panel-body">
+            <div class="upload-zone" onclick="runValidation()">
+              <div class="upload-icon">📊</div>
+              <div class="upload-title">Drop Excel File or Click to Browse</div>
+              <div class="upload-sub">BasinSync_ProgressClaim_Template_v1.0.xlsx · Max 25MB<br/><strong>Azure will run 9 validation checks automatically</strong></div>
+            </div>
+
+            <div class="grid2" style="gap:10px; margin-bottom:12px;">
+              <div class="input-group" style="margin:0">
+                <label class="input-label">Project</label>
+                <select class="select-field" onchange="loadProject(this.selectedOptions[0].getAttribute('data-code'))">
+                  <option data-code="SFPJV">PRJ-MW-WTP-PTA — WTP Primary Augmentation</option>
+                  <option data-code="USC-AWRC">PRJ-USC-AWRC — Upper South Creek AWRC</option>
+                  <option data-code="BWWTW">PRJ-HW-BWWTW-H2S — Belmont WWTW</option>
+                  <option data-code="YYWTP">PRJ-MW-YYWTP-UP — Yan Yean WTP</option>
+                </select>
+              </div>
+              <div class="input-group" style="margin:0">
+                <label class="input-label">Claim Period</label>
+                <select class="select-field">
+                  <option>November 2024</option>
+                  <option>October 2024</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom:12px;">
+              <label class="input-label">Submission Notes (optional)</label>
+              <textarea class="textarea-field" style="min-height:60px;" placeholder="Note any unusual items for the reviewing PM…">Crane hire rate for items MEC.WP-001 supported by market quote MQ-2847 (attached). Sub-contractor GreenPipe Pty Ltd ABN 23 441 987 002 — new entity, verified via ABR 01 Dec 2024.</textarea>
+            </div>
+
+            <!-- Supporting docs -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:12px;">
+              <div style="font-family:var(--font-m);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;">Supporting Documents</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                <span class="badge badge-lime">📄 MQ-2847.pdf</span>
+                <span class="badge badge-lime">📄 ABR-Verify-GreenPipe.pdf</span>
+                <span class="badge badge-muted">+ Add Document</span>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-3);">Attach market quotes, ABN certificates, site inspection sign-offs. Max 5MB per file.</div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-amber" onclick="runValidation()">⚙ Run Pre-Validation</button>
+              <button class="btn btn-ghost">Clear Form</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Validation results (hidden until upload) -->
+        <div class="val-section" id="val-section">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">⚙ Azure Validation Results</div>
+                <div class="panel-sub">9 rules checked · Completed 02 Dec 2024 09:14 AEDT</div>
+              </div>
+              <span class="badge badge-lime" id="val-summary">8 / 9 Passed</span>
+            </div>
+            <div class="panel-body">
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Schema & Column Integrity</strong><span>18 required columns present · correct data types · no blank mandatory cells</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Project WBS Verification</strong><span>PRJ-MW-WTP-PTA matched · Active status · Melbourne Water confirmed</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Vendor ABN — Primary Contractor</strong><span>47 004 533 519 · Abergeldie Contractors Pty Ltd · Active on ATO ABR</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Sub-contractor ABN Lookup</strong><span>23 441 987 002 · GreenPipe Pty Ltd · Active — registered Oct 2024 · Monitor flag added</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>GST Calculation Check</strong><span>All 34 line items pass 10% GST rule · No exempt category violations</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Capex / Opex Classification</strong><span>CAP items mapped to AUC-eligible WBS elements · OPX items to cost centre — no misclassifications</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Duplicate Invoice Detection</strong><span>No duplicate reference numbers found across 24-month claim history</span></div></div>
+              <div class="val-item pass"><div class="val-icon">✅</div><div class="val-text"><strong>Budget Threshold Check</strong><span>$312,400 total · 63.8% of $490,000 monthly cap · No budget alert triggered</span></div></div>
+              <div class="val-item warn"><div class="val-icon">⚠</div>
+                <div class="val-text">
+                  <strong>Rate Anomaly Detected — Row 7 (MEC.WP-001)</strong>
+                  <span>Crane hire: $4,800/day claimed · Market benchmark: $3,200–$3,800/day · +26% deviation · Supporting quote MQ-2847 attached — flag for PM awareness</span>
+                </div>
+                <div class="val-action"><span class="badge badge-amber">Advisory</span></div>
+              </div>
+              <div style="margin-top:14px;" class="btn-row">
+                <button class="btn btn-primary" onclick="submitClaim()">📤 Submit to BasinSync Portal</button>
+                <button class="btn btn-ghost btn-sm">Review Line Items</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: project snapshot -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Project Snapshot</div>
+            <div class="panel-sub" id="snap-wbs">PRJ-MW-WTP-PTA</div>
+          </div>
+          <div class="panel-body">
+            <div class="detail-table" id="snap-details"></div>
+            <hr class="divider"/>
+            <div id="snap-progress"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Reviewing Superintendent</div></div>
+          <div class="panel-body" id="pm-card-body">
+            <!-- populated by loadProject() -->
+          </div>
+        </div>
+
+        <div class="deadline-card">
+          <div class="deadline-info">
+            <div class="deadline-title">⏱ SOPA Deadline</div>
+            <div class="deadline-sub">Submit by <strong style="color:#FCD34D">13 Dec 2024</strong> for Nov 2024 period. PM has 15 business days from receipt to issue Payment Schedule.</div>
+          </div>
+          <div class="deadline-nums">
+            <div class="deadline-unit"><div class="deadline-num">08</div><div class="deadline-lbl">DAYS</div></div>
+            <div class="deadline-sep">:</div>
+            <div class="deadline-unit"><div class="deadline-num">14</div><div class="deadline-lbl">HRS</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       PAGE: VALIDATION / ERROR FIX
+  ═══════════════════════════════ -->
+  <div class="page" id="page-validate">
+    <div class="ph">
+      <div>
+        <div class="ptitle">Validation Errors — Correction Required</div>
+        <div class="psub">Belmont WWTW H₂S Management · EXP-HW-2024-1187 · 2 errors · Submitted 01 Dec 2024</div>
+      </div>
+      <div class="btn-row">
+        <span class="badge badge-red">2 Errors Must Be Fixed</span>
+        <span class="badge badge-amber">1 Advisory Flag</span>
+      </div>
+    </div>
+
+    <div style="background:var(--red-light);border:1px solid #FECACA;border-left:3px solid var(--red);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;font-size:13px;color:#991B1B;line-height:1.6;">
+      <strong>Your claim cannot be submitted until these errors are corrected.</strong> You may edit the flagged cells directly below — only flagged rows are editable. All edits are logged with timestamps. Clean rows are locked and cannot be modified. Once corrected, re-run validation and resubmit.
+    </div>
+
+    <!-- Error 1 -->
+    <div class="edit-row">
+      <div class="edit-row-header">
+        <span style="background:var(--red);color:#FFF;font-family:var(--font-m);font-size:10px;padding:2px 7px;border-radius:3px;">ERROR 01</span>
+        <span class="edit-row-ref">Row 4 · WBS: PRJ-HW-BWWTW-H2S.ELE.WP-002</span>
+        <span class="edit-row-desc">Electrical — HV switchroom cable reticulation</span>
+        <span class="badge badge-red" style="margin-left:auto;">Sub-contractor ABN Invalid</span>
+      </div>
+      <div style="font-size:12px;color:#991B1B;background:#FFF;border:1px solid #FECACA;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+        ⚠ ABN <strong>41 887 992 113</strong> returned no active entity on the ATO ABR. Check for typo or confirm sub-contractor has active ABN registration.
+      </div>
+      <div class="edit-fields">
+        <div class="edit-field-wrap">
+          <div class="edit-field-lbl">Sub-contractor ABN <span class="original">41 887 992 113 (invalid)</span></div>
+          <input class="edit-input" id="abn-fix" value="41 887 992 113" placeholder="Enter correct 11-digit ABN"/>
+        </div>
+        <div class="edit-field-wrap">
+          <div class="edit-field-lbl">Sub-contractor Name</div>
+          <input class="edit-input" value="ElectroBuild Services Pty Ltd"/>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-ghost btn-sm" onclick="verifyABN()">🔍 Verify ABN via ABR</button>
+        <button class="btn btn-lime btn-sm" onclick="markFixed('abn-fix','41 884 992 113')">✓ Apply Correction</button>
+      </div>
+    </div>
+
+    <!-- Error 2 -->
+    <div class="edit-row" style="margin-top:12px;">
+      <div class="edit-row-header">
+        <span style="background:var(--red);color:#FFF;font-family:var(--font-m);font-size:10px;padding:2px 7px;border-radius:3px;">ERROR 02</span>
+        <span class="edit-row-ref">Row 11 · WBS: PRJ-HW-BWWTW-H2S.MEC.WP-003</span>
+        <span class="edit-row-desc">Mechanical — H₂S scrubber unit supply and install</span>
+        <span class="badge badge-red" style="margin-left:auto;">Cumulative Claim Exceeds 100%</span>
+      </div>
+      <div style="font-size:12px;color:#991B1B;background:#FFF;border:1px solid #FECACA;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+        ⚠ Previously claimed 85% + this claim 20% = <strong>105% cumulative</strong>. Maximum is 100%. Reduce "This Claim %" to a maximum of 15%.
+      </div>
+      <div class="edit-fields">
+        <div class="edit-field-wrap">
+          <div class="edit-field-lbl">Previously Claimed % (locked)</div>
+          <input class="edit-input" value="85%" readonly style="background:var(--bg2);color:var(--text-3);"/>
+        </div>
+        <div class="edit-field-wrap">
+          <div class="edit-field-lbl">This Claim % <span class="original">20% — exceeds limit</span></div>
+          <input class="edit-input" id="pct-fix" value="20%" placeholder="Max 15%"/>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-lime btn-sm" onclick="markFixed('pct-fix','15%')">✓ Apply Correction</button>
+      </div>
+    </div>
+
+    <!-- Advisory -->
+    <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-left:3px solid var(--amber);border-radius:var(--r);padding:14px 18px;margin-top:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="background:var(--amber);color:#FFF;font-family:var(--font-m);font-size:10px;padding:2px 7px;border-radius:3px;">ADVISORY</span>
+        <span class="edit-row-ref">Row 7 · WBS: PRJ-HW-BWWTW-H2S.MEC.WP-001</span>
+        <span style="font-size:12px;color:#92400E;flex:1;">Rate anomaly — crane hire $4,800/day vs benchmark $3,200–$3,800/day</span>
+        <span class="badge badge-amber">No Action Required</span>
+      </div>
+      <div style="font-size:12px;color:#92400E;">Market quote MQ-2847 attached. PM will be notified. No change required — advisory only.</div>
+    </div>
+
+    <div style="margin-top:20px;" class="btn-row">
+      <button class="btn btn-amber" onclick="resubmit()">⚙ Re-run Validation & Resubmit</button>
+      <button class="btn btn-ghost" onclick="showPage('dashboard',document.getElementById('nav-dashboard'))">← Back to Projects</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       PAGE: SUBMISSION TRACKER
+  ═══════════════════════════════ -->
+  <div class="page" id="page-tracker">
+    <div class="ph">
+      <div>
+        <div class="ptitle">Submission Status Tracker</div>
+        <div class="psub">Live pipeline — all active claims across your projects</div>
+      </div>
+    </div>
+
+    <!-- Claim 1: Approved -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title" id="trk1-title">USC-AWRC — Progress Claim</div>
+          <div class="panel-sub" id="trk1-sub">GS-2026-02-ABE-007 · $535,920 inc GST · Submitted —</div>
+        </div>
+        <span class="badge badge-lime">✅ PM Approved — Awaiting Payment</span>
+      </div>
+      <div class="panel-body">
+        <div class="tracker-steps">
+          <div class="tracker-step done"><div class="step-circle">✓</div><div class="step-label">Submitted</div><div class="step-date" id="trk1-s1">—</div></div>
+          <div class="tracker-step done"><div class="step-circle">✓</div><div class="step-label">Azure Valid.</div><div class="step-date" id="trk1-s2">—</div></div>
+          <div class="tracker-step done"><div class="step-circle">✓</div><div class="step-label">PM Queue</div><div class="step-date" id="trk1-s3">—</div></div>
+          <div class="tracker-step done"><div class="step-circle">✓</div><div class="step-label">PM Approved</div><div class="step-date" id="trk1-s4">—</div></div>
+          <div class="tracker-step active"><div class="step-circle">5</div><div class="step-label">Finance</div><div class="step-date">In progress</div></div>
+          <div class="tracker-step"><div class="step-circle">6</div><div class="step-label">Payment</div><div class="step-date" id="trk1-s6">—</div></div>
+        </div>
+        <div style="background:var(--lime-light);border:1px solid #BBF7D0;border-radius:6px;padding:10px 14px;font-size:12.5px;color:#14532D;">
+          <strong>PM Approval Note (James Reilly, <span id="trk1-approvaldate">—</span>):</strong> Crane hire rate justified via market quote MQ-2847 — sighted and verified. Sub-contractor ABN new entity but confirmed active on ABR. Approved.
+        </div>
+      </div>
+    </div>
+
+    <!-- Claim 2: Needs correction -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title" id="trk2-title">Belmont WWTW H₂S — Progress Claim</div>
+          <div class="panel-sub" id="trk2-sub">GS-2026-02-ABE-019 · $198,750 claimed · Submitted —</div>
+        </div>
+        <span class="badge badge-red">⚠ Returned — 2 Errors</span>
+      </div>
+      <div class="panel-body">
+        <div class="tracker-steps">
+          <div class="tracker-step done"><div class="step-circle">✓</div><div class="step-label">Submitted</div><div class="step-date" id="trk2-s1">—</div></div>
+          <div class="tracker-step active"><div class="step-circle">⚠</div><div class="step-label">Azure Valid.</div><div class="step-date">Errors Found</div></div>
+          <div class="tracker-step"><div class="step-circle">3</div><div class="step-label">PM Queue</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">4</div><div class="step-label">PM Decision</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">5</div><div class="step-label">Finance</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">6</div><div class="step-label">Payment</div><div class="step-date">—</div></div>
+        </div>
+        <div style="background:var(--red-light);border:1px solid #FECACA;border-radius:6px;padding:10px 14px;font-size:12.5px;color:#991B1B;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div><strong>2 validation errors require correction before this claim can proceed.</strong> SOPA clock is paused until a valid claim is resubmitted.</div>
+          <button class="btn btn-red btn-sm" onclick="showPage('validate',document.getElementById('nav-validate'))">Fix Errors →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claim 3: Not submitted -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title" id="trk3-title">WTP Primary Augmentation — Progress Claim</div>
+          <div class="panel-sub" id="trk3-sub">GS-2026-02-ABE-011 · Not yet submitted · Due —</div>
+        </div>
+        <span class="badge badge-amber">⏳ Not Submitted</span>
+      </div>
+      <div class="panel-body">
+        <div class="tracker-steps">
+          <div class="tracker-step active"><div class="step-circle">1</div><div class="step-label">Submitted</div><div class="step-date">Pending</div></div>
+          <div class="tracker-step"><div class="step-circle">2</div><div class="step-label">Azure Valid.</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">3</div><div class="step-label">PM Queue</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">4</div><div class="step-label">PM Decision</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">5</div><div class="step-label">Finance</div><div class="step-date">—</div></div>
+          <div class="tracker-step"><div class="step-circle">6</div><div class="step-label">Payment</div><div class="step-date">—</div></div>
+        </div>
+        <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="font-size:12.5px;color:#92400E;"><strong>8 business days remaining.</strong> Submit by 13 Dec 2024 to comply with SOPA statutory deadlines.</div>
+          <button class="btn btn-amber btn-sm" onclick="showPage('upload',document.getElementById('nav-upload'))">Submit Now →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       PAGE: PAYMENT HISTORY
+  ═══════════════════════════════ -->
+  <div class="page" id="page-payment">
+    <div class="ph">
+      <div>
+        <div class="ptitle">Payment History</div>
+        <div class="psub">Abergeldie Contractors Pty Ltd · ABN 47 004 533 519 · FY 2024–25</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm">⬇ Export Statement</button>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-bottom:20px;">
+      <div class="stat-card lime">
+        <div class="stat-lbl">YTD Paid</div>
+        <div class="stat-val">$2.4M</div>
+        <div class="stat-sub">7 payments received</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-lbl">Awaiting Payment</div>
+        <div class="stat-val">$487K</div>
+        <div class="stat-sub">Est. 30 Dec 2024</div>
+      </div>
+      <div class="stat-card sky">
+        <div class="stat-lbl">Avg Payment Cycle</div>
+        <div class="stat-val">28d</div>
+        <div class="stat-sub">From SOPA submission</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Transaction History — All Projects</div>
+        <div class="panel-sub">FY 2024–25 · Sorted by date</div>
+      </div>
+      <div>
+        <table class="pay-table" id="pay-table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Claim</th>
+              <th class="right">Amount (inc GST)</th>
+              <th class="right">Status</th>
+              <th class="right">Payment Date</th>
+            </tr>
+          </thead>
+          <tbody id="pay-tbody">
+            <!-- Populated dynamically by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ══════════════════════════════════════════════════════════════
+       PAGE: PM QUERIES
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-queries">
+    <div class="ph">
+      <div>
+        <div class="ptitle">PM Queries — Response Required</div>
+        <div class="psub">Line items returned by your Project Manager with specific comments. You must respond to each query before the line item can be approved. Only the flagged cell is editable — all other rows remain locked.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm">⬇ Export Queries</button>
+      </div>
+    </div>
+
+    <!-- SOPA NOTICE -->
+    <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-left:3px solid var(--amber);border-radius:var(--r);padding:12px 16px;margin-bottom:20px;font-size:12.5px;color:#92400E;line-height:1.7;">
+      <strong>⚠️ SOPA Clock is Paused on Queried Items</strong><br/>
+      The SOPA response deadline is paused while a query is open. Once you resubmit a valid response, the PM's SOPA clock resumes from where it left off. Respond as quickly as possible — the PM is waiting on you before issuing the Payment Schedule.
+    </div>
+
+    <!-- STAT ROW -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div class="stat-card red">
+        <div class="stat-lbl">Overdue Response</div>
+        <div class="stat-val">1</div>
+        <div class="stat-sub">Vendor response overdue 2 days</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-lbl">Awaiting Response</div>
+        <div class="stat-val">2</div>
+        <div class="stat-sub">Open queries — action required</div>
+      </div>
+      <div class="stat-card lime">
+        <div class="stat-lbl">Resolved This Month</div>
+        <div class="stat-val">4</div>
+        <div class="stat-sub">Resubmitted &amp; PM approved</div>
+      </div>
+      <div class="stat-card sky">
+        <div class="stat-lbl">Resubmitted — Pending PM</div>
+        <div class="stat-val">1</div>
+        <div class="stat-sub">Awaiting PM re-review</div>
+      </div>
+    </div>
+
+    <!-- QUERY CARDS -->
+    <div id="query-cards-wrap">
+
+      <!-- QUERY 1 — OVERDUE -->
+      <div class="panel" style="margin-bottom:16px;border-left:3px solid var(--red);" id="qcard-downer">
+        <div class="panel-head" style="background:var(--red-light);">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;">
+            <div style="font-size:20px;">🚨</div>
+            <div>
+              <div class="panel-title" style="color:var(--red);">Response Overdue — 2 days past PM request</div>
+              <div class="panel-sub">Claim GS-2026-02-ABE-019 · PRJ-HW-BWWTW-H2S · PM: Sarah Reinhardt · Query raised: 1 Mar 2026</div>
+            </div>
+          </div>
+          <span class="badge badge-red">⏱ OVERDUE</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;">
+            <div>
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">Line Item Returned</div>
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;">
+                <div style="font-family:var(--font-m);font-size:11px;color:var(--text-3);margin-bottom:4px;">WBS Element</div>
+                <div style="font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;">PRJ-HW-BWWTW-H2S.ELE.WP-003</div>
+                <div style="font-family:var(--font-m);font-size:10px;color:var(--text-3);margin-bottom:2px;">Description</div>
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:10px;">Sub-contract — MSL Electrical Services (new ABN)</div>
+                <div style="display:flex;gap:16px;">
+                  <div><div style="font-family:var(--font-m);font-size:9.5px;color:var(--text-3);">This Claim %</div><div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--navy);">50%</div></div>
+                  <div><div style="font-family:var(--font-m);font-size:9.5px;color:var(--text-3);">Amount Ex GST</div><div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--navy);">$38,000</div></div>
+                  <div><div style="font-family:var(--font-m);font-size:9.5px;color:var(--text-3);">Cap/Opx</div><div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--navy);">CAP</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">PM Query Comment</div>
+              <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-left:3px solid var(--amber);border-radius:var(--r);padding:12px 14px;height:calc(100% - 22px);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1B3A5C,#2E5A8A);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:11px;font-weight:700;color:#FFF;">SR</div>
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:var(--navy);">Sarah Reinhardt — PM-0023</div>
+                    <div style="font-family:var(--font-m);font-size:10px;color:var(--text-3);">01 Mar 2026 09:22 AEST</div>
+                  </div>
+                </div>
+                <div style="font-family:var(--font-m);font-size:11px;color:#92400E;font-weight:700;margin-bottom:6px;">Reason Code: RC-04 — Sub-contractor ABN not on approved panel</div>
+                <div style="font-size:12.5px;color:#78350F;line-height:1.7;">MSL Electrical Services (ABN 54 639 221 876) is not listed on the Hunter Water approved vendor panel. Please provide their panel approval reference number, or replace with an approved sub-contractor. ABN was registered less than 6 months ago — additional due diligence required under Hunter Water Procurement Policy HW-GP-0008.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESPONSE INPUT -->
+          <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;">Your Response to PM</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div class="input-group" style="margin-bottom:0;">
+                <label class="input-label">Sub-contractor ABN (corrected)</label>
+                <input class="input-field" id="q1-abn" placeholder="e.g. 54 639 221 876" oninput="checkABN(this)"/>
+                <div id="q1-abn-status" style="font-size:11px;margin-top:4px;font-family:var(--font-m);display:none;"></div>
+              </div>
+              <div class="input-group" style="margin-bottom:0;">
+                <label class="input-label">Panel Approval Reference</label>
+                <input class="input-field" id="q1-panel" placeholder="e.g. HW-PANEL-2024-0142"/>
+              </div>
+            </div>
+            <div class="input-group" style="margin-bottom:14px;">
+              <label class="input-label">Response Comment <span style="color:var(--red);">*</span></label>
+              <textarea class="textarea-field" id="q1-comment" placeholder="Explain how you have resolved the PM's query. Provide all supporting references. This comment will be logged in the audit trail alongside your resubmission..." style="min-height:80px;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-amber" style="padding:9px 18px;" onclick="submitQueryResponse('qcard-downer','q1-comment','GS-2026-02-ABE-019','PRJ-HW-BWWTW-H2S.ELE.WP-003')">↩ Submit Response to PM</button>
+              <span style="font-size:11.5px;color:var(--text-3);">Your response will be sent to PM-0023 Sarah Reinhardt immediately. Only this line item will be resubmitted — all other rows remain in their current state.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUERY 2 — OPEN -->
+      <div class="panel" style="margin-bottom:16px;border-left:3px solid var(--amber);" id="qcard-scada">
+        <div class="panel-head" style="background:var(--amber-light);">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;">
+            <div style="font-size:20px;">⚠️</div>
+            <div>
+              <div class="panel-title" style="color:#92400E;">Response Required</div>
+              <div class="panel-sub">Claim GS-2026-02-ABE-019 · PRJ-HW-BWWTW-H2S · PM: Sarah Reinhardt · Query raised: 02 Mar 2026</div>
+            </div>
+          </div>
+          <span class="badge badge-amber">↩ RETURNED TO VENDOR</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;">
+            <div>
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">Line Item Returned</div>
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;">
+                <div style="font-family:var(--font-m);font-size:11px;color:var(--text-3);margin-bottom:4px;">WBS Element</div>
+                <div style="font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;">PRJ-HW-BWWTW-H2S.SCA.WP-001</div>
+                <div style="font-family:var(--font-m);font-size:10px;color:var(--text-3);margin-bottom:2px;">Description</div>
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:10px;">SCADA integration — H2S sensor telemetry link</div>
+                <div style="display:flex;gap:16px;">
+                  <div><div style="font-family:var(--font-m);font-size:9.5px;color:var(--text-3);">This Claim %</div><div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--navy);">30%</div></div>
+                  <div><div style="font-family:var(--font-m);font-size:9.5px;color:var(--text-3);">Amount Ex GST</div><div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--navy);">$26,000</div></div>
+                  <div><div style="font-family:var(--font-m);font-size:9.5px;color:var(--text-3);">Cap/Opx</div><div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--navy);">CAP</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">PM Query Comment</div>
+              <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-left:3px solid var(--amber);border-radius:var(--r);padding:12px 14px;height:calc(100% - 22px);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1B3A5C,#2E5A8A);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:11px;font-weight:700;color:#FFF;">SR</div>
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:var(--navy);">Sarah Reinhardt — PM-0023</div>
+                    <div style="font-family:var(--font-m);font-size:10px;color:var(--text-3);">02 Mar 2026 14:07 AEST</div>
+                  </div>
+                </div>
+                <div style="font-family:var(--font-m);font-size:11px;color:#92400E;font-weight:700;margin-bottom:6px;">Reason Code: RC-03 — Rate anomaly requires breakdown justification</div>
+                <div style="font-size:12.5px;color:#78350F;line-height:1.7;">The SCADA telemetry integration rate of $26,000 for 30% progress is 34% above the Synertec benchmark for equivalent SCADA work packages on this program. Please provide a detailed labour + materials breakdown for this work package so I can assess whether the rate is justified before approving.</div>
+              </div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;">Your Response to PM</div>
+            <div class="input-group" style="margin-bottom:14px;">
+              <label class="input-label">Detailed Cost Breakdown <span style="color:var(--red);">*</span></label>
+              <textarea class="textarea-field" id="q2-comment" placeholder="Provide a line-by-line breakdown of labour hours, rates, materials, and any specialist equipment costs for this work package..." style="min-height:80px;"></textarea>
+            </div>
+            <div style="margin-bottom:14px;">
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;">Attach Supporting Documentation</div>
+              <div style="border:2px dashed var(--border2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;background:var(--surface2);" onclick="this.style.borderColor='var(--amber)';showToast('q2','📎','Document attached: SCADA_WP001_Rate_Breakdown.pdf','lime')">
+                <div style="font-size:24px;margin-bottom:6px;">📎</div>
+                <div style="font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;">Attach Rate Breakdown Document</div>
+                <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;">PDF, Excel, or Word · Max 25MB · Stored in Azure Blob for 7 years</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-amber" style="padding:9px 18px;" onclick="submitQueryResponse('qcard-scada','q2-comment','GS-2026-02-ABE-019','PRJ-HW-BWWTW-H2S.SCA.WP-001')">↩ Submit Response to PM</button>
+              <span style="font-size:11.5px;color:var(--text-3);">PM will be notified immediately. SOPA clock resumes from the point it was paused.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUERY 3 — RESUBMITTED / PENDING PM -->
+      <div class="panel" style="margin-bottom:16px;border-left:3px solid var(--sky);opacity:0.85;">
+        <div class="panel-head" style="background:var(--sky-light);">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;">
+            <div style="font-size:20px;">🔵</div>
+            <div>
+              <div class="panel-title" style="color:var(--sky);">Resubmitted — Awaiting PM Re-review</div>
+              <div class="panel-sub">Claim GS-2026-01-ABE-017 · PRJ-HW-BWWTW-H2S · PM: Sarah Reinhardt · Resubmitted: 03 Mar 2026</div>
+            </div>
+          </div>
+          <span class="badge badge-sky">✓ Response Sent</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div>
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">Line Item</div>
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;">
+                <div style="font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px;">PRJ-HW-BWWTW-H2S.ELE.WP-002</div>
+                <div style="font-size:13px;color:var(--text-2);">Gas monitoring network — sensors x24</div>
+                <div style="margin-top:8px;"><span class="badge badge-sky">↩ Returned to Vendor</span> → <span class="badge badge-lime" style="margin-left:4px;">✓ Resubmitted 03 Mar</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">Your Response (Sent)</div>
+              <div style="background:var(--sky-light);border:1px solid #BAE6FD;border-radius:var(--r);padding:12px 14px;font-size:12.5px;color:#075985;line-height:1.7;">
+                Corrected This Claim % from 20% to 18% to reflect actual site installation progress as of 28 Feb. Supporting site inspection sign-off (Form IS-2026-022) attached. The 2% variance was due to a miscommunication between our site supervisor and quantity surveyor — corrected and documented.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESOLVED QUERIES (COLLAPSED SUMMARY) -->
+      <div class="panel">
+        <div class="panel-head" style="cursor:pointer;" onclick="toggleResolved(this)">
+          <div>
+            <div class="panel-title">Resolved Queries — March 2026</div>
+            <div class="panel-sub">4 queries resolved and PM-approved this month</div>
+          </div>
+          <span style="font-size:18px;color:var(--text-3);">▾</span>
+        </div>
+        <div id="resolved-body" style="display:none;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);padding:10px 16px;text-align:left;border-bottom:2px solid var(--border);background:var(--surface2);">WBS Element</th>
+                <th style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);padding:10px 16px;text-align:left;border-bottom:2px solid var(--border);background:var(--surface2);">Query Reason</th>
+                <th style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);padding:10px 16px;text-align:left;border-bottom:2px solid var(--border);background:var(--surface2);">Resolved</th>
+                <th style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);padding:10px 16px;text-align:left;border-bottom:2px solid var(--border);background:var(--surface2);">PM Approved</th>
+                <th style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);padding:10px 16px;text-align:right;border-bottom:2px solid var(--border);background:var(--surface2);">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">PRJ-HW-BWWTW-H2S.ENV.WP-001</td>
+                <td style="padding:11px 16px;font-size:12.5px;">RC-03 Rate anomaly</td>
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">21 Feb 2026</td>
+                <td style="padding:11px 16px;"><span class="badge badge-lime">✓ Approved</span></td>
+                <td style="padding:11px 16px;text-align:right;font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$31,200</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">PRJ-HW-BWWTW-H2S.CIV.WP-002</td>
+                <td style="padding:11px 16px;font-size:12.5px;">RC-05 Missing documentation</td>
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">18 Feb 2026</td>
+                <td style="padding:11px 16px;"><span class="badge badge-lime">✓ Approved</span></td>
+                <td style="padding:11px 16px;text-align:right;font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$14,800</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">PRJ-HW-BWWTW-H2S.MEC.WP-001</td>
+                <td style="padding:11px 16px;font-size:12.5px;">RC-02 Scope clarification</td>
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">14 Feb 2026</td>
+                <td style="padding:11px 16px;"><span class="badge badge-lime">✓ Approved</span></td>
+                <td style="padding:11px 16px;text-align:right;font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$72,400</td>
+              </tr>
+              <tr>
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">PRJ-HW-BWWTW-H2S.ELE.WP-001</td>
+                <td style="padding:11px 16px;font-size:12.5px;">RC-01 Work not yet certified</td>
+                <td style="padding:11px 16px;font-family:var(--font-m);font-size:11px;color:var(--text-3);">10 Feb 2026</td>
+                <td style="padding:11px 16px;"><span class="badge badge-lime">✓ Approved</span></td>
+                <td style="padding:11px 16px;text-align:right;font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$58,700</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /query-cards-wrap -->
+  </div><!-- /page-queries -->
+
+  </div><!-- /main -->
+</div><!-- /portal -->
+</div><!-- /screen-portal -->
+
+<!-- TOAST -->
+<div id="toastWrap"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div id="modal-content"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+// ── LOGIN ────────────────────────────────────────────────────────────
+function doLogin() {
+  showToast('l','🔐','Authenticating with Microsoft Azure AD…','navy');
+  setTimeout(() => {
+    document.getElementById('screen-login').classList.remove('active');
+    document.getElementById('screen-portal').classList.add('active');
+    initDates();
+    showToast('w','✅','Welcome back, James Miller — Abergeldie Contractors','lime');
+  }, 1200);
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────
+function showPage(page, el) {
+  document.querySelectorAll('.subnav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('page-' + page).classList.add('active');
+}
+
+// ── PROJECT DATA REGISTRY ────────────────────────────────────────────
+const PROJECTS = {
+  'USC-AWRC': {
+    wbs: 'PRJ-USC-AWRC',
+    name: 'Upper South Creek AWRC',
+    utility: 'Sydney Water Corporation',
+    contractType: 'Alliance · John Holland / Abergeldie JV',
+    jurisdiction: 'IPART (NSW) · 3Cs Framework',
+    contractValue: '$3,200,000',
+    monthlyCap: '$520,000',
+    ytdClaimed: '$2,891,200',
+    remaining: '$308,800',
+    progress: 90.4,
+    spi: { val: 1.03, label: '1.03 — On schedule', color: 'lime' },
+    cpi: { val: 0.99, label: '0.99 — Marginally over', color: 'amber' },
+    pm: { initials: 'JR', name: 'James Reilly', role: 'Senior Project Manager · Sydney Water Corporation', avgDays: '1.4', lastAction: 'Approved last claim' }
+  },
+  'SFPJV': {
+    wbs: 'PRJ-MW-WTP-PTA',
+    name: 'WTP Primary Augmentation',
+    utility: 'Melbourne Water',
+    contractType: 'Alliance / SFPJV',
+    jurisdiction: 'ESC (VIC) · PREMO',
+    contractValue: '$5,800,000',
+    monthlyCap: '$490,000',
+    ytdClaimed: '$3,412,800',
+    remaining: '$2,387,200',
+    progress: 58.8,
+    spi: { val: 0.96, label: '0.96 — Slightly behind', color: 'amber' },
+    cpi: { val: 1.02, label: '1.02 — On budget', color: 'lime' },
+    pm: { initials: 'SC', name: 'Sarah Chen', role: 'Senior Project Manager · Melbourne Water', avgDays: '1.8', lastAction: 'Approved last claim' }
+  },
+  'YYWTP': {
+    wbs: 'PRJ-MW-YYWTP-UP',
+    name: 'Yan Yean WTP Upgrade',
+    utility: 'Melbourne Water',
+    contractType: 'Lump Sum / Schedule of Rates',
+    jurisdiction: 'ESC (VIC) · PREMO',
+    contractValue: '$1,400,000',
+    monthlyCap: '$180,000',
+    ytdClaimed: '$892,600',
+    remaining: '$507,400',
+    progress: 63.8,
+    spi: { val: 1.01, label: '1.01 — On schedule', color: 'lime' },
+    cpi: { val: 1.00, label: '1.00 — On budget', color: 'lime' },
+    pm: { initials: 'DK', name: 'David Kim', role: 'Project Manager · Melbourne Water', avgDays: '2.1', lastAction: 'Approved last claim' }
+  },
+  'BWWTW': {
+    wbs: 'PRJ-HW-BWWTW-H2S',
+    name: 'Belmont WWTW H₂S Management',
+    utility: 'Hunter Water Corporation',
+    contractType: 'Schedule of Rates',
+    jurisdiction: 'IPART (NSW) · 3Cs Framework',
+    contractValue: '$1,800,000',
+    monthlyCap: '$210,000',
+    ytdClaimed: '$1,247,400',
+    remaining: '$552,600',
+    progress: 69.3,
+    spi: { val: 0.94, label: '0.94 — Behind schedule', color: 'red' },
+    cpi: { val: 1.03, label: '1.03 — On budget', color: 'lime' },
+    pm: { initials: 'MO', name: "Michael O'Brien", role: 'Senior Project Manager · Hunter Water Corporation', avgDays: '2.3', lastAction: 'Returned claim - 2 errors' }
+  }
+};
+
+let currentProject = 'SFPJV';
+
+function loadProject(code) {
+  currentProject = code || currentProject;
+  const p = PROJECTS[currentProject];
+  if (!p) return;
+
+  // Update project snapshot panel
+  const snapWbs = document.getElementById('snap-wbs');
+  if (snapWbs) snapWbs.textContent = p.wbs;
+
+  const snapDetails = document.getElementById('snap-details');
+  if (snapDetails) snapDetails.innerHTML = [
+    ['Utility',         p.utility],
+    ['Contract Type',   p.contractType],
+    ['Jurisdiction',    p.jurisdiction],
+    ['Contract Value',  p.contractValue, 'color:var(--navy)'],
+    ['Monthly Cap',     p.monthlyCap],
+    ['YTD Claimed',     p.ytdClaimed, 'color:var(--amber)'],
+    ['Remaining',       p.remaining, 'color:var(--lime)'],
+  ].map(([k, v, style]) =>
+    `<div class="dt-row"><div class="dt-key">${k}</div><div class="dt-val"${style ? ` style="${style}"` : ''}>${v}</div></div>`
+  ).join('');
+
+  const snapProg = document.getElementById('snap-progress');
+  if (snapProg) snapProg.innerHTML = `
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Contract Progress</span><span>${p.progress}%</span></div>
+      <div class="prog-track"><div class="prog-bar lime" style="width:${p.progress}%"></div></div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Schedule (SPI)</span><span>${p.spi.label}</span></div>
+      <div class="prog-track"><div class="prog-bar ${p.spi.color}" style="width:${Math.min(p.spi.val*100,100)}%"></div></div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Cost (CPI)</span><span>${p.cpi.label}</span></div>
+      <div class="prog-track"><div class="prog-bar ${p.cpi.color}" style="width:${Math.min(p.cpi.val*100,100)}%"></div></div>
+    </div>`;
+
+  // Update PM card
+  const pmBody = document.getElementById('pm-card-body');
+  if (pmBody) pmBody.innerHTML = `
+    <div class="pm-card" style="margin-bottom:12px;">
+      <div class="pm-avatar">${p.pm.initials}</div>
+      <div>
+        <div class="pm-name">${p.pm.name}</div>
+        <div class="pm-role">${p.pm.role}</div>
+        <div class="pm-contact">
+          <button class="btn btn-ghost btn-xs">✉ Message</button>
+          <button class="btn btn-ghost btn-xs">📞 Call</button>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-3);line-height:1.6;">Avg response time: <strong style="color:var(--navy)">${p.pm.avgDays} days</strong><br/>${p.pm.lastAction}</div>`;
+
+  // Update page subtitle
+  const upSub = document.querySelector('#page-upload .ph .psub');
+  if (upSub) upSub.textContent = p.name + ' · ' + p.wbs + ' · ' + (window._claimMonthShort || '');
+
+  // Update project selector to match
+  const sel = document.querySelector('#page-upload .select-field');
+  if (sel) {
+    Array.from(sel.options).forEach(o => {
+      if (o.value && o.value === currentProject) sel.value = o.value;
+    });
+  }
+}
+
+// ── CHECKLIST ────────────────────────────────────────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const box = el.querySelector('.check-box');
+  box.textContent = el.classList.contains('checked') ? '✓' : '';
+  const items = document.querySelectorAll('.checklist-item');
+  const done = document.querySelectorAll('.checklist-item.checked').length;
+  const status = document.getElementById('checklist-status');
+  if (status) {
+    status.textContent = done + ' / ' + items.length + ' Complete';
+    status.className = 'badge ' + (done === items.length ? 'badge-lime' : done >= 3 ? 'badge-amber' : 'badge-red');
+  }
+}
+
+// ── VALIDATION ───────────────────────────────────────────────────────
+function runValidation() {
+  showToast('v','⚙','Azure Functions: validating progress claim…','navy');
+  const sec = document.getElementById('val-section');
+  setTimeout(() => {
+    sec.style.display = 'block';
+    sec.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    showToast('r','⚠','Validation complete — 8 passed, 1 advisory flag. Safe to submit.','amber');
+  }, 1400);
+}
+
+function submitClaim() {
+  showToast('s','📤','Progress claim submitted — routed to PM James Reilly for approval','lime');
+  setTimeout(() => showPage('tracker', document.getElementById('nav-tracker')), 1000);
+}
+
+// ── INLINE EDIT ──────────────────────────────────────────────────────
+function verifyABN() {
+  showToast('a','🔍','Checking ATO ABR registry…','navy');
+  setTimeout(() => showToast('a2','✅','ABN 41 884 992 113 — ElectroBuild Services Pty Ltd · Active','lime'), 1200);
+}
+
+function markFixed(fieldId, val) {
+  const el = document.getElementById(fieldId);
+  if (el) { el.value = val; el.classList.add('corrected'); }
+  showToast('f','✓','Correction logged with timestamp — re-run validation to confirm','lime');
+}
+
+function resubmit() {
+  showToast('rs','⚙','Re-running Azure validation on corrected fields…','navy');
+  setTimeout(() => {
+    showToast('rs2','✅','All errors resolved — claim submitted to PM queue','lime');
+    showPage('tracker', document.getElementById('nav-tracker'));
+  }, 1600);
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────
+function showToast(id, icon, msg, type) {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  const cls = type==='lime'?'toast-lime':type==='red'?'toast-red':type==='amber'?'toast-amber':'toast-navy';
+  t.className = 'toast ' + cls;
+  t.innerHTML = '<span style="font-size:16px">' + icon + '</span>' + msg;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// ── MODALS ───────────────────────────────────────────────────────────
+const modals = {
+  template: {
+    title: '⬇ Download Progress Claim Template',
+    sub: 'Official template for BasinSync progress claim submissions. v1.0 — March 2026.',
+    content: `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;">
+      <div style="font-family:var(--font-d);font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">📊 BasinSync_ProgressClaim_Template_v1.0.xlsx</div>
+      <div style="font-size:12px;color:var(--text-3);line-height:1.6;">18 mandatory columns · SAP WBS pre-populated on login · Auto-calculated GST · ABN lookup macro · Capex/Opex classification · Azure validation-ready</div>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-3);margin-bottom:12px;">Tabs: INSTRUCTIONS · CLAIM_HEADER · CLAIM_LINES · VARIATION_REGISTER · REF_DATA</div>
+    <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-radius:6px;padding:10px 12px;font-size:12px;color:#92400E;">⚠ Always use the latest template version. Submissions using older versions will be rejected by Azure validation.</div>`,
+    actions: `<button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-amber" onclick="downloadTemplate()">Download Template</button>`
+  },
+  notif: {
+    title: '🔔 Notifications',
+    sub: 'Recent activity on your account',
+    content: `<div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="background:var(--red-light);border:1px solid #FECACA;border-radius:8px;padding:12px;"><div style="font-size:13px;font-weight:600;color:var(--red);">⚠ Belmont WWTW claim returned — 2 validation errors</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px;">01 Dec 2024 · Fix errors and resubmit</div></div>
+      <div style="background:var(--lime-light);border:1px solid #BBF7D0;border-radius:8px;padding:12px;"><div style="font-size:13px;font-weight:600;color:var(--lime);">✅ USC-AWRC Nov claim approved by PM</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px;">04 Dec 2024 · $487,200 · Est payment 30 Dec</div></div>
+      <div style="background:var(--amber-light);border:1px solid var(--amber-mid);border-radius:8px;padding:12px;"><div style="font-size:13px;font-weight:600;color:var(--amber);">⏱ SOPA deadline in 8 business days</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px;">2 claims not yet submitted for Nov 2024</div></div>
+    </div>`,
+    actions: `<button class="btn btn-primary" onclick="closeModal()">Dismiss All</button>`
+  },
+  sopa_info: {
+    title: 'ⓘ SOPA Compliance Guide',
+    sub: 'Security of Payment Act — what vendors need to know',
+    content: `<div style="font-size:13px;line-height:1.8;color:var(--text-2);">
+      <p style="margin-bottom:10px;">Under the <strong>Security of Payment Act</strong> (NSW: Building and Construction Industry Security of Payment Act 1999; VIC: Building and Construction Industry Security of Payment Act 2002; SA: Building and Construction Industry Security of Payment Act 2009), contractors have a statutory right to progress payments.</p>
+      <div style="background:var(--surface2);border-radius:6px;padding:12px;margin-bottom:10px;font-size:12px;">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--navy);">Key Deadlines</div>
+        <div>📋 <strong>Claim submission:</strong> 1st–5th of each month via BasinSync portal</div>
+        <div>⏱ <strong>Payment Schedule:</strong> Superintendent must respond within 10–15 business days</div>
+        <div>💰 <strong>Payment due:</strong> Within 15 business days of scheduled payment date (NSW); 20 business days (VIC)</div>
+      </div>
+      <p style="font-size:12px;color:var(--text-3);">Failure by the utility to issue a Payment Schedule within the statutory period renders the full claimed amount payable, overriding any disputes.</p>
+    </div>`,
+    actions: `<button class="btn btn-primary" onclick="closeModal()">Got It</button>`
+  }
+};
+
+
+// ── DYNAMIC DATES ──────────────────────────────────────────────────
+function getAustralianFY(date) {
+  const m = date.getMonth(); // 0-indexed, July=6
+  const y = date.getFullYear();
+  return m >= 6 ? 'FY ' + y + '–' + String(y+1).slice(2) : 'FY ' + (y-1) + '–' + String(y).slice(2);
+}
+function fmtMonthYear(date) {
+  return date.toLocaleDateString('en-AU', { month:'long', year:'numeric' });
+}
+function fmtShort(date) {
+  return date.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'2-digit' }).replace(/ /g,' ');
+}
+function fmtMedium(date) {
+  return date.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+function addBusinessDays(date, days) {
+  let d = new Date(date); let added = 0;
+  while (added < days) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() !== 0 && d.getDay() !== 6) added++;
+  }
+  return d;
+}
+function businessDaysUntil(target, from) {
+  let d = new Date(from); let count = 0;
+  while (d < target) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() !== 0 && d.getDay() !== 6) count++;
+  }
+  return count;
+}
+
+function initDates() {
+  const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const fy = getAustralianFY(now);
+
+  // SOPA submission deadline: 13th of current month; if past 13th, use next month
+  let sopaDeadline = new Date(now.getFullYear(), now.getMonth(), 13);
+  if (now > sopaDeadline) sopaDeadline = new Date(now.getFullYear(), now.getMonth() + 1, 13);
+  const sopaDays = businessDaysUntil(sopaDeadline, now);
+  const sopaDayStr = sopaDays + ' DAY' + (sopaDays !== 1 ? 'S' : '') + ' REMAINING';
+  const sopaDeadlineStr = sopaDeadline.toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' });
+  const claimMonthStr = fmtMonthYear(prevMonth);
+  const claimMonthShort = prevMonth.toLocaleDateString('en-AU', { month:'short', year:'numeric' });
+
+  // Payment est = addBusinessDays(sopaDeadline, 15)
+  const payEst = addBusinessDays(sopaDeadline, 15);
+  const payEstStr = fmtShort(payEst);
+
+  // Build payment history rows relative to today
+  const months = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d);
+  }
+  const payData = [
+    { m: months[0], name: 'USC-AWRC — Progress Claim #11', ref: 'EXP-' + months[0].getFullYear() + '-1187', note: 'PM Approved ' + fmtShort(addBusinessDays(months[0], 4)), amount: '$487,200', status: 'awaiting', statusBadge: '<span class="badge badge-amber">Awaiting Payment</span>', date: 'Est ' + payEstStr },
+    { m: months[1], name: 'USC-AWRC — Progress Claim #10', ref: 'EXP-' + months[1].getFullYear() + '-1144', note: 'Paid on time', amount: '$461,800', status: '', statusBadge: '<span class="badge badge-lime">Paid</span>', date: fmtShort(addBusinessDays(new Date(months[1].getFullYear(), months[1].getMonth()+1, 1), 20)) },
+    { m: months[2], name: 'WTP Primary Aug — Progress Claim #6', ref: 'EXP-' + months[2].getFullYear() + '-1141', note: '', amount: '$312,400', status: '', statusBadge: '<span class="badge badge-lime">Paid</span>', date: fmtShort(addBusinessDays(new Date(months[2].getFullYear(), months[2].getMonth()+1, 1), 20)) },
+    { m: months[3], name: 'USC-AWRC — Progress Claim #9', ref: 'EXP-' + months[3].getFullYear() + '-1098', note: '', amount: '$398,450', status: '', statusBadge: '<span class="badge badge-lime">Paid</span>', date: fmtShort(addBusinessDays(new Date(months[3].getFullYear(), months[3].getMonth()+1, 1), 20)) },
+    { m: months[4], name: 'USC-AWRC — Progress Claim #8', ref: 'EXP-' + months[4].getFullYear() + '-1052', note: '', amount: '$512,200', status: '', statusBadge: '<span class="badge badge-lime">Paid</span>', date: fmtShort(addBusinessDays(new Date(months[4].getFullYear(), months[4].getMonth()+1, 1), 20)) },
+    { m: months[5], name: 'USC-AWRC — Progress Claim #7', ref: 'EXP-' + months[5].getFullYear() + '-1009', note: 'Rejected — resubmitted', amount: '—', status: 'rejected', statusBadge: '<span class="badge badge-red">Rejected</span>', date: '—' },
+    { m: months[6], name: 'USC-AWRC — Progress Claim #6', ref: 'EXP-' + months[6].getFullYear() + '-0964', note: '', amount: '$421,900', status: '', statusBadge: '<span class="badge badge-lime">Paid</span>', date: fmtShort(addBusinessDays(new Date(months[6].getFullYear(), months[6].getMonth()+1, 1), 20)) },
+  ];
+
+  const tbody = document.getElementById('pay-tbody');
+  if (tbody) {
+    tbody.innerHTML = payData.map(p => {
+      const mo = p.m.toLocaleDateString('en-AU', { month:'short', year:'numeric' });
+      return '<tr class="' + p.status + '">' +
+        '<td class="pay-month">' + mo + '</td>' +
+        '<td><div class="pay-claim-name">' + p.name + '</div><div class="pay-claim-ref">' + p.ref + (p.note ? ' · ' + p.note : '') + '</div></td>' +
+        '<td class="pay-amount">' + p.amount + '</td>' +
+        '<td class="pay-status-cell">' + p.statusBadge + '</td>' +
+        '<td class="pay-date">' + p.date + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // Store globally for loadProject
+  window._claimMonthShort = claimMonthShort;
+  window._sopaDeadlineStr = sopaDeadlineStr;
+
+  // Update project card claim status badges
+  const setBadge = (id, html_content) => { const el = document.getElementById(id); if (el) el.innerHTML = html_content; };
+  setBadge('badge-usc-awrc', claimMonthShort + ' Claim Submitted');
+  setBadge('badge-wtp', '⏳ ' + claimMonthShort + ' Claim Not Yet Submitted');
+  setBadge('badge-yywtp', '⏳ ' + claimMonthShort + ' Claim Not Yet Submitted');
+
+  // ── Update all dynamic text nodes ──
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setHTML = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+
+  // Topbar SOPA
+  const topSopa = document.querySelector('.topbar-sopa');
+  if (topSopa) {
+    topSopa.setAttribute('onclick', "showToast('s','⏱','SOPA window closes " + sopaDeadlineStr + " — " + sopaDays + " business days remaining','amber')");
+    topSopa.innerHTML = '<div class="sopa-pulse"></div>SOPA: ' + sopaDayStr;
+  }
+
+  // Dashboard SOPA banner
+  setHTML('sopa-banner-title', '⏱ ' + claimMonthStr + ' Submission Window Open');
+  setHTML('sopa-banner-desc', 'Submit progress claims by <strong style="color:#FCD34D">' + sopaDeadlineStr + '</strong> to comply with SOPA statutory deadlines. Once submitted, the Superintendent has 15 business days to issue a Payment Schedule. Late submissions forfeit your SOPA entitlements.');
+  setHTML('sopa-banner-clock', '<div class="sopa-clock-val" id="sopa-days-val">' + String(sopaDays).padStart(2,'0') + '</div><div class="sopa-clock-lbl">BUS. DAYS LEFT</div>');
+
+  // Stat cards
+  setTxt('stat-cycle', claimMonthShort + ' cycle');
+  setTxt('stat-fy', fy);
+
+  // Project list subtitle
+  const psub = document.querySelector('#page-dashboard .ph .psub');
+  if (psub) psub.textContent = 'Abergeldie Contractors Pty Ltd · 4 active projects · ' + claimMonthShort;
+
+  // Project cards — claim month labels
+  document.querySelectorAll('.project-amount-lbl').forEach(el => {
+    if (el.textContent.includes('claim')) el.textContent = claimMonthShort + ' claim';
+  });
+
+  // Upload page subtitle
+  const upSub = document.querySelector('#page-upload .ph .psub');
+  if (upSub) upSub.textContent = 'Western Treatment Plant Primary Augmentation · PRJ-MW-WTP-PTA · ' + claimMonthShort;
+
+  // Upload page claim period badge
+  const upBadge = document.querySelector('#page-upload .panel-head .badge-navy');
+  if (upBadge) upBadge.textContent = claimMonthShort;
+
+  // Deadline card (upload page)
+  const dlSub = document.querySelector('.deadline-sub');
+  if (dlSub) dlSub.innerHTML = 'Submit by <strong style="color:#FCD34D">' + sopaDeadlineStr + '</strong> for ' + claimMonthStr + ' period. PM has 15 business days from receipt to issue Payment Schedule.';
+  const dlNum = document.querySelector('.deadline-num');
+  if (dlNum) dlNum.textContent = String(sopaDays).padStart(2,'0');
+
+  // SOPA clock on banner (tracker/upload actions)
+  document.querySelectorAll('.sopa-actions .btn-ghost').forEach(el => {
+    if (el.textContent.includes('SOPA')) el.textContent = '⏱ SOPA: ' + sopaDays + 'd';
+  });
+
+  // Tracker page SOPA reference
+  const trackerAmber = document.querySelector('#page-tracker .amber-light div');
+  if (trackerAmber) trackerAmber.innerHTML = '<strong>' + sopaDays + ' business days remaining.</strong> Submit by ' + sopaDeadlineStr + ' to comply with SOPA statutory deadlines.';
+
+  // Payment page subtitle  
+  const paySub = document.querySelector('#page-payment .ph .psub');
+  if (paySub) paySub.textContent = 'Abergeldie Contractors Pty Ltd · ABN 47 004 533 519 · ' + fy;
+  const payPanelSub = document.querySelector('#page-payment .panel-head .panel-sub');
+  if (payPanelSub) payPanelSub.textContent = fy + ' · Sorted by date';
+
+  // Payment awaiting stat sub
+  const payWaitSub = document.querySelector('#page-payment .stat-card.amber .stat-sub');
+  if (payWaitSub) payWaitSub.textContent = 'Est. ' + fmtMedium(payEst);
+
+  // Payment FY stat sub
+  const payFySub = document.querySelector('#page-payment .stat-card.sky .stat-sub');
+  if (payFySub) payFySub.textContent = fy;
+
+  // Notification modal dates
+  const notifContent = document.getElementById('notif-content');
+  if (notifContent) notifContent.setAttribute('data-fy', fy);
+  
+  // Claim select dropdown
+  const claimSelect = document.querySelector('select option');
+  if (claimSelect) {
+    const opts = document.querySelectorAll('.select-field option');
+    opts.forEach(o => {
+      if (o.textContent.includes('November 2024')) o.textContent = claimMonthStr;
+      if (o.textContent.includes('October 2024')) {
+        const prev2 = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        o.textContent = fmtMonthYear(prev2);
+      }
+    });
+  }
+  // Render default project snapshot
+  loadProject('SFPJV');
+
+  // ── TRACKER DATES ────────────────────────────────────────────
+  // Claim 1: USC-AWRC — approved, submitted ~18 days ago
+  const trk1Sub  = addBusinessDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), -18);
+  const trk1Val  = addBusinessDays(trk1Sub, 0);
+  const trk1Appr = addBusinessDays(trk1Sub, 2);
+  const trk1Pay  = addBusinessDays(sopaDeadline, 15);
+
+  const fmtTrk = d => d.toLocaleDateString('en-AU',{day:'2-digit',month:'short'});
+  const fmtTrkFull = d => d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+
+  const setId = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setHTML2 = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+
+  setId('trk1-title', 'USC-AWRC — ' + claimMonthStr + ' Progress Claim');
+  setId('trk1-sub',   'GS-' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-ABE-007 · $535,920 inc GST · Submitted ' + fmtTrkFull(trk1Sub));
+  setId('trk1-s1', fmtTrk(trk1Sub) + ' 09:14');
+  setId('trk1-s2', fmtTrk(trk1Val) + ' 09:16');
+  setId('trk1-s3', fmtTrk(trk1Val) + ' 09:16');
+  setId('trk1-s4', fmtTrk(trk1Appr) + ' 14:22');
+  setId('trk1-s6', 'Est. ' + fmtTrkFull(trk1Pay));
+  setId('trk1-approvaldate', fmtTrkFull(trk1Appr));
+
+  // Claim 2: Belmont — errors, submitted ~5 days ago
+  const trk2Sub = addBusinessDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), -5);
+  setId('trk2-title', 'Belmont WWTW H₂S — ' + claimMonthStr + ' Progress Claim');
+  setId('trk2-sub',   'GS-' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-ABE-019 · $198,750 claimed · Submitted ' + fmtTrkFull(trk2Sub));
+  setId('trk2-s1', fmtTrk(trk2Sub) + ' 11:42');
+
+  // Claim 3: WTP — not submitted
+  const trk3Year = now.getFullYear();
+  const trk3Mon  = String(now.getMonth()+1).padStart(2,'0');
+  setId('trk3-title', 'WTP Primary Augmentation — ' + claimMonthStr + ' Progress Claim');
+  setId('trk3-sub',   'GS-' + trk3Year + '-' + trk3Mon + '-ABE-011 · Not yet submitted · Due ' + sopaDeadlineStr);
+  setHTML2('trk3-sopa-msg', '<strong>' + sopaDays + ' business days remaining.</strong> Submit by ' + sopaDeadlineStr + ' to comply with SOPA statutory deadlines.');
+}
+
+// ── PROJECT FILTERING ────────────────────────────────────────────────
+let currentFilter = 'all';
+function filterProjects(status) {
+  currentFilter = status;
+  const cards = document.querySelectorAll('.project-card[data-status]');
+  const title = document.getElementById('portfolio-title');
+  const labels = { all: 'My Project Portfolio', approved: 'Approved Projects', pending: 'Awaiting Submission', flagged: 'Needs Correction' };
+  if (title) title.textContent = labels[status] || 'My Project Portfolio';
+  let shown = 0;
+  cards.forEach(card => {
+    const match = status === 'all' || card.getAttribute('data-status') === status;
+    card.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  // Show "no results" message if needed
+  let msg = document.getElementById('filter-empty');
+  if (!msg) {
+    msg = document.createElement('div');
+    msg.id = 'filter-empty';
+    msg.style.cssText = 'text-align:center;padding:32px;color:var(--text-3);font-size:13px;display:none;';
+    msg.innerHTML = 'No projects match this filter. <a href="#" onclick="filterProjects(\'all\');return false;" style="color:var(--navy2);font-weight:600;">Show all →</a>';
+    cards[cards.length-1].parentNode.appendChild(msg);
+  }
+  msg.style.display = shown === 0 ? 'block' : 'none';
+  // Highlight active stat card
+  document.querySelectorAll('.stat-strip .stat-card').forEach(c => c.style.opacity = '1');
+}
+
+// ── TEMPLATE DOWNLOAD ────────────────────────────────────────────────
+function downloadTemplate() {
+  closeModal();
+  showToast('t', '⬇', 'Preparing BasinSync_ProgressClaim_Template_v1.0.xlsx…', 'navy');
+  // Try to download the actual file if it exists alongside this HTML
+  const a = document.createElement('a');
+  a.href = 'BasinSync_ProgressClaim_Template_v1.0.xlsx';
+  a.download = 'BasinSync_ProgressClaim_Template_v1.0.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => showToast('t2', '✅', 'Template downloaded — use v1.0 to avoid validation errors', 'lime'), 800);
+}
+
+// Call initDates after login so dates are always fresh
+
+
+
+function openModal(key) {
+  const d = modals[key]; if (!d) return;
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-sub').textContent = d.sub;
+  document.getElementById('modal-content').innerHTML = d.content;
+  document.getElementById('modal-actions').innerHTML = d.actions;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// ── PM QUERIES PAGE ──────────────────────────────────────────────────
+function submitQueryResponse(cardId, commentId, claimRef, wbsEl) {
+  const comment = document.getElementById(commentId);
+  if (!comment || !comment.value.trim()) {
+    showToast(cardId, '⚠️', 'Please enter a response comment before submitting', 'amber');
+    return;
+  }
+  const card = document.getElementById(cardId);
+  if (card) {
+    card.style.borderLeftColor = 'var(--lime)';
+    card.style.opacity = '0.8';
+    const head = card.querySelector('.panel-head');
+    if (head) {
+      head.style.background = 'var(--lime-light)';
+      head.querySelector('.panel-title').style.color = 'var(--lime)';
+      head.querySelector('.panel-title').textContent = '✓ Response Submitted — Awaiting PM Re-review';
+      const badge = head.querySelector('.badge');
+      if (badge) { badge.className = 'badge badge-lime'; badge.textContent = '✓ Response Sent'; }
+    }
+    // Replace response area with confirmation
+    const bodyDivs = card.querySelectorAll('.panel-body > div');
+    const lastDiv = card.querySelector('.panel-body > div:last-child');
+    if (lastDiv) {
+      lastDiv.innerHTML = `<div style="background:var(--lime-light);border:1px solid #BBF7D0;border-radius:var(--r);padding:14px 16px;font-size:13px;color:#14532D;line-height:1.7;">
+        <strong>✓ Your response has been sent to PM Sarah Reinhardt (PM-0023).</strong><br/>
+        WBS: <span style="font-family:var(--font-m);font-size:11.5px;">${wbsEl}</span> · Claim: <span style="font-family:var(--font-m);font-size:11.5px;">${claimRef}</span><br/>
+        The SOPA clock has resumed. The PM will review your response and issue an Approve or further Query. You will be notified of the outcome.
+      </div>`;
+    }
+    // Update the nav badge count
+    const badge = document.querySelector('#nav-queries .subnav-badge');
+    if (badge) {
+      const current = parseInt(badge.textContent) || 0;
+      if (current > 1) badge.textContent = current - 1;
+      else badge.remove();
+    }
+  }
+  showToast(cardId, '✅', 'Response submitted to PM · SOPA clock resumed', 'lime');
+}
+
+function checkABN(input) {
+  const val = input.value.replace(/\s/g,'');
+  const statusEl = document.getElementById('q1-abn-status');
+  if (!statusEl) return;
+  if (val.length === 11) {
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--lime)';
+    statusEl.textContent = '✓ ABN format valid — will be verified against ATO ABR on submission';
+  } else if (val.length > 0) {
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--text-3)';
+    statusEl.textContent = 'Enter 11-digit ABN (' + val.length + '/11)';
+  } else {
+    statusEl.style.display = 'none';
+  }
+}
+
+function toggleResolved(head) {
+  const body = document.getElementById('resolved-body');
+  const arrow = head.querySelector('span:last-child');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    arrow.textContent = '▴';
+  } else {
+    body.style.display = 'none';
+    arrow.textContent = '▾';
+  }
+}
+</script>
+</body>
+</html>

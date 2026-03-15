@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BasinSync — Project Manager Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #F5F3EE;
+  --bg2:         #EDEBE4;
+  --surface:     #FFFFFF;
+  --surface2:    #F9F8F5;
+  --border:      #DDD9CF;
+  --border2:     #C8C3B5;
+  --navy:        #1B3A5C;
+  --navy2:       #2E5A8A;
+  --navy-dim:    rgba(27,58,92,0.08);
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --amber-mid:   #FDE68A;
+  --amber-dim:   rgba(217,119,6,0.10);
+  --lime:        #16A34A;
+  --lime-light:  #DCFCE7;
+  --lime-dim:    rgba(22,163,74,0.10);
+  --red:         #DC2626;
+  --red-light:   #FEE2E2;
+  --red-dim:     rgba(220,38,38,0.10);
+  --sky:         #0284C7;
+  --sky-light:   #E0F2FE;
+  --sky-dim:     rgba(2,132,199,0.10);
+  --orange:      #EA580C;
+  --text:        #1C1917;
+  --text-2:      #44403C;
+  --text-3:      #78716C;
+  --text-4:      #A8A29E;
+  --font-d:      'Barlow Condensed', sans-serif;
+  --font-b:      'Nunito Sans', sans-serif;
+  --font-m:      'IBM Plex Mono', monospace;
+  --r:           8px;
+  --shadow:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.14);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--font-b); font-size:14px; min-height:100vh; }
+
+/* ── SCREENS ─────────────────────────────────────────────────────────── */
+.screen { display:none !important; }
+.screen.active { display:block !important; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ══════════════════════════════════════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════════════════════════════════════ */
+#screen-login { min-height:100vh; grid-template-columns: 1fr 480px; }
+#screen-login.active { display:grid !important; }
+.login-left {
+  background: var(--navy); position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between; padding:48px;
+}
+.login-left::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 30%, rgba(217,119,6,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(45,90,138,0.4) 0%, transparent 60%);
+}
+.login-grid {
+  position:absolute; inset:0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.login-brand { position:relative; z-index:1; }
+.login-logo {
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--font-d); font-size:26px; font-weight:800;
+  color:#FFF; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;
+}
+.login-logo-mark {
+  width:44px; height:44px; border-radius:10px;
+  background:linear-gradient(135deg, #D97706, #EA580C);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0; box-shadow: 0 4px 12px rgba(217,119,6,0.4);
+}
+.login-tagline { color:rgba(255,255,255,0.55); font-size:13px; letter-spacing:0.3px; }
+.login-hero { position:relative; z-index:1; }
+.login-hero-title {
+  font-family:var(--font-d); font-size:52px; font-weight:800;
+  color:#FFF; line-height:1.05; letter-spacing:0.5px; margin-bottom:20px; text-transform:uppercase;
+}
+.login-hero-title em { color:var(--amber); font-style:normal; }
+.login-hero-sub { color:rgba(255,255,255,0.6); font-size:15px; line-height:1.7; max-width:440px; }
+.login-stats { position:relative; z-index:1; display:flex; gap:32px; }
+.login-stat-val { font-family:var(--font-d); font-size:28px; font-weight:800; color:var(--amber); line-height:1; }
+.login-stat-lbl { font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; letter-spacing:0.5px; font-family:var(--font-m); }
+.login-right {
+  background:var(--surface); display:flex; flex-direction:column;
+  justify-content:center; padding:56px 48px; border-left:1px solid var(--border);
+}
+.login-right-title {
+  font-family:var(--font-d); font-size:28px; font-weight:700;
+  letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); margin-bottom:6px;
+}
+.login-right-sub { color:var(--text-3); font-size:13px; margin-bottom:36px; }
+.login-role-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--navy-dim); border:1px solid rgba(27,58,92,0.2);
+  color:var(--navy); font-family:var(--font-m); font-size:11px;
+  padding:4px 10px; border-radius:20px; margin-bottom:28px;
+}
+.login-sopa-notice {
+  background:var(--amber-light); border:1px solid var(--amber-mid);
+  border-left:3px solid var(--amber);
+  border-radius:var(--r); padding:12px 14px; margin-bottom:28px;
+  font-size:12px; color:#92400E; line-height:1.6;
+}
+.login-sopa-notice strong { display:block; margin-bottom:2px; font-size:12.5px; }
+.sso-btn {
+  width:100%; padding:14px 20px; border-radius:var(--r);
+  background:var(--navy); color:#FFF; border:none; cursor:pointer;
+  font-family:var(--font-d); font-size:16px; font-weight:700;
+  letter-spacing:0.8px; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  transition:all 0.2s; margin-bottom:12px; box-shadow: var(--shadow-md);
+}
+.sso-btn:hover { background:#264E7A; transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+.sso-btn-icon { width:22px; height:22px; background:#FFF; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.login-help { text-align:center; font-size:12px; color:var(--text-4); margin-top:24px; }
+.login-help a { color:var(--navy2); text-decoration:none; font-weight:600; }
+.login-footer { margin-top:auto; padding-top:32px; }
+.login-footer-text { font-size:11px; color:var(--text-4); line-height:1.6; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PORTAL SHELL
+══════════════════════════════════════════════════════════════════════ */
+.portal { min-height:100vh; display:flex; flex-direction:column; }
+
+/* TOPBAR */
+.topbar {
+  height:56px; background:var(--navy);
+  display:flex; align-items:center; padding:0 24px; gap:0;
+  position:sticky; top:0; z-index:300;
+  box-shadow: 0 2px 8px rgba(27,58,92,0.3);
+}
+.topbar-logo {
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-d); font-size:18px; font-weight:800;
+  color:#FFF; letter-spacing:1px; text-transform:uppercase; margin-right:24px;
+}
+.topbar-logo-mark {
+  width:30px; height:30px; border-radius:7px;
+  background:linear-gradient(135deg,#D97706,#EA580C);
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.topbar-logo em { color:#FCD34D; font-style:normal; }
+.topbar-tag {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.7); font-family:var(--font-m); font-size:10px;
+  padding:2px 8px; border-radius:4px; letter-spacing:0.5px;
+}
+/* PM escalation alert in topbar */
+.topbar-escalation {
+  margin-left:16px;
+  background:rgba(220,38,38,0.2); border:1px solid rgba(220,38,38,0.5);
+  color:#FCA5A5; font-family:var(--font-m); font-size:10px;
+  padding:4px 12px; border-radius:20px;
+  display:flex; align-items:center; gap:6px;
+  animation: escalate-pulse 2s infinite;
+}
+@keyframes escalate-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.topbar-sopa {
+  background:rgba(217,119,6,0.2); border:1px solid rgba(217,119,6,0.4);
+  color:#FCD34D; font-family:var(--font-m); font-size:10.5px;
+  padding:4px 12px; border-radius:20px; cursor:pointer;
+  display:flex; align-items:center; gap:6px; transition:background 0.15s;
+}
+.topbar-sopa:hover { background:rgba(217,119,6,0.3); }
+.sopa-pulse { width:7px; height:7px; background:#FCD34D; border-radius:50%; animation: pulse 1.4s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.topbar-notif {
+  width:32px; height:32px; border-radius:6px;
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; position:relative; font-size:14px; transition:background 0.15s;
+}
+.topbar-notif:hover { background:rgba(255,255,255,0.14); }
+.notif-badge { position:absolute; top:5px; right:5px; width:7px; height:7px; border-radius:50%; background:#F87171; border:1.5px solid var(--navy); }
+.topbar-user {
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  padding:4px 8px; border-radius:6px; transition:background 0.15s;
+}
+.topbar-user:hover { background:rgba(255,255,255,0.08); }
+.user-avatar {
+  width:30px; height:30px; border-radius:6px;
+  background:linear-gradient(135deg,#1B3A5C,#2E5A8A);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-d); font-size:12px; font-weight:700; color:#FFF; letter-spacing:1px;
+}
+.user-info { text-align:right; }
+.user-name { font-size:12px; font-weight:600; color:#FFF; line-height:1.2; }
+.user-company { font-size:10px; color:rgba(255,255,255,0.5); font-family:var(--font-m); }
+
+/* SUBNAV */
+.subnav {
+  height:44px; background:var(--surface); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 24px; gap:2px;
+  position:sticky; top:56px; z-index:200;
+}
+.subnav-item {
+  padding:6px 14px; border-radius:6px; font-size:13px; font-weight:600;
+  color:var(--text-3); cursor:pointer; border:1px solid transparent;
+  transition:all 0.15s; display:flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.subnav-item:hover { color:var(--text); background:var(--bg2); }
+.subnav-item.active { color:var(--navy); background:var(--navy-dim); border-color:rgba(27,58,92,0.2); }
+.subnav-badge {
+  background:var(--amber); color:#FFF;
+  font-size:10px; font-weight:700; font-family:var(--font-m);
+  padding:1px 6px; border-radius:10px;
+}
+.subnav-badge-red {
+  background:var(--red); color:#FFF;
+  font-size:10px; font-weight:700; font-family:var(--font-m);
+  padding:1px 6px; border-radius:10px;
+}
+.subnav-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* MAIN CONTENT */
+.main { padding:24px; max-width:1400px; margin:0 auto; }
+.page { display:none; }
+.page.active { display:block; animation:fadeIn 0.2s ease; }
+
+/* ── SHARED COMPONENTS ───────────────────────────────────────────── */
+.ph { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; }
+.ptitle { font-family:var(--font-d); font-size:22px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--navy); }
+.psub { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.btn-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:8px 16px; border-radius:var(--r); font-size:13px; font-weight:600;
+  cursor:pointer; border:none; transition:all 0.15s; font-family:var(--font-b);
+  white-space:nowrap;
+}
+.btn-primary { background:var(--navy); color:#FFF; }
+.btn-primary:hover { background:#264E7A; transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn-amber { background:var(--amber); color:#FFF; }
+.btn-amber:hover { background:#B45309; transform:translateY(-1px); }
+.btn-ghost { background:transparent; border:1px solid var(--border2); color:var(--text-2); }
+.btn-ghost:hover { background:var(--bg2); border-color:var(--text-4); }
+.btn-lime { background:var(--lime-dim); border:1px solid rgba(22,163,74,0.3); color:var(--lime); }
+.btn-lime:hover { background:rgba(22,163,74,0.18); }
+.btn-lime-solid { background:var(--lime); color:#FFF; }
+.btn-lime-solid:hover { background:#15803D; transform:translateY(-1px); }
+.btn-red { background:var(--red-dim); border:1px solid rgba(220,38,38,0.3); color:var(--red); }
+.btn-red:hover { background:rgba(220,38,38,0.2); }
+.btn-red-solid { background:var(--red); color:#FFF; }
+.btn-red-solid:hover { background:#B91C1C; transform:translateY(-1px); }
+.btn-sky { background:var(--sky-dim); border:1px solid rgba(2,132,199,0.3); color:var(--sky); }
+.btn-sky:hover { background:rgba(2,132,199,0.18); }
+.btn-sm { padding:5px 11px; font-size:12px; }
+.btn-xs { padding:3px 8px; font-size:11px; border-radius:5px; }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;
+  font-family:var(--font-m); white-space:nowrap;
+}
+.badge-amber  { background:var(--amber-light); color:#92400E; border:1px solid var(--amber-mid); }
+.badge-lime   { background:var(--lime-light);  color:#14532D; border:1px solid #BBF7D0; }
+.badge-red    { background:var(--red-light);   color:#991B1B; border:1px solid #FECACA; }
+.badge-sky    { background:var(--sky-light);   color:#075985; border:1px solid #BAE6FD; }
+.badge-navy   { background:var(--navy-dim);    color:var(--navy); border:1px solid rgba(27,58,92,0.2); }
+.badge-muted  { background:var(--bg2); color:var(--text-3); border:1px solid var(--border); }
+.badge-orange { background:#FFF7ED; color:#9A3412; border:1px solid #FDBA74; }
+
+.panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); }
+.panel-head { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.panel-title { font-family:var(--font-d); font-size:14px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); }
+.panel-sub { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.panel-body { padding:18px; }
+
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.grid12 { display:grid; grid-template-columns:1fr 2fr; gap:16px; align-items:start; }
+.grid21 { display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:start; }
+.grid13 { display:grid; grid-template-columns:1fr 3fr; gap:16px; align-items:start; }
+
+.divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+.input-group { margin-bottom:14px; }
+.input-label { font-family:var(--font-m); font-size:10.5px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-3); display:block; margin-bottom:6px; }
+.input-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; transition:border-color 0.15s; }
+.input-field:focus { border-color:var(--navy2); box-shadow:0 0 0 3px var(--navy-dim); }
+.select-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; cursor:pointer; }
+.textarea-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; resize:vertical; min-height:90px; transition:border-color 0.15s; }
+.textarea-field:focus { border-color:var(--navy2); box-shadow:0 0 0 3px var(--navy-dim); }
+
+.prog-wrap { margin-bottom:12px; }
+.prog-label { display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px; }
+.prog-label span:first-child { color:var(--text-2); font-weight:500; }
+.prog-label span:last-child { color:var(--text-3); font-family:var(--font-m); font-size:11px; }
+.prog-track { height:6px; background:var(--bg2); border-radius:4px; overflow:hidden; }
+.prog-bar { height:100%; border-radius:4px; transition:width 0.6s ease; }
+.prog-bar.navy  { background:var(--navy); }
+.prog-bar.amber { background:var(--amber); }
+.prog-bar.lime  { background:var(--lime); }
+.prog-bar.red   { background:var(--red); }
+
+.dt-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
+.dt-row:last-child { border-bottom:none; }
+.dt-key { font-family:var(--font-m); font-size:10.5px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-3); }
+.dt-val { font-size:13px; font-weight:600; color:var(--text); text-align:right; }
+
+/* TOAST */
+#toastWrap { position:fixed; bottom:24px; right:24px; z-index:999; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.toast {
+  padding:11px 16px; border-radius:8px; font-size:13px; font-weight:500;
+  display:flex; align-items:center; gap:10px; max-width:380px; font-family:var(--font-b);
+  animation:toastIn 0.25s ease; border:1px solid transparent; box-shadow:var(--shadow-md);
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(10px) scale(0.96); } to { opacity:1; transform:none; } }
+.toast-lime   { background:var(--lime-light); border-color:#BBF7D0; color:#14532D; }
+.toast-amber  { background:var(--amber-light); border-color:var(--amber-mid); color:#92400E; }
+.toast-red    { background:var(--red-light); border-color:#FECACA; color:#991B1B; }
+.toast-navy   { background:var(--sky-light); border-color:#BAE6FD; color:#075985; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; z-index:900; background:rgba(28,25,23,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; animation:fadeIn 0.18s ease; }
+.modal { background:var(--surface); border:1px solid var(--border2); border-radius:12px; width:520px; max-width:94vw; padding:26px; box-shadow:var(--shadow-lg); }
+.modal-title { font-family:var(--font-d); font-size:20px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:var(--navy); }
+.modal-sub { font-size:12.5px; color:var(--text-3); margin-bottom:20px; line-height:1.6; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+
+/* STAT STRIP */
+.stat-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+.stat-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 16px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden;
+}
+.stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:var(--r) var(--r) 0 0; }
+.stat-card.navy::after  { background:var(--navy); }
+.stat-card.amber::after { background:var(--amber); }
+.stat-card.lime::after  { background:var(--lime); }
+.stat-card.red::after   { background:var(--red); }
+.stat-card.sky::after   { background:var(--sky); }
+.stat-lbl { font-family:var(--font-m); font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.stat-val { font-family:var(--font-d); font-size:26px; font-weight:800; line-height:1; }
+.stat-card.navy  .stat-val { color:var(--navy); }
+.stat-card.amber .stat-val { color:var(--amber); }
+.stat-card.lime  .stat-val { color:var(--lime); }
+.stat-card.red   .stat-val { color:var(--red); }
+.stat-card.sky   .stat-val { color:var(--sky); }
+.stat-sub { font-size:11px; color:var(--text-3); margin-top:5px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   SOPA CLOCK HERO — PM VIEW
+══════════════════════════════════════════════════════════════════════ */
+.sopa-hero {
+  background:linear-gradient(135deg, var(--navy) 0%, #1a3352 100%);
+  border-radius:var(--r); margin-bottom:20px;
+  box-shadow:var(--shadow-md); position:relative; overflow:hidden;
+}
+.sopa-hero::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 80% at 0% 50%, rgba(217,119,6,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 100% 30%, rgba(45,90,138,0.3) 0%, transparent 60%);
+}
+.sopa-hero-inner { position:relative; z-index:1; padding:20px 24px; display:flex; align-items:stretch; gap:0; }
+.sopa-hero-title-block { padding-right:24px; border-right:1px solid rgba(255,255,255,0.12); margin-right:24px; display:flex; flex-direction:column; justify-content:center; min-width:200px; }
+.sopa-hero-label { font-family:var(--font-m); font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:6px; }
+.sopa-hero-heading { font-family:var(--font-d); font-size:20px; font-weight:800; color:#FFF; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2; margin-bottom:8px; }
+.sopa-hero-claim { font-family:var(--font-m); font-size:11px; color:rgba(255,255,255,0.55); }
+
+/* Individual SOPA claim cards */
+.sopa-claims-scroll { display:flex; gap:12px; flex:1; overflow-x:auto; padding-bottom:2px; }
+.sopa-claim-card {
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  border-radius:var(--r); padding:14px 16px; min-width:220px; flex-shrink:0;
+  cursor:pointer; transition:all 0.2s;
+}
+.sopa-claim-card:hover { background:rgba(255,255,255,0.1); }
+.sopa-claim-card.critical { border-color:rgba(220,38,38,0.6); background:rgba(220,38,38,0.12); }
+.sopa-claim-card.urgent   { border-color:rgba(217,119,6,0.6); background:rgba(217,119,6,0.12); }
+.sopa-claim-card.ok       { border-color:rgba(22,163,74,0.4); background:rgba(22,163,74,0.08); }
+.scc-vendor { font-family:var(--font-m); font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:4px; }
+.scc-project { font-size:12px; font-weight:700; color:#FFF; margin-bottom:10px; line-height:1.3; }
+.scc-days-row { display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
+.scc-days-num { font-family:var(--font-d); font-size:32px; font-weight:800; line-height:1; }
+.sopa-claim-card.critical .scc-days-num { color:#FCA5A5; }
+.sopa-claim-card.urgent   .scc-days-num { color:#FCD34D; animation:pulse 1.4s infinite; }
+.sopa-claim-card.ok       .scc-days-num { color:#86EFAC; }
+.scc-days-lbl { font-family:var(--font-m); font-size:9px; color:rgba(255,255,255,0.45); letter-spacing:1px; }
+.scc-deadline { font-size:10.5px; color:rgba(255,255,255,0.45); font-family:var(--font-m); }
+.scc-amount { font-family:var(--font-d); font-size:14px; font-weight:700; color:rgba(255,255,255,0.8); margin-top:8px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAGE: DASHBOARD
+══════════════════════════════════════════════════════════════════════ */
+.claim-queue-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:16px 18px; margin-bottom:10px;
+  display:flex; align-items:center; gap:16px; box-shadow:var(--shadow);
+  cursor:pointer; transition:all 0.2s;
+}
+.claim-queue-item:hover { border-color:var(--navy2); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.claim-queue-item.sopa-critical { border-left:3px solid var(--red); }
+.claim-queue-item.sopa-urgent   { border-left:3px solid var(--amber); }
+.claim-queue-item.sopa-ok       { border-left:3px solid var(--lime); }
+.claim-queue-item.sopa-queried  { border-left:3px solid var(--sky); }
+.cqi-sopa {
+  text-align:center; flex-shrink:0; min-width:56px;
+}
+.cqi-days { font-family:var(--font-d); font-size:28px; font-weight:800; line-height:1; }
+.sopa-critical .cqi-days { color:var(--red); }
+.sopa-urgent   .cqi-days { color:var(--amber); }
+.sopa-ok       .cqi-days { color:var(--lime); }
+.sopa-queried  .cqi-days { color:var(--sky); }
+.cqi-days-lbl { font-family:var(--font-m); font-size:8.5px; letter-spacing:1px; color:var(--text-4); margin-top:2px; }
+.cqi-divider { width:1px; height:50px; background:var(--border); flex-shrink:0; }
+.cqi-body { flex:1; }
+.cqi-vendor { font-family:var(--font-m); font-size:10.5px; color:var(--text-3); margin-bottom:3px; }
+.cqi-project { font-family:var(--font-d); font-size:16px; font-weight:700; color:var(--navy); letter-spacing:0.3px; margin-bottom:4px; }
+.cqi-meta { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.cqi-amount { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--navy); flex-shrink:0; }
+.cqi-amount-lbl { font-family:var(--font-m); font-size:10px; color:var(--text-4); }
+.cqi-actions { display:flex; gap:6px; flex-shrink:0; }
+
+/* PROJECT LIST */
+.proj-list-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 16px; margin-bottom:8px;
+  display:flex; align-items:center; gap:14px; box-shadow:var(--shadow);
+}
+.pli-icon {
+  width:38px; height:38px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+  background:var(--navy-dim); border:1px solid rgba(27,58,92,0.15);
+}
+.pli-body { flex:1; }
+.pli-name { font-family:var(--font-d); font-size:15px; font-weight:700; color:var(--navy); }
+.pli-wbs { font-family:var(--font-m); font-size:10.5px; color:var(--text-3); margin-top:2px; }
+.pli-right { text-align:right; flex-shrink:0; }
+.pli-amount { font-family:var(--font-d); font-size:16px; font-weight:800; color:var(--navy); }
+.pli-amount-lbl { font-size:10.5px; color:var(--text-4); font-family:var(--font-m); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAGE: APPROVAL QUEUE (full list)
+══════════════════════════════════════════════════════════════════════ */
+.queue-filters {
+  display:flex; gap:8px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
+}
+.filter-chip {
+  padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600;
+  border:1px solid var(--border2); color:var(--text-3);
+  cursor:pointer; transition:all 0.15s; font-family:var(--font-m);
+  display:flex; align-items:center; gap:6px;
+}
+.filter-chip:hover { border-color:var(--navy2); color:var(--navy); }
+.query-row:hover td { background:var(--sky-light) !important; }
+.filter-chip.active { background:var(--navy-dim); border-color:rgba(27,58,92,0.3); color:var(--navy); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAGE: CLAIM REVIEW — LINE-ITEM APPROVAL
+══════════════════════════════════════════════════════════════════════ */
+.review-layout { display:grid; grid-template-columns:1fr 320px; gap:16px; align-items:start; }
+
+/* Inline SOPA banner for review */
+.sopa-review-banner {
+  background:var(--navy); border-radius:var(--r); padding:14px 18px;
+  display:flex; align-items:center; gap:16px; margin-bottom:16px;
+  box-shadow:var(--shadow-md); position:relative; overflow:hidden;
+}
+.sopa-review-banner::after {
+  content:''; position:absolute; right:0; top:0; bottom:0; width:180px;
+  background:radial-gradient(ellipse at right center, rgba(217,119,6,0.18) 0%, transparent 70%);
+}
+.srb-clock { text-align:center; flex-shrink:0; }
+.srb-clock-val { font-family:var(--font-d); font-size:36px; font-weight:800; color:#FCD34D; line-height:1; }
+.srb-clock.critical .srb-clock-val { color:#FCA5A5; animation:pulse 1.4s infinite; }
+.srb-clock-lbl { font-family:var(--font-m); font-size:8.5px; color:rgba(255,255,255,0.45); letter-spacing:1px; margin-top:2px; }
+.srb-div { width:1px; height:50px; background:rgba(255,255,255,0.12); flex-shrink:0; }
+.srb-info { flex:1; position:relative; z-index:1; }
+.srb-label { font-family:var(--font-m); font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:3px; }
+.srb-deadline { font-family:var(--font-d); font-size:14px; font-weight:700; color:#FFF; margin-bottom:3px; }
+.srb-sub { font-size:11.5px; color:rgba(255,255,255,0.55); }
+.srb-actions { display:flex; gap:8px; position:relative; z-index:1; flex-shrink:0; }
+
+/* Claim info header */
+.claim-info-strip {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:16px 18px; margin-bottom:16px;
+  display:flex; gap:24px; align-items:flex-start; box-shadow:var(--shadow);
+}
+.cis-block { flex:1; }
+.cis-label { font-family:var(--font-m); font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-4); margin-bottom:4px; }
+.cis-value { font-size:13px; font-weight:600; color:var(--text); }
+.cis-mono  { font-family:var(--font-m); font-size:12px; color:var(--text-2); }
+
+/* Bulk action bar */
+.bulk-bar {
+  background:var(--navy); border-radius:var(--r); padding:10px 16px;
+  display:flex; align-items:center; gap:12px; margin-bottom:12px;
+  animation:fadeIn 0.2s ease;
+}
+.bulk-bar-text { font-size:13px; font-weight:600; color:#FFF; flex:1; font-family:var(--font-d); letter-spacing:0.5px; }
+.bulk-bar-actions { display:flex; gap:8px; }
+
+/* Line-item table */
+.li-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); }
+.li-table { width:100%; border-collapse:collapse; }
+.li-table thead th {
+  font-family:var(--font-m); font-size:9.5px; letter-spacing:1px; text-transform:uppercase;
+  color:var(--text-3); padding:10px 12px; text-align:left;
+  border-bottom:2px solid var(--border); background:var(--surface2); white-space:nowrap;
+}
+.li-table thead th.center { text-align:center; }
+.li-table thead th.right  { text-align:right; }
+.li-table tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+.li-table tbody tr:last-child { border-bottom:none; }
+.li-table tbody tr:hover { background:var(--bg2); }
+.li-table td { padding:11px 12px; font-size:12.5px; color:var(--text); vertical-align:middle; }
+.li-table td.mono { font-family:var(--font-m); font-size:11px; color:var(--text-3); }
+.li-table td.amount { font-family:var(--font-d); font-size:15px; font-weight:700; color:var(--navy); text-align:right; }
+.li-table td.center { text-align:center; }
+
+/* Row states */
+.li-row-approved { background:rgba(22,163,74,0.04); }
+.li-row-approved:hover { background:rgba(22,163,74,0.08) !important; }
+.li-row-queried { background:rgba(2,132,199,0.04); }
+.li-row-queried:hover { background:rgba(2,132,199,0.08) !important; }
+.li-row-rejected { background:rgba(220,38,38,0.04); opacity:0.7; }
+.li-row-selected { background:var(--amber-dim) !important; }
+
+/* Checkbox */
+.li-check { width:16px; height:16px; cursor:pointer; accent-color:var(--navy); }
+
+/* Action buttons in row */
+.li-actions { display:flex; gap:5px; align-items:center; }
+
+/* Row status stripe */
+.li-table tbody tr.li-row-approved td:first-child { border-left:3px solid var(--lime); }
+.li-table tbody tr.li-row-queried  td:first-child { border-left:3px solid var(--sky); }
+.li-table tbody tr.li-row-rejected td:first-child { border-left:3px solid var(--red); }
+
+/* Budget snapshot sidebar */
+.budget-snap { position:sticky; top:116px; }
+.bs-total {
+  background:var(--navy); border-radius:var(--r); padding:16px 18px;
+  margin-bottom:12px; box-shadow:var(--shadow-md);
+}
+.bs-total-label { font-family:var(--font-m); font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:6px; }
+.bs-total-val { font-family:var(--font-d); font-size:34px; font-weight:800; color:#FFF; line-height:1; }
+.bs-total-sub { font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; }
+
+.bs-breakdown {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:16px; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.bs-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--border); }
+.bs-row:last-child { border-bottom:none; }
+.bs-row-label { font-size:12px; color:var(--text-2); }
+.bs-row-val { font-family:var(--font-m); font-size:12px; font-weight:500; color:var(--text); }
+
+/* Vendor card in sidebar */
+.vendor-sidebar-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px; box-shadow:var(--shadow);
+  margin-bottom:12px;
+}
+.vsc-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.vsc-avatar {
+  width:38px; height:38px; border-radius:8px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--navy),var(--navy2));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-d); font-size:14px; font-weight:700; color:#FFF;
+}
+.vsc-name { font-size:13px; font-weight:700; color:var(--navy); }
+.vsc-abn  { font-family:var(--font-m); font-size:10px; color:var(--text-3); margin-top:2px; }
+
+/* Claim progress (sidebar) */
+.claim-progress-ring { text-align:center; padding:12px 0; }
+.progress-ring-wrap { position:relative; display:inline-block; }
+.progress-ring-wrap svg { transform:rotate(-90deg); }
+.progress-ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.prt-val { font-family:var(--font-d); font-size:24px; font-weight:800; color:var(--navy); line-height:1; }
+.prt-lbl { font-family:var(--font-m); font-size:9px; letter-spacing:1px; color:var(--text-3); margin-top:2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAGE: AUDIT HISTORY
+══════════════════════════════════════════════════════════════════════ */
+.audit-table { width:100%; border-collapse:collapse; }
+.audit-table thead th {
+  font-family:var(--font-m); font-size:10px; letter-spacing:1px; text-transform:uppercase;
+  color:var(--text-3); padding:10px 14px; border-bottom:2px solid var(--border);
+  background:var(--surface2); text-align:left; white-space:nowrap;
+}
+.audit-table tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+.audit-table tbody tr:last-child { border-bottom:none; }
+.audit-table tbody tr:hover { background:var(--bg2); }
+.audit-table td { padding:12px 14px; font-size:12.5px; vertical-align:middle; }
+.audit-table td.mono { font-family:var(--font-m); font-size:11px; color:var(--text-3); }
+.at-action { display:flex; align-items:center; gap:6px; font-weight:600; }
+.at-action.approved { color:var(--lime); }
+.at-action.queried  { color:var(--sky); }
+.at-action.rejected { color:var(--red); }
+.at-action.submitted { color:var(--navy); }
+.at-action.escalated { color:var(--orange); }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg2); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+.sopa-claims-scroll::-webkit-scrollbar { height:3px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-left">
+    <div class="login-grid"></div>
+    <div class="login-brand">
+      <div class="login-logo">
+        <div class="login-logo-mark">💧</div>
+        Basin<em style="color:#FCD34D">Sync</em>
+      </div>
+      <div class="login-tagline">Australian Water Utility Infrastructure Program · Project Manager Portal</div>
+    </div>
+    <div class="login-hero">
+      <div class="login-hero-title">
+        Approve.<br/>Query.<br/><em>Control.</em>
+      </div>
+      <div class="login-hero-sub">
+        Line-item progress claim approval with real-time SOPA deadline tracking. Every decision is timestamped, audited, and SOPA-compliant. Partial approval means no more rejecting entire $400K+ claims over a single queried line.
+      </div>
+    </div>
+    <div class="login-stats">
+      <div>
+        <div class="login-stat-val">14</div>
+        <div class="login-stat-lbl">Active Projects</div>
+      </div>
+      <div>
+        <div class="login-stat-val">7</div>
+        <div class="login-stat-lbl">Pending Claims</div>
+      </div>
+      <div>
+        <div class="login-stat-val">2</div>
+        <div class="login-stat-lbl">SOPA Urgent</div>
+      </div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-right-title">Project Manager Portal</div>
+    <div class="login-right-sub">Sign in with your Sydney Water Azure Active Directory credentials</div>
+    <div class="login-role-pill">🏗️ &nbsp;Role: GRP-ProjectManager</div>
+    <div class="login-sopa-notice">
+      <strong>⚠️ SOPA Response Obligation</strong>
+      You have <strong>10 business days (NSW)</strong> to issue a Payment Schedule from the date a valid Progress Claim is received. Failure to respond renders Sydney Water liable for the full claimed amount. SOPA deadlines are displayed on every claim and cannot be overridden.
+    </div>
+    <button class="sso-btn" onclick="login()">
+      <div class="sso-btn-icon">🔷</div>
+      Sign in with Microsoft Azure AD
+    </button>
+    <div class="login-help">Locked out? Contact <a href="#"><span class="__cf_email__" data-cfemail="2b4c59424f5852454806585e5b5b44595f6b58524f454e525c4a5f4e5905484446054a5e">[email&#160;protected]</span></a></div>
+    <div class="login-footer">
+      <div class="login-footer-text">BasinSync v2.1 · Azure Australia East · Data Sovereignty Compliant · IPART Audit Ready<br/>Security of Payment Act (NSW) 1999 · IPART Determination 2024–28</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREEN: PORTAL
+══════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-portal">
+  <div class="portal">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-logo">
+        <div class="topbar-logo-mark">💧</div>
+        Basin<em>Sync</em>
+      </div>
+      <div class="topbar-tag">PM PORTAL</div>
+      <div class="topbar-escalation">🚨 &nbsp;1 claim escalating in 24hrs</div>
+      <div class="topbar-right">
+        <div class="topbar-sopa">
+          <div class="sopa-pulse"></div>
+          2 SOPA URGENT
+        </div>
+        <div class="topbar-notif">
+          🔔
+          <div class="notif-badge"></div>
+        </div>
+        <div class="topbar-user">
+          <div class="user-avatar">SR</div>
+          <div class="user-info">
+            <div class="user-name">Sarah Reinhardt</div>
+            <div class="user-company">PM-0023 · NSW-North</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBNAV -->
+    <div class="subnav">
+      <div class="subnav-item active" id="subnav-dashboard" onclick="showPage('pg-dashboard',this)">📋 &nbsp;Dashboard</div>
+      <div class="subnav-item" id="subnav-queue" onclick="showPage('pg-queue',this)">
+        ⏳ &nbsp;Approval Queue
+        <span class="subnav-badge">7</span>
+      </div>
+      <div class="subnav-item" id="subnav-review" onclick="showPage('pg-review',this)">
+        🔍 &nbsp;Claim Review
+        <span class="subnav-badge-red">2 URGENT</span>
+      </div>
+      <div class="subnav-item" id="subnav-history" onclick="showPage('pg-history',this)">📜 &nbsp;Audit History</div>
+      <div class="subnav-item" id="subnav-projects" onclick="showPage('pg-projects',this)">🗂️ &nbsp;My Projects</div>
+      <div class="subnav-right">
+        <button class="btn btn-ghost btn-sm" style="font-size:12px;">⬇ Export Report</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- ══ PAGE: DASHBOARD ══════════════════════════════════════ -->
+      <div class="page active" id="pg-dashboard">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Dashboard</div>
+            <div class="psub">PM-0023 · Sarah Reinhardt · Region: NSW-North · 14 Active Projects</div>
+          </div>
+          <div class="btn-row">
+            <span style="font-family:var(--font-m);font-size:11px;color:var(--text-3);">Last refreshed: Today 09:42 AEST</span>
+          </div>
+        </div>
+
+        <!-- SOPA HERO -->
+        <div class="sopa-hero">
+          <div class="sopa-hero-inner">
+            <div class="sopa-hero-title-block">
+              <div class="sopa-hero-label">SOPA Compliance Monitor</div>
+              <div class="sopa-hero-heading">Active SOPA<br/>Deadlines</div>
+              <div class="sopa-hero-claim">7 claims pending response</div>
+            </div>
+            <div class="sopa-claims-scroll">
+              <div class="sopa-claim-card critical" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('john-holland')">
+                <div class="scc-vendor">JOHN HOLLAND GROUP · ABN 11 004 282 268</div>
+                <div class="scc-project">PRJ-USC-AWRC · Upper South Creek AWRC</div>
+                <div class="scc-days-row">
+                  <div class="scc-days-num">1</div>
+                  <div class="scc-days-lbl">DAYS LEFT<br/>SOPA NSW</div>
+                </div>
+                <div class="scc-deadline">Due: Fri 07 Mar 2026 · CRITICAL</div>
+                <div class="scc-amount">$1,364,880 inc GST</div>
+              </div>
+              <div class="sopa-claim-card urgent" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('abergeldie')">
+                <div class="scc-vendor">ABERGELDIE CONTRACTORS · ABN 47 004 533 519</div>
+                <div class="scc-project">PRJ-HW-BWWTW-H2S · Belmont H2S Management</div>
+                <div class="scc-days-row">
+                  <div class="scc-days-num">3</div>
+                  <div class="scc-days-lbl">DAYS LEFT<br/>SOPA NSW</div>
+                </div>
+                <div class="scc-deadline">Due: Mon 10 Mar 2026 · URGENT</div>
+                <div class="scc-amount">$218,625 inc GST</div>
+              </div>
+              <div class="sopa-claim-card ok" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('cpb')">
+                <div class="scc-vendor">CPB CONTRACTORS · ABN 98 000 070 090</div>
+                <div class="scc-project">PRJ-SW-PROMAC · ProMac Pipeline</div>
+                <div class="scc-days-row">
+                  <div class="scc-days-num">6</div>
+                  <div class="scc-days-lbl">DAYS LEFT<br/>SOPA NSW</div>
+                </div>
+                <div class="scc-deadline">Due: Thu 13 Mar 2026</div>
+                <div class="scc-amount">$3,120,880 inc GST</div>
+              </div>
+              <div class="sopa-claim-card ok" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('bmd')">
+                <div class="scc-vendor">BMD CONSTRUCTIONS · ABN 70 010 060 800</div>
+                <div class="scc-project">PRJ-SW-MSIP · Malabar System Invest.</div>
+                <div class="scc-days-row">
+                  <div class="scc-days-num">8</div>
+                  <div class="scc-days-lbl">DAYS LEFT<br/>SOPA NSW</div>
+                </div>
+                <div class="scc-deadline">Due: Mon 16 Mar 2026</div>
+                <div class="scc-amount">$672,150 inc GST</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAT STRIP -->
+        <div class="stat-strip">
+          <div class="stat-card red" style="cursor:pointer;" title="View critical claims" onclick="goToQueueFiltered('critical')">
+            <div class="stat-lbl">SOPA Critical (&lt;2 days)</div>
+            <div class="stat-val" id="sc-critical">1</div>
+            <div class="stat-sub">John Holland AWRC</div>
+          </div>
+          <div class="stat-card amber" style="cursor:pointer;" title="View urgent claims" onclick="goToQueueFiltered('urgent')">
+            <div class="stat-lbl">SOPA Urgent (&lt;4 days)</div>
+            <div class="stat-val" id="sc-urgent">2</div>
+            <div class="stat-sub">Action required today</div>
+          </div>
+          <div class="stat-card navy" style="cursor:pointer;" title="View all pending claims" onclick="goToQueueFiltered('all')">
+            <div class="stat-lbl">Pending Review</div>
+            <div class="stat-val" id="sc-pending">7</div>
+            <div class="stat-sub">Awaiting PM decision</div>
+          </div>
+          <div class="stat-card lime">
+            <div class="stat-lbl">Approved This Month</div>
+            <div class="stat-val">$18.4M</div>
+            <div class="stat-sub">171 line items cleared</div>
+          </div>
+          <div class="stat-card sky" style="cursor:pointer;" title="View open queries" onclick="scrollToQueries()">
+            <div class="stat-lbl">Items Queried (Open)</div>
+            <div class="stat-val" id="sc-queried">4</div>
+            <div class="stat-sub">Awaiting vendor response</div>
+          </div>
+        </div>
+
+        <!-- QUEUE + PROJECT SPLIT -->
+        <div class="grid21" style="align-items:start;">
+          <!-- URGENT QUEUE -->
+          <div>
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Approval Queue — Action Required</div>
+                  <div class="panel-sub">Ordered by SOPA deadline · oldest first</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="showPage('pg-queue',document.getElementById('subnav-queue'))">View All →</button>
+              </div>
+              <div style="padding:12px;">
+
+                <div class="claim-queue-item sopa-critical" data-sopa="critical" data-claim="john-holland" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('john-holland')">
+                  <div class="cqi-sopa">
+                    <div class="cqi-days">1</div>
+                    <div class="cqi-days-lbl">DAYS LEFT</div>
+                  </div>
+                  <div class="cqi-divider"></div>
+                  <div class="cqi-body">
+                    <div class="cqi-vendor">JOHN HOLLAND GROUP · Feb 2026 Progress Claim · GS-2026-02-JHG-008</div>
+                    <div class="cqi-project">PRJ-USC-AWRC — Upper South Creek AWRC</div>
+                    <div class="cqi-meta">
+                      <span class="badge badge-red">🚨 CRITICAL</span>
+                      <span class="badge badge-muted">26 line items</span>
+                      <span class="badge badge-muted">CAP: CIV · MEC · ELE</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="cqi-amount">$1,364,880</div>
+                    <div class="cqi-amount-lbl">INC GST</div>
+                  </div>
+                  <div class="cqi-actions">
+                    <button class="btn btn-amber btn-sm">Review →</button>
+                  </div>
+                </div>
+
+                <div class="claim-queue-item sopa-urgent" data-sopa="urgent" data-claim="abergeldie" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('abergeldie')">
+                  <div class="cqi-sopa">
+                    <div class="cqi-days">3</div>
+                    <div class="cqi-days-lbl">DAYS LEFT</div>
+                  </div>
+                  <div class="cqi-divider"></div>
+                  <div class="cqi-body">
+                    <div class="cqi-vendor">ABERGELDIE CONTRACTORS · Feb 2026 Progress Claim · GS-2026-02-ABE-019</div>
+                    <div class="cqi-project">PRJ-HW-BWWTW-H2S — Belmont H2S Management</div>
+                    <div class="cqi-meta">
+                      <span class="badge badge-amber">⚠ URGENT</span>
+                      <span class="badge badge-muted">8 line items</span>
+                      <span class="badge badge-sky">1 item queried</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="cqi-amount">$218,625</div>
+                    <div class="cqi-amount-lbl">INC GST</div>
+                  </div>
+                  <div class="cqi-actions">
+                    <button class="btn btn-amber btn-sm">Review →</button>
+                  </div>
+                </div>
+
+                <div class="claim-queue-item sopa-ok" data-sopa="ok" data-claim="cpb" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('cpb')">
+                  <div class="cqi-sopa">
+                    <div class="cqi-days">6</div>
+                    <div class="cqi-days-lbl">DAYS LEFT</div>
+                  </div>
+                  <div class="cqi-divider"></div>
+                  <div class="cqi-body">
+                    <div class="cqi-vendor">CPB CONTRACTORS · Feb 2026 Progress Claim · GS-2026-02-CPB-031</div>
+                    <div class="cqi-project">PRJ-SW-PROMAC — Prospect South to Macarthur Pipeline</div>
+                    <div class="cqi-meta">
+                      <span class="badge badge-navy">ON TRACK</span>
+                      <span class="badge badge-muted">41 line items</span>
+                      <span class="badge badge-muted">CAP: CIV · ENV</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="cqi-amount">$3,120,880</div>
+                    <div class="cqi-amount-lbl">INC GST</div>
+                  </div>
+                  <div class="cqi-actions">
+                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('cpb')">Review →</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- QUERIED ITEMS -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Open Queries — Awaiting Vendor Response</div>
+                  <div class="panel-sub">4 line items returned to vendors pending correction</div>
+                </div>
+              </div>
+              <div style="padding:0;">
+                <table class="audit-table" style="width:100%;">
+                  <thead>
+                    <tr>
+                      <th>Claim Ref</th>
+                      <th>Vendor</th>
+                      <th>WBS Element</th>
+                      <th>Query Raised</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="query-row" style="cursor:pointer;" title="Click to review this claim" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('abergeldie')">
+                      <td class="mono" style="color:var(--navy2);font-weight:600;">GS-2026-01-ABE-017</td>
+                      <td>Abergeldie Contractors</td>
+                      <td class="mono">PRJ-HW-BWWTW-H2S.ELE.WP-003</td>
+                      <td class="mono" id="qr-abe-date">28 Feb 2026</td>
+                      <td><span class="badge badge-sky">Vendor Responding</span></td>
+                    </tr>
+                    <tr class="query-row" style="cursor:pointer;" title="SOPA paused — validation error pending" onclick="showToast('qd','⏸','Downer Utilities · SOPA clock paused · Awaiting vendor resubmission','sky')">
+                      <td class="mono" style="color:var(--navy2);font-weight:600;">GS-2026-02-DWN-022</td>
+                      <td>Downer Utilities</td>
+                      <td class="mono">PRJ-SW-MSIP.MEC.WP-007</td>
+                      <td class="mono" id="qr-dwn-date">01 Mar 2026</td>
+                      <td><span class="badge badge-amber">Overdue 2 days</span></td>
+                    </tr>
+                    <tr class="query-row" style="cursor:pointer;" title="Click to view" onclick="showToast('qs','🔍','Synertec Corporation · PRJ-USC-AWRC.SCA.WP-002 · Vendor responding','sky')">
+                      <td class="mono" style="color:var(--navy2);font-weight:600;">GS-2026-02-SYN-011</td>
+                      <td>Synertec Corporation</td>
+                      <td class="mono">PRJ-USC-AWRC.SCA.WP-002</td>
+                      <td class="mono" id="qr-syn-date">02 Mar 2026</td>
+                      <td><span class="badge badge-sky">Vendor Responding</span></td>
+                    </tr>
+                    <tr class="query-row" style="cursor:pointer;" title="Resubmitted — pending re-validation" onclick="showToast('qst','✅','Stantec Australia · PRJ-SW-PROMAC.ENV.WP-001 · Resubmitted — Azure re-validation in progress','lime')">
+                      <td class="mono" style="color:var(--navy2);font-weight:600;">GS-2026-02-STN-008</td>
+                      <td>Stantec Australia</td>
+                      <td class="mono">PRJ-SW-PROMAC.ENV.WP-001</td>
+                      <td class="mono" id="qr-stn-date">03 Mar 2026</td>
+                      <td><span class="badge badge-lime">Resubmitted</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIDEBAR: BUDGET SNAPSHOT -->
+          <div>
+            <div class="panel" style="margin-bottom:12px;">
+              <div class="panel-head">
+                <div class="panel-title">Portfolio Budget Utilisation</div>
+              </div>
+              <div class="panel-body">
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>PRJ-USC-AWRC</span><span>72%</span></div>
+                  <div class="prog-track"><div class="prog-bar amber" style="width:72%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>PRJ-SW-PROMAC</span><span>44%</span></div>
+                  <div class="prog-track"><div class="prog-bar navy" style="width:44%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>PRJ-HW-BWWTW-H2S</span><span>91%</span></div>
+                  <div class="prog-track"><div class="prog-bar red" style="width:91%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>PRJ-SW-MSIP</span><span>58%</span></div>
+                  <div class="prog-track"><div class="prog-bar navy" style="width:58%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>PRJ-HW-BELMONT-DESAL</span><span>31%</span></div>
+                  <div class="prog-track"><div class="prog-bar lime" style="width:31%"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div class="panel-title">EVM Indicators</div>
+                <div style="font-family:var(--font-m);font-size:10px;color:var(--text-3);">Feb 2026</div>
+              </div>
+              <div class="panel-body" style="padding-top:12px;">
+                <div class="dt-row">
+                  <div class="dt-key">SPI (Schedule)</div>
+                  <div class="dt-val" style="color:var(--amber);">0.94 ⚠</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">CPI (Cost)</div>
+                  <div class="dt-val" style="color:var(--lime);">1.02 ✓</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">TRIFR (YTD)</div>
+                  <div class="dt-val">4.2</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">Total Capex YTD</div>
+                  <div class="dt-val">$112.4M</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">Capex / Opex Split</div>
+                  <div class="dt-val">88% / 12%</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">ILI (Leakage Index)</div>
+                  <div class="dt-val" style="color:var(--lime);">2.8 ✓</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: APPROVAL QUEUE ════════════════════════════════ -->
+      <div class="page" id="pg-queue">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Approval Queue</div>
+            <div class="psub">7 Progress Claims awaiting Payment Schedule · Ordered by SOPA deadline</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm">⬇ Export CSV</button>
+          </div>
+        </div>
+
+        <div class="queue-filters">
+          <div class="filter-chip active" onclick="filterQueue(this,'all')">All (7)</div>
+          <div class="filter-chip" onclick="filterQueue(this,'critical')">🚨 Critical (1)</div>
+          <div class="filter-chip" onclick="filterQueue(this,'urgent')">⚠ Urgent (2)</div>
+          <div class="filter-chip" onclick="filterQueue(this,'ok')">✅ On Track (4)</div>
+          <div class="filter-chip" onclick="filterQueue(this,'queried')">🔵 Has Query</div>
+          <div style="margin-left:auto;">
+            <input class="input-field" id="queue-search" style="width:220px;padding:6px 12px;font-size:12px;" placeholder="Search vendor or project..." oninput="searchQueue(this.value)"/>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Pending Progress Claims</div>
+              <div class="panel-sub">SOPA NSW: 10 business days. You must issue a Payment Schedule or the full amount becomes payable.</div>
+            </div>
+          </div>
+          <div style="padding:12px;">
+
+            <div class="claim-queue-item sopa-critical" data-sopa="critical" data-claim="john-holland" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('john-holland')">
+              <div class="cqi-sopa">
+                <div class="cqi-days">1</div>
+                <div class="cqi-days-lbl">DAYS LEFT</div>
+              </div>
+              <div class="cqi-divider"></div>
+              <div class="cqi-body">
+                <div class="cqi-vendor">JOHN HOLLAND GROUP · Claim GS-2026-02-JHG-008 · Submitted: 19 Feb 2026 09:14 AEST</div>
+                <div class="cqi-project">PRJ-USC-AWRC — Upper South Creek Advanced Water Recycling Centre</div>
+                <div class="cqi-meta">
+                  <span class="badge badge-red">🚨 CRITICAL — 1 DAY</span>
+                  <span class="badge badge-muted">26 line items</span>
+                  <span class="badge badge-muted">CAP 88% / OPX 12%</span>
+                  <span class="badge badge-muted">CIV · MEC · ELE · SCA</span>
+                </div>
+              </div>
+              <div>
+                <div class="cqi-amount">$1,364,880</div>
+                <div class="cqi-amount-lbl">INC GST · $1,240,800 ex</div>
+              </div>
+              <div class="cqi-actions">
+                <button class="btn btn-amber btn-sm">⚡ Review Now</button>
+              </div>
+            </div>
+
+            <div class="claim-queue-item sopa-urgent" data-sopa="urgent" data-claim="abergeldie" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('abergeldie')">
+              <div class="cqi-sopa">
+                <div class="cqi-days">3</div>
+                <div class="cqi-days-lbl">DAYS LEFT</div>
+              </div>
+              <div class="cqi-divider"></div>
+              <div class="cqi-body">
+                <div class="cqi-vendor">ABERGELDIE CONTRACTORS · Claim GS-2026-02-ABE-019 · Submitted: 21 Feb 2026 14:32 AEST</div>
+                <div class="cqi-project">PRJ-HW-BWWTW-H2S — Belmont WWTW H2S Management, Hunter Water</div>
+                <div class="cqi-meta">
+                  <span class="badge badge-amber">⚠ URGENT — 3 DAYS</span>
+                  <span class="badge badge-muted">8 line items</span>
+                  <span class="badge badge-sky">1 item queried</span>
+                  <span class="badge badge-muted">Budget: 91% utilised</span>
+                </div>
+              </div>
+              <div>
+                <div class="cqi-amount">$218,625</div>
+                <div class="cqi-amount-lbl">INC GST · $198,750 ex</div>
+              </div>
+              <div class="cqi-actions">
+                <button class="btn btn-amber btn-sm">Review →</button>
+              </div>
+            </div>
+
+            <div class="claim-queue-item sopa-ok" data-sopa="ok" data-claim="cpb" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('cpb')">
+              <div class="cqi-sopa">
+                <div class="cqi-days">6</div>
+                <div class="cqi-days-lbl">DAYS LEFT</div>
+              </div>
+              <div class="cqi-divider"></div>
+              <div class="cqi-body">
+                <div class="cqi-vendor">CPB CONTRACTORS · Claim GS-2026-02-CPB-031 · Submitted: 24 Feb 2026 08:55 AEST</div>
+                <div class="cqi-project">PRJ-SW-PROMAC — Prospect South to Macarthur Pipeline, 15km + 3 pump stations</div>
+                <div class="cqi-meta">
+                  <span class="badge badge-navy">ON TRACK</span>
+                  <span class="badge badge-muted">41 line items</span>
+                  <span class="badge badge-muted">CAP 95% / OPX 5%</span>
+                </div>
+              </div>
+              <div>
+                <div class="cqi-amount">$3,120,880</div>
+                <div class="cqi-amount-lbl">INC GST · $2,837,164 ex</div>
+              </div>
+              <div class="cqi-actions">
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('cpb')">Review →</button>
+              </div>
+            </div>
+
+            <div class="claim-queue-item sopa-ok" data-sopa="ok" data-claim="bmd" onclick="showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('bmd')">
+              <div class="cqi-sopa">
+                <div class="cqi-days">8</div>
+                <div class="cqi-days-lbl">DAYS LEFT</div>
+              </div>
+              <div class="cqi-divider"></div>
+              <div class="cqi-body">
+                <div class="cqi-vendor">BMD CONSTRUCTIONS · Claim GS-2026-02-BMD-014 · Submitted: 26 Feb 2026 11:20 AEST</div>
+                <div class="cqi-project">PRJ-SW-MSIP — Malabar System Investment Program</div>
+                <div class="cqi-meta">
+                  <span class="badge badge-navy">ON TRACK</span>
+                  <span class="badge badge-muted">14 line items</span>
+                  <span class="badge badge-muted">CAP 100%</span>
+                </div>
+              </div>
+              <div>
+                <div class="cqi-amount">$672,150</div>
+                <div class="cqi-amount-lbl">INC GST · $611,045 ex</div>
+              </div>
+              <div class="cqi-actions">
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();showPage('pg-review',document.getElementById('subnav-review'));reviewClaim('bmd')">Review →</button>
+              </div>
+            </div>
+
+            <div class="claim-queue-item sopa-queried" data-sopa="queried" data-claim="downer">
+              <div class="cqi-sopa">
+                <div class="cqi-days">⏸</div>
+                <div class="cqi-days-lbl">PAUSED</div>
+              </div>
+              <div class="cqi-divider"></div>
+              <div class="cqi-body">
+                <div class="cqi-vendor">DOWNER UTILITIES · Claim GS-2026-02-DWN-022 · Submitted: 24 Feb 2026</div>
+                <div class="cqi-project">PRJ-SW-MSIP — Malabar System Investment Program</div>
+                <div class="cqi-meta">
+                  <span class="badge badge-sky">🔵 SOPA PAUSED — VALIDATION ERROR</span>
+                  <span class="badge badge-muted">Resubmission pending</span>
+                </div>
+              </div>
+              <div>
+                <div class="cqi-amount">$441,800</div>
+                <div class="cqi-amount-lbl">INC GST</div>
+              </div>
+              <div class="cqi-actions">
+                <button class="btn btn-ghost btn-sm">View Status</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: CLAIM REVIEW (LINE-ITEM APPROVAL) ════════════ -->
+      <div class="page" id="pg-review">
+        <div class="ph">
+          <div>
+            <div class="ptitle" id="review-title">Claim Review — John Holland Group</div>
+            <div class="psub" id="review-sub">GS-2026-02-JHG-008 · PRJ-USC-AWRC · Feb 2026 Progress Claim</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="showPage('pg-queue',document.getElementById('subnav-queue'))">← Back to Queue</button>
+            <button class="btn btn-lime-solid btn-sm" onclick="approveAll()">✓ Approve All Pending</button>
+          </div>
+        </div>
+
+        <!-- SOPA BANNER -->
+        <div class="sopa-review-banner" id="sopa-review-banner">
+          <div class="srb-clock critical" id="srb-clock">
+            <div class="srb-clock-val" id="srb-days">1</div>
+            <div class="srb-clock-lbl">DAYS REMAINING<br/>SOPA NSW</div>
+          </div>
+          <div class="srb-div"></div>
+          <div class="srb-info">
+            <div class="srb-label">Security of Payment Act (NSW) 1999 — Payment Schedule Deadline</div>
+            <div class="srb-deadline" id="srb-deadline">⚠ Due: Friday 7 March 2026, 17:00 AEST — CRITICAL</div>
+            <div class="srb-sub" id="srb-subdesc">You must issue a Payment Schedule by this deadline. Failure to respond renders Sydney Water liable for the full claimed amount of <strong style="color:#FCD34D;">$1,364,880 inc GST</strong> regardless of any disputes.</div>
+          </div>
+          <div class="srb-actions">
+            <button class="btn btn-amber btn-sm" onclick="finalisePaymentSchedule()">📋 Issue Payment Schedule</button>
+          </div>
+        </div>
+
+        <!-- CLAIM INFO STRIP -->
+        <div class="claim-info-strip">
+          <div class="cis-block">
+            <div class="cis-label">Vendor</div>
+            <div class="cis-value" id="cis-vendor">John Holland Group Pty Ltd</div>
+            <div class="cis-mono">ABN 11 004 282 268 · Tier 1</div>
+          </div>
+          <div class="cis-block">
+            <div class="cis-label">Claim Reference</div>
+            <div class="cis-value" id="cis-ref">GS-2026-02-JHG-008</div>
+            <div class="cis-mono">Feb 2026 Progress Claim</div>
+          </div>
+          <div class="cis-block">
+            <div class="cis-label">Project</div>
+            <div class="cis-value" id="cis-project">PRJ-USC-AWRC</div>
+            <div class="cis-mono">Upper South Creek Advanced Water Recycling Centre</div>
+          </div>
+          <div class="cis-block">
+            <div class="cis-label">Submitted</div>
+            <div class="cis-value">19 Feb 2026</div>
+            <div class="cis-mono">09:14:32 AEST · SOPA clock started</div>
+          </div>
+          <div class="cis-block">
+            <div class="cis-label">Validation</div>
+            <div class="cis-value" style="color:var(--lime);">✓ All 9 Rules Passed</div>
+            <div class="cis-mono">Azure Function · 0 errors</div>
+          </div>
+        </div>
+
+        <!-- BULK ACTION BAR (appears on checkbox selection) -->
+        <div class="bulk-bar" id="bulk-bar" style="display:none;">
+          <div class="bulk-bar-text" id="bulk-bar-text">3 line items selected</div>
+          <div class="bulk-bar-actions">
+            <button class="btn btn-lime btn-sm" onclick="bulkApprove()">✓ Approve Selected</button>
+            <button class="btn btn-sky btn-sm" onclick="openQueryModal()">↩ Return to Vendor</button>
+            <button class="btn btn-red btn-sm" onclick="openRejectModal()">✕ Reject Selected</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Clear</button>
+          </div>
+        </div>
+
+        <!-- REVIEW LAYOUT -->
+        <div class="review-layout">
+          <!-- LINE ITEM TABLE -->
+          <div>
+            <div class="li-table-wrap">
+              <table class="li-table">
+                <thead>
+                  <tr>
+                    <th style="width:32px;"><input type="checkbox" class="li-check" onchange="toggleAll(this)"/></th>
+                    <th>WBS Element</th>
+                    <th>Description</th>
+                    <th class="center">Cost Cat</th>
+                    <th class="center">Cap/Opx</th>
+                    <th class="center">Prev %</th>
+                    <th class="center">This %</th>
+                    <th class="right">Amount ex GST</th>
+                    <th class="center" style="width:160px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="li-tbody">
+                  <!-- Rows injected by JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- TOTALS ROW -->
+            <div class="panel" style="margin-top:12px;">
+              <div class="panel-body" style="padding:14px 18px;">
+                <div style="display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
+                  <div>
+                    <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;">Total Ex GST</div>
+                    <div style="font-family:var(--font-d);font-size:24px;font-weight:800;color:var(--navy);" id="total-ex">$1,240,800</div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;">GST (10%)</div>
+                    <div style="font-family:var(--font-d);font-size:24px;font-weight:800;color:var(--text-3);" id="total-gst">$167,931</div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;">Total Inc GST</div>
+                    <div style="font-family:var(--font-d);font-size:28px;font-weight:800;color:var(--navy);" id="total-inc">$1,364,880</div>
+                  </div>
+                  <div style="margin-left:auto;text-align:right;">
+                    <div style="font-family:var(--font-m);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">Progress</div>
+                    <div style="display:flex;gap:12px;">
+                      <div style="text-align:center;">
+                        <div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:var(--lime);" id="count-approved">0</div>
+                        <div style="font-size:10px;color:var(--text-3);font-family:var(--font-m);">APPROVED</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:var(--sky);" id="count-queried">0</div>
+                        <div style="font-size:10px;color:var(--text-3);font-family:var(--font-m);">QUERIED</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:var(--red);" id="count-rejected">0</div>
+                        <div style="font-size:10px;color:var(--text-3);font-family:var(--font-m);">REJECTED</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:var(--amber);" id="count-pending">10</div>
+                        <div style="font-size:10px;color:var(--text-3);font-family:var(--font-m);">PENDING</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIDEBAR -->
+          <div class="budget-snap">
+            <!-- CLAIM PROGRESS RING -->
+            <div class="vendor-sidebar-card" style="text-align:center;margin-bottom:12px;">
+              <div class="vsc-head">
+                <div class="vsc-avatar">JH</div>
+                <div>
+                  <div class="vsc-name" id="sidebar-vendor-name">John Holland Group</div>
+                  <div class="vsc-abn">ABN 11 004 282 268</div>
+                </div>
+              </div>
+              <div class="claim-progress-ring">
+                <div class="progress-ring-wrap">
+                  <svg width="110" height="110" viewBox="0 0 110 110">
+                    <circle cx="55" cy="55" r="44" fill="none" stroke="var(--bg2)" stroke-width="10"/>
+                    <circle cx="55" cy="55" r="44" fill="none" stroke="var(--amber)" stroke-width="10"
+                      stroke-dasharray="276.46" stroke-dashoffset="77.4" stroke-linecap="round" id="progress-arc"/>
+                  </svg>
+                  <div class="progress-ring-text">
+                    <div class="prt-val" id="progress-pct">72%</div>
+                    <div class="prt-lbl">Budget<br/>Used</div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;">Predictive: hits cap in <strong style="color:var(--amber);">~3 months</strong> at current burn rate</div>
+            </div>
+
+            <!-- BUDGET BREAKDOWN -->
+            <div class="bs-total" id="sidebar-budget">
+              <div class="bs-total-label">Approved Contract Value</div>
+              <div class="bs-total-val" id="sidebar-contract-val">$142.5M</div>
+              <div class="bs-total-sub" id="sidebar-budget-sub">$102.6M approved to date · $39.9M remaining</div>
+            </div>
+
+            <div class="bs-breakdown panel">
+              <div class="panel-head" style="padding:12px 14px;">
+                <div class="panel-title" style="font-size:12px;">Budget Utilisation</div>
+              </div>
+              <div class="panel-body" style="padding:12px 14px;">
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>Civil (CIV)</span><span>68%</span></div>
+                  <div class="prog-track"><div class="prog-bar navy" style="width:68%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>Mechanical (MEC)</span><span>74%</span></div>
+                  <div class="prog-track"><div class="prog-bar amber" style="width:74%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>Electrical (ELE)</span><span>81%</span></div>
+                  <div class="prog-track"><div class="prog-bar amber" style="width:81%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>SCADA/I&amp;C (SCA)</span><span>55%</span></div>
+                  <div class="prog-track"><div class="prog-bar navy" style="width:55%"></div></div>
+                </div>
+                <div class="prog-wrap">
+                  <div class="prog-label"><span>Environmental (ENV)</span><span>92%</span></div>
+                  <div class="prog-track"><div class="prog-bar red" style="width:92%"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top:12px;">
+              <div class="panel-head" style="padding:12px 14px;">
+                <div class="panel-title" style="font-size:12px;">This Claim Summary</div>
+              </div>
+              <div class="panel-body" style="padding:12px 14px;">
+                <div class="dt-row">
+                  <div class="dt-key">Cap Items</div>
+                  <div class="dt-val">22 lines</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">Opx Items</div>
+                  <div class="dt-val">4 lines</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">Sub-contractors</div>
+                  <div class="dt-val">3 entities</div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">Rate Anomaly Flag</div>
+                  <div class="dt-val"><span class="badge badge-amber" style="font-size:10px;">1 advisory</span></div>
+                </div>
+                <div class="dt-row">
+                  <div class="dt-key">Budget Threshold</div>
+                  <div class="dt-val"><span class="badge badge-lime" style="font-size:10px;">Below 95%</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: AUDIT HISTORY ═════════════════════════════════ -->
+      <div class="page" id="pg-history">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Audit History</div>
+            <div class="psub">Complete timestamped record of all PM decisions · Immutable audit trail for IPART compliance</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm">⬇ Export for IPART</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Decision Log — PM-0023 Sarah Reinhardt</div>
+            <div style="font-family:var(--font-m);font-size:10.5px;color:var(--text-3);">All times AEST · UTC+11</div>
+          </div>
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Claim Ref</th>
+                <th>Vendor</th>
+                <th>WBS Element</th>
+                <th>Action</th>
+                <th>Amount</th>
+                <th>Note / Reason Code</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">05 Mar 2026 08:14</td>
+                <td class="mono">GS-2026-02-STN-008</td>
+                <td>Stantec Australia</td>
+                <td class="mono">PRJ-SW-PROMAC.ENV.WP-001</td>
+                <td><div class="at-action approved">✓ Approved</div></td>
+                <td class="mono">$84,200</td>
+                <td style="color:var(--text-3);font-size:11.5px;">Resubmission accepted after query resolved</td>
+              </tr>
+              <tr>
+                <td class="mono">04 Mar 2026 16:52</td>
+                <td class="mono">GS-2026-01-JHG-044</td>
+                <td>John Holland Group</td>
+                <td class="mono">PRJ-USC-AWRC.MEC.WP-008</td>
+                <td><div class="at-action approved">✓ Approved</div></td>
+                <td class="mono">$427,500</td>
+                <td style="color:var(--text-3);font-size:11.5px;">—</td>
+              </tr>
+              <tr>
+                <td class="mono">04 Mar 2026 16:51</td>
+                <td class="mono">GS-2026-01-JHG-044</td>
+                <td>John Holland Group</td>
+                <td class="mono">PRJ-USC-AWRC.CIV.WP-011</td>
+                <td><div class="at-action approved">✓ Approved</div></td>
+                <td class="mono">$218,700</td>
+                <td style="color:var(--text-3);font-size:11.5px;">—</td>
+              </tr>
+              <tr>
+                <td class="mono">04 Mar 2026 16:49</td>
+                <td class="mono">GS-2026-01-JHG-044</td>
+                <td>John Holland Group</td>
+                <td class="mono">PRJ-USC-AWRC.ENV.WP-002</td>
+                <td><div class="at-action queried">💬 Queried</div></td>
+                <td class="mono">$34,100</td>
+                <td style="font-size:11.5px;color:var(--sky);">RC-03: Rate anomaly — crane hire 38% above benchmark. Awaiting breakdown.</td>
+              </tr>
+              <tr>
+                <td class="mono">03 Mar 2026 11:22</td>
+                <td class="mono">GS-2026-02-DWN-022</td>
+                <td>Downer Utilities</td>
+                <td class="mono">PRJ-SW-MSIP.MEC.WP-007</td>
+                <td><div class="at-action queried">💬 Queried</div></td>
+                <td class="mono">$98,400</td>
+                <td style="font-size:11.5px;color:var(--sky);">RC-02: Work package description doesn't match SAP WBS scope. Please clarify.</td>
+              </tr>
+              <tr>
+                <td class="mono">01 Mar 2026 09:07</td>
+                <td class="mono">GS-2026-01-CPB-028</td>
+                <td>CPB Contractors</td>
+                <td class="mono">PRJ-SW-PROMAC.CIV.WP-004</td>
+                <td><div class="at-action rejected">✕ Rejected</div></td>
+                <td class="mono">$156,000</td>
+                <td style="font-size:11.5px;color:var(--red);">RC-01: Work not yet certified by Superintendent. Practical completion milestone not reached.</td>
+              </tr>
+              <tr>
+                <td class="mono">28 Feb 2026 17:44</td>
+                <td class="mono">GS-2026-01-ABE-017</td>
+                <td>Abergeldie Contractors</td>
+                <td class="mono">PRJ-HW-BWWTW-H2S.ELE.WP-003</td>
+                <td><div class="at-action queried">💬 Queried</div></td>
+                <td class="mono">$41,800</td>
+                <td style="font-size:11.5px;color:var(--sky);">RC-04: Sub-contractor ABN not on approved vendor panel. Verify before approval.</td>
+              </tr>
+              <tr>
+                <td class="mono">25 Feb 2026 14:18</td>
+                <td class="mono">GS-2026-01-BMD-011</td>
+                <td>BMD Constructions</td>
+                <td class="mono">PRJ-SW-MSIP.CIV.WP-001</td>
+                <td><div class="at-action approved">✓ Approved</div></td>
+                <td class="mono">$311,200</td>
+                <td style="color:var(--text-3);font-size:11.5px;">—</td>
+              </tr>
+              <tr>
+                <td class="mono">12 Feb 2026 09:30</td>
+                <td class="mono">GS-2026-01-JHG-042</td>
+                <td>John Holland Group</td>
+                <td class="mono">PRJ-USC-AWRC.SCA.WP-001</td>
+                <td><div class="at-action escalated">🔺 Escalated</div></td>
+                <td class="mono">$892,000</td>
+                <td style="font-size:11.5px;color:var(--orange);">Auto-escalated to Infrastructure Director. SOPA deadline T-0.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: MY PROJECTS ══════════════════════════════════ -->
+      <div class="page" id="pg-projects">
+        <div class="ph">
+          <div>
+            <div class="ptitle">My Projects</div>
+            <div class="psub">14 Active Capital Projects · Region: NSW-North · projectList from Azure AD attribute PM-0023</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">Active Projects — NSW</div></div>
+              <div style="padding:12px;">
+                <div class="proj-list-item">
+                  <div class="pli-icon">🏗️</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Upper South Creek AWRC</div>
+                    <div class="pli-wbs">PRJ-USC-AWRC · John Holland / Abergeldie JV</div>
+                    <div style="margin-top:6px;"><span class="badge badge-amber">72% budget</span> <span class="badge badge-red">🚨 SOPA: 1 day</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$142.5M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🔧</div>
+                  <div class="pli-body">
+                    <div class="pli-name">ProMac Pipeline</div>
+                    <div class="pli-wbs">PRJ-SW-PROMAC · CPB Contractors</div>
+                    <div style="margin-top:6px;"><span class="badge badge-navy">44% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$387M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🌊</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Malabar System Investment</div>
+                    <div class="pli-wbs">PRJ-SW-MSIP · BMD Constructions + Downer</div>
+                    <div style="margin-top:6px;"><span class="badge badge-navy">58% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$84M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">💧</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Belmont H2S Management</div>
+                    <div class="pli-wbs">PRJ-HW-BWWTW-H2S · Abergeldie Contractors</div>
+                    <div style="margin-top:6px;"><span class="badge badge-red">91% budget</span> <span class="badge badge-amber">⚠ SOPA: 3 days</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$1.8M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🏭</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Belmont Desalination Plant</div>
+                    <div class="pli-wbs">PRJ-HW-BELMONT-DESAL · CPB Contractors</div>
+                    <div style="margin-top:6px;"><span class="badge badge-lime">31% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$479M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">Active Projects — VIC / SA</div></div>
+              <div style="padding:12px;">
+                <div class="proj-list-item">
+                  <div class="pli-icon">💧</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Western Treatment Plant Augmentation</div>
+                    <div class="pli-wbs">PRJ-MW-WTP-PTA · Melbourne Water · SFPJV</div>
+                    <div style="margin-top:6px;"><span class="badge badge-navy">52% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$220M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🔬</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Yan Yean WTP Upgrade</div>
+                    <div class="pli-wbs">PRJ-MW-YYWTP-UP · Melbourne Water</div>
+                    <div style="margin-top:6px;"><span class="badge badge-navy">38% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$67M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🏝️</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Kangaroo Island Desalination</div>
+                    <div class="pli-wbs">PRJ-SAW-KI-DESAL · SA Water · BMD</div>
+                    <div style="margin-top:6px;"><span class="badge badge-navy">29% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$340M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🚇</div>
+                  <div class="pli-body">
+                    <div class="pli-name">M4 Water Main Renewal</div>
+                    <div class="pli-wbs">PRJ-YVW-M4-RENEWAL · Yarra Valley Water</div>
+                    <div style="margin-top:6px;"><span class="badge badge-lime">18% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$28M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+                <div class="proj-list-item">
+                  <div class="pli-icon">🏗️</div>
+                  <div class="pli-body">
+                    <div class="pli-name">Craigieburn Sewage Transfer Hub</div>
+                    <div class="pli-wbs">PRJ-YVW-CRAIGIEBURN-STH · Yarra Valley Water</div>
+                    <div style="margin-top:6px;"><span class="badge badge-lime">12% budget</span></div>
+                  </div>
+                  <div class="pli-right">
+                    <div class="pli-amount">$54M</div>
+                    <div class="pli-amount-lbl">CONTRACT VALUE</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /portal -->
+</div><!-- /screen-portal -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MODAL: QUERY LINE ITEM
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-query">
+  <div class="modal">
+    <div class="modal-title">↩ Return to Vendor with Comment</div>
+    <div class="modal-sub" id="modal-query-sub">Send this line item back to the vendor with a specific query comment. The vendor will be notified, must respond, and can only edit the flagged cell. The SOPA clock pauses on returned items until the vendor resubmits a valid response.</div>
+    <div class="input-group">
+      <label class="input-label">WBS Element</label>
+      <input class="input-field" id="query-wbs" readonly/>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Query Reason Code</label>
+      <select class="select-field" id="query-reason">
+        <option value="">Select reason code...</option>
+        <option value="RC-01">RC-01 — Work not yet certified by Superintendent</option>
+        <option value="RC-02">RC-02 — Work scope doesn't match SAP WBS definition</option>
+        <option value="RC-03">RC-03 — Rate anomaly — requires breakdown justification</option>
+        <option value="RC-04">RC-04 — Sub-contractor ABN not on approved panel</option>
+        <option value="RC-05">RC-05 — Supporting documentation insufficient or missing</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Additional Notes (visible to vendor)</label>
+      <textarea class="textarea-field" id="query-notes" placeholder="Provide specific detail to help the vendor understand exactly what needs to be corrected or clarified..."></textarea>
+    </div>
+    <div style="background:var(--sky-light);border:1px solid #BAE6FD;border-radius:var(--r);padding:10px 12px;font-size:12px;color:#075985;line-height:1.6;">
+      ℹ️ &nbsp;The vendor will only be able to edit the queried cells. All other approved rows remain locked. Every edit is timestamped and the original value is preserved in the audit trail.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-query')">Cancel</button>
+      <button class="btn btn-sky" onclick="submitQuery()">↩ Return to Vendor →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MODAL: REJECT LINE ITEM
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-reject">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--red);">✕ Reject Line Item</div>
+    <div class="modal-sub" id="modal-reject-sub">Rejecting a line item removes it from this claim. The vendor cannot resubmit a rejected item in the same claim period. A mandatory reason code is required for the audit trail.</div>
+    <div class="input-group">
+      <label class="input-label">WBS Element</label>
+      <input class="input-field" id="reject-wbs" readonly/>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Rejection Reason Code <span style="color:var(--red);">*</span></label>
+      <select class="select-field" id="reject-reason">
+        <option value="">Select mandatory reason code...</option>
+        <option value="RC-01">RC-01 — Work not yet certified by Superintendent</option>
+        <option value="RC-02">RC-02 — Work scope doesn't match SAP WBS definition</option>
+        <option value="RC-03">RC-03 — Rate anomaly unresolved after query</option>
+        <option value="RC-04">RC-04 — Sub-contractor ABN invalid or not on panel</option>
+        <option value="RC-05">RC-05 — Duplicate invoice — previously claimed in period GS-XXXX</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Detailed Justification <span style="color:var(--red);">*</span></label>
+      <textarea class="textarea-field" id="reject-notes" placeholder="Provide a detailed justification for rejection. This forms part of the Payment Schedule and is a legal document under SOPA."></textarea>
+    </div>
+    <div style="background:var(--red-light);border:1px solid #FECACA;border-left:3px solid var(--red);border-radius:var(--r);padding:10px 12px;font-size:12px;color:#991B1B;line-height:1.6;">
+      ⚠️ &nbsp;This rejection will be included in the Payment Schedule issued under the Security of Payment Act. The reason code and justification must be legally defensible. If in doubt, use <strong>Query</strong> instead.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-reject')">Cancel</button>
+      <button class="btn btn-red-solid" onclick="submitRejection()">Confirm Rejection</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MODAL: ISSUE PAYMENT SCHEDULE
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-payment-schedule">
+  <div class="modal" style="width:560px;">
+    <div class="modal-title">📋 Issue Payment Schedule</div>
+    <div class="modal-sub">This issues the formal Payment Schedule under the Security of Payment Act (NSW) 1999. All line-item decisions must be finalised before issuing.</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+      <div style="font-family:var(--font-d);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">Payment Schedule Summary</div>
+      <div class="dt-row"><div class="dt-key">Claim Reference</div><div class="dt-val" style="font-family:var(--font-m);font-size:12px;" id="ps-ref">GS-2026-02-JHG-008</div></div>
+      <div class="dt-row"><div class="dt-key">Scheduled Amount</div><div class="dt-val" style="color:var(--lime);font-size:16px;" id="ps-amount">$1,612,940</div></div>
+      <div class="dt-row"><div class="dt-key">Withheld Amount</div><div class="dt-val" style="color:var(--red);" id="ps-withheld">$234,300</div></div>
+      <div class="dt-row"><div class="dt-key">Reason for Withholding</div><div class="dt-val" style="font-size:12px;">1 queried · 1 rejected</div></div>
+      <div class="dt-row"><div class="dt-key">Payment Due Date</div><div class="dt-val">15 business days from schedule</div></div>
+      <div class="dt-row"><div class="dt-key">SOPA Compliance</div><div class="dt-val" style="color:var(--lime);">✓ Issued within 10 business days</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-payment-schedule')">Cancel</button>
+      <button class="btn btn-lime-solid" onclick="confirmPaymentSchedule()">✓ Confirm &amp; Issue Payment Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastWrap"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── DATA ────────────────────────────────────────────────────────────
+
+const jhgLineItems = [
+  { id:'li-001', wbs:'PRJ-USC-AWRC.CIV.WP-001', desc:'Earthworks — Stage 1 bulk excavation', cat:'Civil', capopx:'CAP', prev:60, claim:15, amount:287400, status:'pending' },
+  { id:'li-002', wbs:'PRJ-USC-AWRC.CIV.WP-002', desc:'Concrete structures — inlet works footing', cat:'Civil', capopx:'CAP', prev:45, claim:20, amount:412800, status:'pending' },
+  { id:'li-003', wbs:'PRJ-USC-AWRC.MEC.WP-001', desc:'Primary treatment screens — supply & install', cat:'Mechanical', capopx:'CAP', prev:30, claim:25, amount:198600, status:'pending' },
+  { id:'li-004', wbs:'PRJ-USC-AWRC.MEC.WP-002', desc:'Aerobic granular sludge reactor modules', cat:'Mechanical', capopx:'CAP', prev:20, claim:15, amount:324000, status:'pending' },
+  { id:'li-005', wbs:'PRJ-USC-AWRC.ELE.WP-001', desc:'HV switchgear — 11kV ring main unit', cat:'Electrical', capopx:'CAP', prev:55, claim:10, amount:87300, status:'pending' },
+  { id:'li-006', wbs:'PRJ-USC-AWRC.ELE.WP-002', desc:'MCC panels — dosing systems x4', cat:'Electrical', capopx:'CAP', prev:40, claim:12, amount:61200, status:'pending' },
+  { id:'li-007', wbs:'PRJ-USC-AWRC.SCA.WP-001', desc:'SCADA integration — Wonderware license', cat:'SCADA/I&C', capopx:'CAP', prev:10, claim:20, amount:148500, status:'pending' },
+  { id:'li-008', wbs:'PRJ-USC-AWRC.ENV.WP-001', desc:'Odour control — biofilter media replacement', cat:'Environmental', capopx:'OPX', prev:70, claim:10, amount:42000, status:'pending' },
+  { id:'li-009', wbs:'PRJ-USC-AWRC.CIV.WP-003', desc:'Pipeline — DN600 MSCL trunk main laying', cat:'Civil', capopx:'CAP', prev:35, claim:18, amount:221100, status:'pending' },
+  { id:'li-010', wbs:'PRJ-USC-AWRC.ENV.WP-002', desc:'Specialist crane hire — 250T Liebherr LTM', cat:'Environmental', capopx:'OPX', prev:0, claim:100, amount:34100, status:'pending', flag:'rate-anomaly' },
+];
+
+const abergeldie = [
+  { id:'ab-001', wbs:'PRJ-HW-BWWTW-H2S.CIV.WP-001', desc:'H2S scrubber — inlet works concrete base', cat:'Civil', capopx:'CAP', prev:80, claim:10, amount:44200, status:'pending' },
+  { id:'ab-002', wbs:'PRJ-HW-BWWTW-H2S.MEC.WP-001', desc:'Chemical dosing system — NaOH storage tank', cat:'Mechanical', capopx:'CAP', prev:60, claim:20, amount:78400, status:'pending' },
+  { id:'ab-003', wbs:'PRJ-HW-BWWTW-H2S.ELE.WP-001', desc:'ATEX-rated electrical equipment — Zone 2', cat:'Electrical', capopx:'CAP', prev:40, claim:15, amount:62700, status:'pending' },
+  { id:'ab-004', wbs:'PRJ-HW-BWWTW-H2S.ELE.WP-002', desc:'Gas monitoring network — sensors x24', cat:'Electrical', capopx:'CAP', prev:50, claim:20, amount:38900, status:'pending' },
+  { id:'ab-005', wbs:'PRJ-HW-BWWTW-H2S.ELE.WP-003', desc:'Sub-contract — MSL Electrical Services (new ABN)', cat:'Electrical', capopx:'CAP', prev:0, claim:50, amount:41800, status:'queried', queryNote:'RC-04: Sub-contractor ABN not on approved panel. Verify registration before approval.' },
+  { id:'ab-006', wbs:'PRJ-HW-BWWTW-H2S.SCA.WP-001', desc:'SCADA integration — H2S sensor telemetry', cat:'SCADA/I&C', capopx:'CAP', prev:20, claim:30, amount:28600, status:'pending' },
+  { id:'ab-007', wbs:'PRJ-HW-BWWTW-H2S.ENV.WP-001', desc:'Environmental monitoring — baseline studies', cat:'Environmental', capopx:'OPX', prev:100, claim:0, amount:0, status:'approved' },
+  { id:'ab-008', wbs:'PRJ-HW-BWWTW-H2S.CIV.WP-002', desc:'Site establishment & temp accommodation', cat:'Civil', capopx:'OPX', prev:85, claim:15, amount:15200, status:'pending' },
+];
+
+let currentClaim = 'john-holland';
+let currentItems = [];
+let selectedRows = new Set();
+
+const cpbLineItems = [
+  { id:'cpb-001', wbs:'PRJ-SW-PROMAC.CIV.WP-001', desc:'Pipeline DN600 MSCL — Chainage 0–1,400m', cat:'Civil', capopx:'CAP', prev:70, claim:15, amount:412000, status:'pending' },
+  { id:'cpb-002', wbs:'PRJ-SW-PROMAC.CIV.WP-002', desc:'Pipeline DN600 MSCL — Chainage 1,400–3,200m', cat:'Civil', capopx:'CAP', prev:40, claim:20, amount:524000, status:'pending' },
+  { id:'cpb-003', wbs:'PRJ-SW-PROMAC.CIV.WP-003', desc:'Pump Station 1 — civil structure & basement', cat:'Civil', capopx:'CAP', prev:30, claim:25, amount:398000, status:'pending' },
+  { id:'cpb-004', wbs:'PRJ-SW-PROMAC.CIV.WP-004', desc:'Reservoir 1 — 100ML tank ring beam footing', cat:'Civil', capopx:'CAP', prev:15, claim:20, amount:618000, status:'pending' },
+  { id:'cpb-005', wbs:'PRJ-SW-PROMAC.MEC.WP-001', desc:'Pump Station 1 — centrifugal pumps x3', cat:'Mechanical', capopx:'CAP', prev:20, claim:18, amount:287000, status:'pending' },
+  { id:'cpb-006', wbs:'PRJ-SW-PROMAC.ELE.WP-001', desc:'11kV power supply — switchgear & cabling', cat:'Electrical', capopx:'CAP', prev:25, claim:15, amount:214000, status:'pending' },
+  { id:'cpb-007', wbs:'PRJ-SW-PROMAC.ENV.WP-001', desc:'Environmental monitoring — CEMP compliance', cat:'Environmental', capopx:'OPX', prev:60, claim:20, amount:84200, status:'pending' },
+  { id:'cpb-008', wbs:'PRJ-SW-PROMAC.CIV.WP-005', desc:'Access road & site compound — Stage 2', cat:'Civil', capopx:'CAP', prev:80, claim:10, amount:183680, status:'pending' },
+];
+
+const bmdLineItems = [
+  { id:'bmd-001', wbs:'PRJ-SW-MSIP.CIV.WP-001', desc:'Malabar headworks — screenings upgrade', cat:'Civil', capopx:'CAP', prev:65, claim:15, amount:188400, status:'pending' },
+  { id:'bmd-002', wbs:'PRJ-SW-MSIP.CIV.WP-002', desc:'Primary sedimentation tanks — refurbishment', cat:'Civil', capopx:'CAP', prev:50, claim:20, amount:241200, status:'pending' },
+  { id:'bmd-003', wbs:'PRJ-SW-MSIP.MEC.WP-001', desc:'Tertiary filtration — membrane modules supply', cat:'Mechanical', capopx:'CAP', prev:30, claim:25, amount:142350, status:'pending' },
+  { id:'bmd-004', wbs:'PRJ-SW-MSIP.ELE.WP-001', desc:'HV upgrade — 33kV substation refurbishment', cat:'Electrical', capopx:'CAP', prev:40, claim:20, amount:100200, status:'pending' },
+  { id:'bmd-005', wbs:'PRJ-SW-MSIP.ENV.WP-001', desc:'Odour control strategy — biofilter maintenance', cat:'Environmental', capopx:'OPX', prev:75, claim:10, amount:0, status:'approved' },
+];
+
+function getItemsForClaim(claimId) {
+  if (claimId === 'john-holland') return jhgLineItems.map(i=>({...i}));
+  if (claimId === 'abergeldie') return abergeldie.map(i=>({...i}));
+  if (claimId === 'cpb') return cpbLineItems.map(i=>({...i}));
+  if (claimId === 'bmd') return bmdLineItems.map(i=>({...i}));
+  return [];
+}
+
+// ── NAV ─────────────────────────────────────────────────────────────
+
+function login() {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-portal').classList.add('active');
+  initPMDates();
+}
+
+function showPage(pageId, navItem) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.subnav-item').forEach(i => i.classList.remove('active'));
+  if (navItem) navItem.classList.add('active');
+}
+
+function reviewClaim(claimId) {
+  currentClaim = claimId;
+  currentItems = getItemsForClaim(claimId);
+  selectedRows.clear();
+
+  if (claimId === 'john-holland') {
+    document.getElementById('review-title').textContent = 'Claim Review — John Holland Group';
+    document.getElementById('review-sub').textContent = 'GS-2026-02-JHG-008 · PRJ-USC-AWRC · Feb 2026 Progress Claim';
+    document.getElementById('srb-days').textContent = '1';
+    document.getElementById('srb-deadline').textContent = '⚠ Due: Friday 7 March 2026, 17:00 AEST — CRITICAL';
+    document.getElementById('srb-subdesc').innerHTML = 'You must issue a Payment Schedule by this deadline. Failure to respond renders Sydney Water liable for the full claimed amount of <strong style="color:#FCD34D;">$1,364,880 inc GST</strong> regardless of any disputes.';
+    document.getElementById('srb-clock').className = 'srb-clock critical';
+    document.getElementById('sidebar-vendor-name').textContent = 'John Holland Group';
+    document.getElementById('sidebar-contract-val').textContent = '$142.5M';
+    document.getElementById('sidebar-budget-sub').textContent = '$102.6M approved to date · $39.9M remaining';
+    document.getElementById('progress-pct').textContent = '72%';
+    document.getElementById('progress-arc').setAttribute('stroke-dashoffset', '77.4');
+    document.getElementById('progress-arc').setAttribute('stroke', 'var(--amber)');
+    document.getElementById('cis-vendor').textContent = 'John Holland Group Pty Ltd';
+    document.getElementById('cis-ref').textContent = 'GS-2026-02-JHG-008';
+    document.getElementById('cis-project').textContent = 'PRJ-USC-AWRC';
+  } else if (claimId === 'abergeldie') {
+    document.getElementById('review-title').textContent = 'Claim Review — Abergeldie Contractors';
+    document.getElementById('review-sub').textContent = 'GS-2026-02-ABE-019 · PRJ-HW-BWWTW-H2S · Feb 2026 Progress Claim';
+    document.getElementById('srb-days').textContent = '3';
+    document.getElementById('srb-deadline').textContent = '⚠ Due: Monday 10 March 2026, 17:00 AEST — URGENT';
+    document.getElementById('srb-subdesc').innerHTML = 'You must issue a Payment Schedule by this deadline. Full claimed amount at risk: <strong style="color:#FCD34D;">$218,625 inc GST</strong>.';
+    document.getElementById('srb-clock').className = 'srb-clock';
+    document.getElementById('sidebar-vendor-name').textContent = 'Abergeldie Contractors';
+    document.getElementById('sidebar-contract-val').textContent = '$1.8M';
+    document.getElementById('sidebar-budget-sub').textContent = '$1.24M approved to date · $0.56M remaining';
+    document.getElementById('progress-pct').textContent = '69%';
+    document.getElementById('progress-arc').setAttribute('stroke-dashoffset', '24.9');
+    document.getElementById('progress-arc').setAttribute('stroke', 'var(--red)');
+    document.getElementById('cis-vendor').textContent = 'Abergeldie Contractors Pty Ltd';
+    document.getElementById('cis-ref').textContent = 'GS-2026-02-ABE-019';
+    document.getElementById('cis-project').textContent = 'PRJ-HW-BWWTW-H2S';
+  } else if (claimId === 'cpb') {
+    document.getElementById('review-title').textContent = 'Claim Review — CPB Contractors';
+    document.getElementById('review-sub').textContent = 'GS-2026-02-CPB-031 · PRJ-SW-PROMAC · Feb 2026 Progress Claim';
+    document.getElementById('srb-days').textContent = '6';
+    document.getElementById('srb-deadline').textContent = 'Due: Thursday 13 March 2026, 17:00 AEST';
+    document.getElementById('srb-subdesc').innerHTML = 'You must issue a Payment Schedule by this deadline. Full claimed amount at risk: <strong style="color:#FCD34D;">$3,120,880 inc GST</strong>.';
+    document.getElementById('srb-clock').className = 'srb-clock';
+    document.getElementById('sidebar-vendor-name').textContent = 'CPB Contractors Pty Ltd';
+    document.getElementById('sidebar-contract-val').textContent = '$387M';
+    document.getElementById('sidebar-budget-sub').textContent = '$170M approved to date · $217M remaining';
+    document.getElementById('progress-pct').textContent = '44%';
+    document.getElementById('progress-arc').setAttribute('stroke-dashoffset', '154.8');
+    document.getElementById('progress-arc').setAttribute('stroke', 'var(--navy)');
+    document.getElementById('cis-vendor').textContent = 'CPB Contractors Pty Ltd';
+    document.getElementById('cis-ref').textContent = 'GS-2026-02-CPB-031';
+    document.getElementById('cis-project').textContent = 'PRJ-SW-PROMAC';
+  } else {
+    document.getElementById('review-title').textContent = 'Claim Review — BMD Constructions';
+    document.getElementById('review-sub').textContent = 'GS-2026-02-BMD-014 · PRJ-SW-MSIP · Feb 2026 Progress Claim';
+    document.getElementById('srb-days').textContent = '8';
+    document.getElementById('srb-deadline').textContent = 'Due: Monday 16 March 2026, 17:00 AEST';
+    document.getElementById('srb-subdesc').innerHTML = 'You must issue a Payment Schedule by this deadline. Full claimed amount at risk: <strong style="color:#FCD34D;">$672,150 inc GST</strong>.';
+    document.getElementById('srb-clock').className = 'srb-clock';
+    document.getElementById('sidebar-vendor-name').textContent = 'BMD Constructions Pty Ltd';
+    document.getElementById('sidebar-contract-val').textContent = '$84M';
+    document.getElementById('sidebar-budget-sub').textContent = '$48.7M approved to date · $35.3M remaining';
+    document.getElementById('progress-pct').textContent = '58%';
+    document.getElementById('progress-arc').setAttribute('stroke-dashoffset', '116.1');
+    document.getElementById('progress-arc').setAttribute('stroke', 'var(--navy)');
+    document.getElementById('cis-vendor').textContent = 'BMD Constructions Pty Ltd';
+    document.getElementById('cis-ref').textContent = 'GS-2026-02-BMD-014';
+    document.getElementById('cis-project').textContent = 'PRJ-SW-MSIP';
+  }
+
+  renderTable();
+  updateCounts();
+  showPage('pg-review', document.getElementById('subnav-review'));
+}
+
+// ── TABLE RENDER ────────────────────────────────────────────────────
+
+function renderTable() {
+  const tbody = document.getElementById('li-tbody');
+  tbody.innerHTML = '';
+  currentItems.forEach((item, idx) => {
+    if (item.amount === 0 && item.claim === 0) return;
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + item.id;
+
+    let rowClass = '';
+    if (item.status === 'approved') rowClass = 'li-row-approved';
+    else if (item.status === 'queried') rowClass = 'li-row-queried';
+    else if (item.status === 'rejected') rowClass = 'li-row-rejected';
+    if (selectedRows.has(item.id)) rowClass += ' li-row-selected';
+    tr.className = rowClass;
+
+    const actionBtns = item.status === 'approved'
+      ? `<span class="badge badge-lime">✓ Approved</span>`
+      : item.status === 'queried'
+      ? `<span class="badge badge-sky">↩ Returned to Vendor</span>`
+      : item.status === 'rejected'
+      ? `<span class="badge badge-red">✕ Rejected</span>`
+      : `<div class="li-actions">
+           <button class="btn btn-lime btn-xs" onclick="approveItem('${item.id}')">✓ Approve</button>
+           <button class="btn btn-sky btn-xs" title="Return to vendor with comment" onclick="openQueryFor('${item.id}')">↩ Return</button>
+           <button class="btn btn-red btn-xs" onclick="openRejectFor('${item.id}')">✕ Reject</button>
+         </div>`;
+
+    const amtFmt = '$' + item.amount.toLocaleString();
+    const rateFlag = item.flag === 'rate-anomaly'
+      ? ` <span class="badge badge-amber" style="font-size:9.5px;margin-left:4px;">⚠ Rate</span>` : '';
+
+    tr.innerHTML = `
+      <td><input type="checkbox" class="li-check" ${selectedRows.has(item.id)?'checked':''} onchange="toggleRow('${item.id}', this)"/></td>
+      <td class="mono">${item.wbs}${rateFlag}</td>
+      <td style="max-width:260px;">${item.desc}</td>
+      <td class="center"><span class="badge badge-muted" style="font-size:10px;">${item.cat}</span></td>
+      <td class="center"><span class="badge ${item.capopx==='CAP'?'badge-navy':'badge-orange'}" style="font-size:10px;">${item.capopx}</span></td>
+      <td class="center" style="font-family:var(--font-m);font-size:11.5px;">${item.prev}%</td>
+      <td class="center" style="font-family:var(--font-m);font-size:11.5px;font-weight:700;">${item.claim}%</td>
+      <td class="amount">${amtFmt}</td>
+      <td class="center">${actionBtns}</td>
+    `;
+
+    // If queried, append a note row
+    if (item.status === 'queried' && item.queryNote) {
+      tbody.appendChild(tr);
+      const noteRow = document.createElement('tr');
+      noteRow.style.cssText = 'background:rgba(2,132,199,0.05);';
+      noteRow.innerHTML = `<td></td><td colspan="8" style="padding:8px 12px 10px 12px;font-size:11.5px;color:var(--sky);font-family:var(--font-m);">💬 Query: ${item.queryNote}</td>`;
+      tbody.appendChild(noteRow);
+      return;
+    }
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ── ROW ACTIONS ─────────────────────────────────────────────────────
+
+function approveItem(id) {
+  const item = currentItems.find(i => i.id === id);
+  if (!item) return;
+  item.status = 'approved';
+  renderTable();
+  updateCounts();
+  toast('✓ Line item approved: ' + item.wbs.split('.').pop(), 'lime');
+}
+
+let activeItemId = null;
+
+function openQueryFor(id) {
+  activeItemId = id;
+  const item = currentItems.find(i => i.id === id);
+  document.getElementById('query-wbs').value = item.wbs;
+  document.getElementById('query-notes').value = '';
+  document.getElementById('query-reason').value = '';
+  openModal('modal-query');
+}
+
+function openRejectFor(id) {
+  activeItemId = id;
+  const item = currentItems.find(i => i.id === id);
+  document.getElementById('reject-wbs').value = item.wbs;
+  document.getElementById('reject-notes').value = '';
+  document.getElementById('reject-reason').value = '';
+  openModal('modal-reject');
+}
+
+function submitQuery() {
+  const reason = document.getElementById('query-reason').value;
+  const notes = document.getElementById('query-notes').value;
+  if (!reason) { toast('Select a reason code before querying', 'amber'); return; }
+  const item = currentItems.find(i => i.id === activeItemId);
+  if (item) {
+    item.status = 'queried';
+    item.queryNote = reason + (notes ? ': ' + notes : '');
+  }
+  closeModal('modal-query');
+  renderTable();
+  updateCounts();
+  toast('💬 Query sent to vendor for ' + (item ? item.wbs.split('.').pop() : ''), 'navy');
+}
+
+function submitRejection() {
+  const reason = document.getElementById('reject-reason').value;
+  const notes = document.getElementById('reject-notes').value;
+  if (!reason || !notes) { toast('Reason code and justification are mandatory for rejection', 'amber'); return; }
+  const item = currentItems.find(i => i.id === activeItemId);
+  if (item) { item.status = 'rejected'; }
+  closeModal('modal-reject');
+  renderTable();
+  updateCounts();
+  toast('✕ Line item rejected: ' + (item ? item.wbs.split('.').pop() : ''), 'red');
+}
+
+// ── BULK ACTIONS ─────────────────────────────────────────────────────
+
+function toggleRow(id, cb) {
+  if (cb.checked) selectedRows.add(id);
+  else selectedRows.delete(id);
+  updateBulkBar();
+  renderTable();
+}
+
+function toggleAll(cb) {
+  if (cb.checked) {
+    currentItems.filter(i => i.status === 'pending').forEach(i => selectedRows.add(i.id));
+  } else {
+    selectedRows.clear();
+  }
+  updateBulkBar();
+  renderTable();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  if (selectedRows.size > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-bar-text').textContent = selectedRows.size + ' line item' + (selectedRows.size > 1 ? 's' : '') + ' selected';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function bulkApprove() {
+  let count = 0;
+  selectedRows.forEach(id => {
+    const item = currentItems.find(i => i.id === id);
+    if (item && item.status === 'pending') { item.status = 'approved'; count++; }
+  });
+  selectedRows.clear();
+  updateBulkBar();
+  renderTable();
+  updateCounts();
+  toast('✓ ' + count + ' line items approved', 'lime');
+}
+
+function openQueryModal() {
+  if (selectedRows.size === 0) return;
+  activeItemId = [...selectedRows][0];
+  const item = currentItems.find(i => i.id === activeItemId);
+  document.getElementById('query-wbs').value = selectedRows.size > 1 ? '(' + selectedRows.size + ' items selected)' : item.wbs;
+  document.getElementById('query-notes').value = '';
+  document.getElementById('query-reason').value = '';
+  openModal('modal-query');
+}
+
+function openRejectModal() {
+  if (selectedRows.size === 0) return;
+  activeItemId = [...selectedRows][0];
+  const item = currentItems.find(i => i.id === activeItemId);
+  document.getElementById('reject-wbs').value = selectedRows.size > 1 ? '(' + selectedRows.size + ' items selected)' : item.wbs;
+  document.getElementById('reject-notes').value = '';
+  document.getElementById('reject-reason').value = '';
+  openModal('modal-reject');
+}
+
+function clearSelection() {
+  selectedRows.clear();
+  updateBulkBar();
+  renderTable();
+}
+
+function approveAll() {
+  let count = 0;
+  currentItems.forEach(item => {
+    if (item.status === 'pending') { item.status = 'approved'; count++; }
+  });
+  renderTable();
+  updateCounts();
+  if (count > 0) toast('✓ All ' + count + ' pending line items approved', 'lime');
+  else toast('No pending line items remaining', 'amber');
+}
+
+// ── COUNTS ───────────────────────────────────────────────────────────
+
+function updateCounts() {
+  const a = currentItems.filter(i => i.status === 'approved').length;
+  const q = currentItems.filter(i => i.status === 'queried').length;
+  const r = currentItems.filter(i => i.status === 'rejected').length;
+  const p = currentItems.filter(i => i.status === 'pending').length;
+  document.getElementById('count-approved').textContent = a;
+  document.getElementById('count-queried').textContent = q;
+  document.getElementById('count-rejected').textContent = r;
+  document.getElementById('count-pending').textContent = p;
+}
+
+// ── PAYMENT SCHEDULE ─────────────────────────────────────────────────
+
+function finalisePaymentSchedule() {
+  const approved = currentItems.filter(i => i.status === 'approved');
+  const withheld = currentItems.filter(i => i.status === 'queried' || i.status === 'rejected');
+  const approvedTotal = approved.reduce((s, i) => s + i.amount, 0);
+  const withheldTotal = withheld.reduce((s, i) => s + i.amount, 0);
+  document.getElementById('ps-ref').textContent = currentClaim === 'john-holland' ? 'GS-2026-02-JHG-008' : 'GS-2026-02-ABE-019';
+  document.getElementById('ps-amount').textContent = '$' + Math.round(approvedTotal * 1.1).toLocaleString() + ' inc GST';
+  document.getElementById('ps-withheld').textContent = withheldTotal > 0 ? '$' + Math.round(withheldTotal * 1.1).toLocaleString() + ' inc GST' : '$0';
+  openModal('modal-payment-schedule');
+}
+
+function confirmPaymentSchedule() {
+  closeModal('modal-payment-schedule');
+  toast('📋 Payment Schedule issued. Claim GS-2026-02 · SOPA compliant · Vendor notified.', 'lime');
+}
+
+// ── MODAL ────────────────────────────────────────────────────────────
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
+});
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+
+function toast(msg, type = 'lime') {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+
+// ── DYNAMIC DATES ────────────────────────────────────────────────────
+function addBizDays(date, n) {
+  let d = new Date(date); let added = 0;
+  const dir = n >= 0 ? 1 : -1; n = Math.abs(n);
+  while (added < n) {
+    d.setDate(d.getDate() + dir);
+    if (d.getDay() !== 0 && d.getDay() !== 6) added++;
+  }
+  return d;
+}
+function bizDaysUntil(target, from) {
+  let d = new Date(from); let count = 0;
+  if (d >= target) return 0;
+  while (d < target) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() !== 0 && d.getDay() !== 6) count++;
+  }
+  return count;
+}
+function fmtDay(d) {
+  return d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function fmtShortPM(d) {
+  return d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtShortMonthYear(d) {
+  return d.toLocaleDateString('en-AU',{month:'short',year:'numeric'});
+}
+
+function initPMDates() {
+  const now = new Date();
+  // Submission dates relative to today so SOPA days always make sense
+  // Critical: submitted 9 biz days ago → 1 day left
+  // Urgent: submitted 7 biz days ago → 3 days left
+  // OK-1: submitted 4 biz days ago → 6 days left
+  // OK-2: submitted 2 biz days ago → 8 days left
+  const subJHG  = addBizDays(now, -9);  // John Holland — 1 day left
+  const subABE  = addBizDays(now, -7);  // Abergeldie — 3 days left
+  const subCPB  = addBizDays(now, -4);  // CPB — 6 days left
+  const subBMD  = addBizDays(now, -2);  // BMD — 8 days left
+
+  const dlJHG  = addBizDays(subJHG, 10);
+  const dlABE  = addBizDays(subABE, 10);
+  const dlCPB  = addBizDays(subCPB, 10);
+  const dlBMD  = addBizDays(subBMD, 10);
+
+  const daysJHG = Math.max(0, bizDaysUntil(dlJHG, now));
+  const daysABE = Math.max(0, bizDaysUntil(dlABE, now));
+  const daysCPB = Math.max(0, bizDaysUntil(dlCPB, now));
+  const daysBMD = Math.max(0, bizDaysUntil(dlBMD, now));
+
+  // Store for reviewClaim to use
+  window._pmClaims = {
+    'john-holland': { days: daysJHG, deadline: dlJHG, sub: subJHG },
+    'abergeldie':   { days: daysABE, deadline: dlABE, sub: subABE },
+    'cpb':          { days: daysCPB, deadline: dlCPB, sub: subCPB },
+    'bmd':          { days: daysBMD, deadline: dlBMD, sub: subBMD },
+  };
+
+  const claimMonth = now.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+  const claimMonthShort = now.toLocaleDateString('en-AU',{month:'short',year:'numeric'});
+
+  // Update all days-remaining displays
+  document.querySelectorAll('.cqi-days').forEach(el => {
+    const item = el.closest('.claim-queue-item');
+    if (!item) return;
+    const cid = item.getAttribute('data-claim');
+    if (cid && window._pmClaims[cid]) {
+      el.textContent = window._pmClaims[cid].days;
+    }
+  });
+
+  // Update claim vendor lines with fresh dates
+  document.querySelectorAll('.cqi-vendor').forEach(el => {
+    const item = el.closest('.claim-queue-item');
+    if (!item) return;
+    const cid = item.getAttribute('data-claim');
+    if (!cid || !window._pmClaims[cid]) return;
+    const d = window._pmClaims[cid].sub;
+    const timeStr = d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+    el.textContent = el.textContent.replace(/Submitted:.*AEST/, 'Submitted: ' + timeStr + ' AEST');
+    el.textContent = el.textContent.replace(/Feb 2026|Mar 2026|Jan 2026/, claimMonthShort);
+  });
+
+  // Sopa deadline text in claims strip (topbar)
+  const topSopa = document.querySelector('.topbar-sopa');
+  if (topSopa) {
+    topSopa.innerHTML = '<div class="sopa-pulse"></div>' + daysJHG + ' DAYS — CRITICAL DUE';
+  }
+
+  // Update topbar dates in scc-deadline
+  const sccDeadlines = document.querySelectorAll('.scc-deadline');
+  const claimDates = [
+    { days: daysJHG, dl: dlJHG, urgency: 'CRITICAL' },
+    { days: daysABE, dl: dlABE, urgency: 'URGENT' },
+    { days: daysCPB, dl: dlCPB, urgency: '' },
+    { days: daysBMD, dl: dlBMD, urgency: '' },
+  ];
+  sccDeadlines.forEach((el, i) => {
+    if (claimDates[i]) {
+      const c = claimDates[i];
+      const dlStr = c.dl.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      el.textContent = 'Due: ' + dlStr + (c.urgency ? ' · ' + c.urgency : '');
+    }
+  });
+
+  // Update psub on queue page
+  const queuePsub = document.querySelector('#pg-queue .psub');
+  if (queuePsub) queuePsub.textContent = '7 Progress Claims awaiting Payment Schedule · Ordered by SOPA deadline';
+
+  // Query table dates
+  const qrDates = {
+    'qr-abe-date': addBizDays(now, -5),
+    'qr-dwn-date': addBizDays(now, -4),
+    'qr-syn-date': addBizDays(now, -3),
+    'qr-stn-date': addBizDays(now, -1),
+  };
+  Object.entries(qrDates).forEach(([id, d]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = fmtShortPM(d);
+  });
+}
+
+// ── FILTER QUEUE ─────────────────────────────────────────────────────
+function filterQueue(chipEl, filter) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  document.querySelectorAll('.claim-queue-item').forEach(item => {
+    const sopa = item.getAttribute('data-sopa');
+    if (filter === 'all' || sopa === filter) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+  // Update count badge in panel sub
+  const visible = document.querySelectorAll('#pg-queue .claim-queue-item:not([style*="display: none"])').length;
+  const titles = { all:'All Claims', critical:'Critical Claims', urgent:'Urgent Claims', ok:'On Track Claims', queried:'Paused / Queried Claims' };
+  const sub = document.querySelector('#pg-queue .panel-sub');
+  if (sub) sub.textContent = 'Showing: ' + titles[filter] + ' (' + visible + ')';
+}
+
+function searchQueue(val) {
+  const q = val.toLowerCase();
+  document.querySelectorAll('#pg-queue .claim-queue-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+// ── NAVIGATE TO QUEUE WITH FILTER ────────────────────────────────────
+function goToQueueFiltered(filter) {
+  showPage('pg-queue', document.getElementById('subnav-queue'));
+  // Find and click the right chip
+  const labels = { all:'All', critical:'Critical', urgent:'Urgent', ok:'On Track', queried:'Has Query' };
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    if (chip.textContent.toLowerCase().includes(filter) || 
+        (filter === 'all' && chip.textContent.startsWith('All'))) {
+      filterQueue(chip, filter);
+    }
+  });
+}
+
+function scrollToQueries() {
+  showPage('pg-dashboard', document.getElementById('subnav-dashboard'));
+  setTimeout(() => {
+    const el = document.querySelector('.panel-title');
+    let target = null;
+    document.querySelectorAll('.panel-title').forEach(t => {
+      if (t.textContent.includes('Open Queries')) target = t;
+    });
+    if (target) target.closest('.panel').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 100);
+}
+
+// ── FILTER CHIPS (replaced by filterQueue above) ──
+
+// ── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Show login screen on load
+  const loginScreen = document.getElementById('screen-login');
+  if (loginScreen) loginScreen.classList.add('active');
+  // Show default dashboard page
+  const dashPage = document.getElementById('pg-dashboard');
+  if (dashPage) dashPage.classList.add('active');
+});
+</script>
+</body>
+</html>

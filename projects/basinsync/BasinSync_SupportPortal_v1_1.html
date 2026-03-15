@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BasinSync — Support Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #F0EEE9;
+  --bg2:         #E8E5DE;
+  --surface:     #FFFFFF;
+  --surface2:    #F7F6F2;
+  --border:      #DDD9CF;
+  --border2:     #C8C3B5;
+  --navy:        #1B3A5C;
+  --navy2:       #2E5A8A;
+  --navy-dim:    rgba(27,58,92,0.08);
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --amber-mid:   #FDE68A;
+  --amber-dim:   rgba(217,119,6,0.10);
+  --lime:        #16A34A;
+  --lime-light:  #DCFCE7;
+  --lime-dim:    rgba(22,163,74,0.10);
+  --red:         #DC2626;
+  --red-light:   #FEE2E2;
+  --red-dim:     rgba(220,38,38,0.10);
+  --sky:         #0284C7;
+  --sky-light:   #E0F2FE;
+  --sky-dim:     rgba(2,132,199,0.10);
+  --orange:      #EA580C;
+  --purple:      #7C3AED;
+  --purple-light:#EDE9FE;
+  --purple-dim:  rgba(124,58,237,0.10);
+  --teal:        #0F766E;
+  --teal-light:  #CCFBF1;
+  --support-accent: #7C3AED;
+  --text:        #1C1917;
+  --text-2:      #44403C;
+  --text-3:      #78716C;
+  --text-4:      #A8A29E;
+  --font-d:      'Barlow Condensed', sans-serif;
+  --font-b:      'Nunito Sans', sans-serif;
+  --font-m:      'IBM Plex Mono', monospace;
+  --r:           8px;
+  --shadow:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.14);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--font-b); font-size:14px; min-height:100vh; }
+
+/* ── SCREENS ─────────────────────────────────────────────────────────── */
+.screen { display:none !important; }
+.screen.active { display:block !important; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ══════════════════════════════════════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════════════════════════════════════ */
+#screen-login { min-height:100vh; grid-template-columns: 1fr 480px; }
+#screen-login.active { display:grid !important; }
+
+.login-left {
+  background: linear-gradient(160deg, #0F172A 0%, #1B3A5C 50%, #1e1040 100%);
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding:48px;
+}
+.login-left::before {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 25%, rgba(124,58,237,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 75%, rgba(217,119,6,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(2,132,199,0.10) 0%, transparent 60%);
+}
+.login-grid {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+/* Animated grid pulse */
+.login-grid::after {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%);
+  animation: gridPulse 4s ease-in-out infinite;
+}
+@keyframes gridPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+.login-brand { position:relative; z-index:1; }
+.login-logo {
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--font-d); font-size:26px; font-weight:800;
+  color:#FFF; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;
+}
+.login-logo-mark {
+  width:44px; height:44px; border-radius:10px;
+  background:linear-gradient(135deg, #D97706, #EA580C);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+  box-shadow: 0 4px 12px rgba(217,119,6,0.4);
+}
+.login-portal-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(124,58,237,0.2); border:1px solid rgba(124,58,237,0.4);
+  color:#C4B5FD; font-family:var(--font-m); font-size:10px;
+  padding:3px 10px; border-radius:4px; letter-spacing:0.8px;
+  margin-top:4px;
+}
+.login-tagline { color:rgba(255,255,255,0.45); font-size:13px; letter-spacing:0.3px; margin-top:6px; }
+
+.login-hero { position:relative; z-index:1; }
+.login-hero-title {
+  font-family:var(--font-d); font-size:50px; font-weight:800;
+  color:#FFF; line-height:1.05; letter-spacing:0.5px; margin-bottom:20px;
+  text-transform:uppercase;
+}
+.login-hero-title em { color:#A78BFA; font-style:normal; }
+.login-hero-sub { color:rgba(255,255,255,0.55); font-size:15px; line-height:1.75; max-width:440px; }
+
+.login-access-notice {
+  position:relative; z-index:1;
+  background:rgba(220,38,38,0.12); border:1px solid rgba(220,38,38,0.25);
+  border-left:3px solid #F87171;
+  border-radius:var(--r); padding:12px 16px;
+  font-size:12px; color:#FECACA; line-height:1.6;
+}
+.login-access-notice strong { display:block; margin-bottom:2px; font-size:12.5px; color:#FCA5A5; }
+
+.login-stats { position:relative; z-index:1; display:flex; gap:32px; }
+.login-stat-val {
+  font-family:var(--font-d); font-size:28px; font-weight:800;
+  color:#A78BFA; line-height:1;
+}
+.login-stat-lbl { font-size:11px; color:rgba(255,255,255,0.4); margin-top:4px; letter-spacing:0.5px; font-family:var(--font-m); }
+
+/* LOGIN RIGHT */
+.login-right {
+  background:var(--surface); display:flex; flex-direction:column;
+  justify-content:center; padding:56px 48px;
+  border-left:1px solid var(--border);
+}
+.login-right-title {
+  font-family:var(--font-d); font-size:28px; font-weight:700;
+  letter-spacing:0.5px; text-transform:uppercase; color:var(--navy);
+  margin-bottom:6px;
+}
+.login-right-sub { color:var(--text-3); font-size:13px; margin-bottom:36px; }
+
+.login-internal-badge {
+  background:var(--purple-light); border:1px solid rgba(124,58,237,0.2);
+  border-left:3px solid var(--purple);
+  border-radius:var(--r); padding:12px 14px; margin-bottom:28px;
+  font-size:12px; color:#4C1D95; line-height:1.6;
+}
+.login-internal-badge strong { display:block; margin-bottom:2px; font-size:12.5px; }
+
+.sso-btn {
+  width:100%; padding:14px 20px; border-radius:var(--r);
+  background:var(--navy); color:#FFF; border:none; cursor:pointer;
+  font-family:var(--font-d); font-size:16px; font-weight:700;
+  letter-spacing:0.8px; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  transition:all 0.2s; margin-bottom:12px;
+  box-shadow: var(--shadow-md);
+}
+.sso-btn:hover { background:#264E7A; transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+.sso-btn-icon { width:22px; height:22px; background:#FFF; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.sso-btn-support {
+  background: linear-gradient(135deg, #5B21B6, #7C3AED);
+}
+.sso-btn-support:hover { background: linear-gradient(135deg, #4C1D95, #6D28D9); }
+
+.login-divider { display:flex; align-items:center; gap:12px; margin:16px 0; }
+.login-divider-line { flex:1; height:1px; background:var(--border); }
+.login-divider-text { font-size:11px; color:var(--text-4); font-family:var(--font-m); white-space:nowrap; }
+
+.login-help { text-align:center; font-size:12px; color:var(--text-4); margin-top:24px; }
+.login-help a { color:var(--navy2); text-decoration:none; font-weight:600; }
+.login-footer { margin-top:auto; padding-top:32px; }
+.login-footer-text { font-size:11px; color:var(--text-4); line-height:1.6; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PORTAL SHELL
+══════════════════════════════════════════════════════════════════════ */
+.portal { min-height:100vh; display:flex; flex-direction:column; }
+
+/* TOPBAR */
+.topbar {
+  height:56px; background:var(--navy);
+  display:flex; align-items:center; padding:0 24px; gap:0;
+  position:sticky; top:0; z-index:300;
+  box-shadow: 0 2px 8px rgba(27,58,92,0.3);
+}
+.topbar-logo {
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-d); font-size:18px; font-weight:800;
+  color:#FFF; letter-spacing:1px; text-transform:uppercase; margin-right:20px;
+}
+.topbar-logo-mark {
+  width:30px; height:30px; border-radius:7px;
+  background:linear-gradient(135deg,#D97706,#EA580C);
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.topbar-logo em { color:#FCD34D; font-style:normal; }
+.topbar-portal-tag {
+  background:rgba(124,58,237,0.25); border:1px solid rgba(124,58,237,0.45);
+  color:#C4B5FD; font-family:var(--font-m); font-size:10px;
+  padding:2px 8px; border-radius:4px; letter-spacing:0.5px;
+}
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.topbar-env {
+  background:rgba(220,38,38,0.2); border:1px solid rgba(220,38,38,0.4);
+  color:#FCA5A5; font-family:var(--font-m); font-size:10px;
+  padding:3px 10px; border-radius:20px;
+  display:flex; align-items:center; gap:6px;
+}
+.env-dot { width:6px; height:6px; background:#F87171; border-radius:50%; animation:pulse 1.4s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.topbar-notif {
+  width:32px; height:32px; border-radius:6px;
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; position:relative; font-size:14px; transition:background 0.15s;
+}
+.topbar-notif:hover { background:rgba(255,255,255,0.14); }
+.notif-badge {
+  position:absolute; top:5px; right:5px;
+  width:7px; height:7px; border-radius:50%;
+  background:#F87171; border:1.5px solid var(--navy);
+}
+.topbar-user {
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  padding:4px 8px; border-radius:6px; transition:background 0.15s;
+}
+.topbar-user:hover { background:rgba(255,255,255,0.08); }
+.user-avatar {
+  width:30px; height:30px; border-radius:6px;
+  background:linear-gradient(135deg,#7C3AED,#5B21B6);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-d); font-size:12px; font-weight:700; color:#FFF; letter-spacing:1px;
+}
+.user-info { text-align:right; }
+.user-name { font-size:12px; font-weight:600; color:#FFF; line-height:1.2; }
+.user-role { font-size:10px; color:rgba(255,255,255,0.5); font-family:var(--font-m); }
+
+/* SUBNAV */
+.subnav {
+  height:44px; background:var(--surface); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 24px; gap:2px;
+  position:sticky; top:56px; z-index:200;
+}
+.subnav-item {
+  padding:6px 14px; border-radius:6px; font-size:13px; font-weight:600;
+  color:var(--text-3); cursor:pointer; border:1px solid transparent;
+  transition:all 0.15s; display:flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.subnav-item:hover { color:var(--text); background:var(--bg2); }
+.subnav-item.active { color:var(--navy); background:var(--navy-dim); border-color:rgba(27,58,92,0.2); }
+.subnav-badge {
+  background:var(--red); color:#FFF;
+  font-size:10px; font-weight:700; font-family:var(--font-m);
+  padding:1px 6px; border-radius:10px;
+}
+.subnav-badge-amber { background:var(--amber); }
+.subnav-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* MAIN */
+.main { padding:24px; max-width:1440px; margin:0 auto; }
+.page { display:none; }
+.page.active { display:block; animation:fadeIn 0.2s ease; }
+
+/* ── SHARED COMPONENTS ──────────────────────────────────────────────── */
+.ph { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; }
+.ptitle { font-family:var(--font-d); font-size:22px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--navy); }
+.psub { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.btn-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:8px 16px; border-radius:var(--r); font-size:13px; font-weight:600;
+  cursor:pointer; border:none; transition:all 0.15s; font-family:var(--font-b);
+  white-space:nowrap; text-decoration:none;
+}
+.btn-primary { background:var(--navy); color:#FFF; }
+.btn-primary:hover { background:#264E7A; transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn-amber { background:var(--amber); color:#FFF; }
+.btn-amber:hover { background:#B45309; }
+.btn-ghost { background:transparent; border:1px solid var(--border2); color:var(--text-2); }
+.btn-ghost:hover { background:var(--bg2); }
+.btn-lime { background:var(--lime-dim); border:1px solid rgba(22,163,74,0.3); color:var(--lime); }
+.btn-lime:hover { background:rgba(22,163,74,0.18); }
+.btn-red { background:var(--red-dim); border:1px solid rgba(220,38,38,0.3); color:var(--red); }
+.btn-red:hover { background:rgba(220,38,38,0.2); }
+.btn-purple { background:var(--purple-dim); border:1px solid rgba(124,58,237,0.3); color:var(--purple); }
+.btn-purple:hover { background:rgba(124,58,237,0.18); }
+.btn-sm { padding:5px 11px; font-size:12px; }
+.btn-xs { padding:3px 8px; font-size:11px; }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;
+  font-family:var(--font-m); white-space:nowrap;
+}
+.badge-amber  { background:var(--amber-light); color:#92400E; border:1px solid var(--amber-mid); }
+.badge-lime   { background:var(--lime-light);  color:#14532D; border:1px solid #BBF7D0; }
+.badge-red    { background:var(--red-light);   color:#991B1B; border:1px solid #FECACA; }
+.badge-sky    { background:var(--sky-light);   color:#075985; border:1px solid #BAE6FD; }
+.badge-navy   { background:var(--navy-dim);    color:var(--navy); border:1px solid rgba(27,58,92,0.2); }
+.badge-muted  { background:var(--bg2); color:var(--text-3); border:1px solid var(--border); }
+.badge-purple { background:var(--purple-light); color:#4C1D95; border:1px solid rgba(124,58,237,0.2); }
+.badge-teal   { background:var(--teal-light);  color:#134E4A; border:1px solid #99F6E4; }
+
+.panel {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow);
+}
+.panel-head {
+  padding:14px 18px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.panel-title { font-family:var(--font-d); font-size:14px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); }
+.panel-sub { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.panel-body { padding:18px; }
+
+.tbl { width:100%; border-collapse:collapse; }
+.tbl th { font-family:var(--font-m); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-3); padding:10px 14px; text-align:left; border-bottom:2px solid var(--border); background:var(--surface2); white-space:nowrap; }
+.tbl td { padding:11px 14px; border-bottom:1px solid var(--border); font-size:13px; color:var(--text); vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tr:hover td { background:var(--bg2); cursor:pointer; }
+.tbl td.mono { font-family:var(--font-m); font-size:11.5px; }
+.tbl td.muted { color:var(--text-3); }
+
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.grid12 { display:grid; grid-template-columns:1fr 2fr; gap:16px; align-items:start; }
+.grid21 { display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:start; }
+.divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+.input-group { margin-bottom:14px; }
+.input-label { font-family:var(--font-m); font-size:10.5px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-3); display:block; margin-bottom:6px; }
+.input-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; transition:border-color 0.15s; }
+.input-field:focus { border-color:var(--navy2); box-shadow:0 0 0 3px var(--navy-dim); }
+.select-field { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); padding:9px 12px; font-size:13px; font-family:var(--font-b); outline:none; cursor:pointer; }
+
+/* STAT CARD */
+.stat-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:16px 20px; box-shadow:var(--shadow);
+}
+.stat-card.navy  { border-left:3px solid var(--navy); }
+.stat-card.amber { border-left:3px solid var(--amber); }
+.stat-card.lime  { border-left:3px solid var(--lime); }
+.stat-card.red   { border-left:3px solid var(--red); }
+.stat-card.purple{ border-left:3px solid var(--purple); }
+.stat-card.sky   { border-left:3px solid var(--sky); }
+.stat-lbl { font-family:var(--font-m); font-size:10px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.stat-val { font-family:var(--font-d); font-size:32px; font-weight:800; color:var(--navy); line-height:1; margin-bottom:4px; }
+.stat-sub { font-size:11.5px; color:var(--text-3); }
+
+/* TOAST */
+#toastWrap { position:fixed; bottom:24px; right:24px; z-index:999; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.toast {
+  padding:11px 16px; border-radius:8px; font-size:13px; font-weight:500;
+  display:flex; align-items:center; gap:10px; max-width:380px; font-family:var(--font-b);
+  animation:toastIn 0.25s ease; border:1px solid transparent; box-shadow:var(--shadow-md);
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(10px) scale(0.96); } to { opacity:1; transform:none; } }
+.toast-lime   { background:var(--lime-light); border-color:#BBF7D0; color:#14532D; }
+.toast-amber  { background:var(--amber-light); border-color:var(--amber-mid); color:#92400E; }
+.toast-red    { background:var(--red-light); border-color:#FECACA; color:#991B1B; }
+.toast-navy   { background:var(--sky-light); border-color:#BAE6FD; color:#075985; }
+.toast-purple { background:var(--purple-light); border-color:rgba(124,58,237,0.3); color:#4C1D95; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; z-index:900; background:rgba(28,25,23,0.5); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; animation:fadeIn 0.18s ease; }
+.modal { background:var(--surface); border:1px solid var(--border2); border-radius:12px; width:520px; max-width:94vw; padding:24px; box-shadow:var(--shadow-lg); }
+.modal-title { font-family:var(--font-d); font-size:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:var(--navy); }
+.modal-sub { font-size:12.5px; color:var(--text-3); margin-bottom:18px; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
+
+/* ── LOG STYLES ─────────────────────────────────────────────────────── */
+.log-terminal {
+  background:#0D1117; border:1px solid #30363D;
+  border-radius:var(--r); padding:0; overflow:hidden;
+  font-family:var(--font-m); font-size:12px;
+}
+.log-terminal-header {
+  background:#161B22; border-bottom:1px solid #30363D;
+  padding:10px 16px; display:flex; align-items:center; gap:10px;
+}
+.log-dot { width:10px; height:10px; border-radius:50%; }
+.log-dot-red { background:#FF5F57; }
+.log-dot-amber { background:#FEBC2E; }
+.log-dot-green { background:#28C840; }
+.log-terminal-title { color:#8B949E; font-size:11px; margin-left:4px; }
+.log-output { padding:16px; max-height:420px; overflow-y:auto; }
+.log-line { display:flex; gap:12px; line-height:1.7; }
+.log-ts { color:#484F58; flex-shrink:0; font-size:11px; width:100px; }
+.log-info { color:#58A6FF; }
+.log-pass { color:#3FB950; }
+.log-warn { color:#D29922; }
+.log-fail { color:#F85149; }
+.log-dim  { color:#8B949E; }
+.log-cursor { display:inline-block; width:8px; height:14px; background:#58A6FF; animation:blink 1s step-end infinite; vertical-align:middle; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── PIPELINE ───────────────────────────────────────────────────────── */
+.pipeline-wrap {
+  background:var(--navy); border-radius:var(--r); padding:20px 24px;
+  overflow-x:auto; display:flex; align-items:center; gap:0; margin-bottom:20px;
+}
+.pipe-block {
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14);
+  border-radius:var(--r); padding:14px 18px; min-width:150px; flex-shrink:0;
+  cursor:pointer; transition:all 0.2s;
+}
+.pipe-block:hover { background:rgba(255,255,255,0.12); transform:translateY(-2px); }
+.pipe-block.done   { background:rgba(22,163,74,0.2); border-color:rgba(22,163,74,0.5); }
+.pipe-block.active { background:rgba(217,119,6,0.25); border-color:rgba(217,119,6,0.6); }
+.pipe-block.failed { background:rgba(220,38,38,0.2); border-color:rgba(220,38,38,0.5); }
+.pipe-block.pending{ background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+.pipe-icon { font-size:20px; margin-bottom:6px; }
+.pipe-name { font-family:var(--font-d); font-size:13px; font-weight:700; color:#FFF; text-transform:uppercase; letter-spacing:0.5px; }
+.pipe-sub  { font-family:var(--font-m); font-size:9.5px; color:rgba(255,255,255,0.5); margin-top:3px; }
+.pipe-time { font-family:var(--font-m); font-size:9px; color:#FCD34D; margin-top:6px; }
+.pipe-time.green { color:#6EE7B7; }
+.pipe-time.red   { color:#FCA5A5; }
+.pipe-arrow { flex-shrink:0; padding:0 10px; display:flex; align-items:center; font-size:18px; color:rgba(255,255,255,0.25); }
+.pipe-arrow.done   { color:var(--lime); }
+.pipe-arrow.active { color:var(--amber); }
+.pipe-arrow.failed { color:var(--red); }
+
+/* ── SQL BLOCK ──────────────────────────────────────────────────────── */
+.sql-block {
+  background:#0D1117; padding:16px; font-family:var(--font-m);
+  font-size:12px; line-height:1.8; overflow-x:auto; white-space:pre;
+  border-radius:0;
+}
+.sql-kw  { color:#FF7B72; }
+.sql-str { color:#A5D6FF; }
+.sql-num { color:#79C0FF; }
+.sql-cmt { color:#484F58; }
+
+/* ── RULE CARDS ─────────────────────────────────────────────────────── */
+.rule-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.rule-card {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden; cursor:pointer; transition:all 0.15s;
+  border-left:3px solid var(--border2);
+}
+.rule-card:hover { box-shadow:var(--shadow-md); }
+.rule-card.block { border-left-color:var(--navy); }
+.rule-card.warn  { border-left-color:var(--amber); }
+.rule-card.fail  { border-left-color:var(--red); }
+.rule-card.expanded .rule-detail { display:block; }
+.rule-header { display:flex; align-items:center; gap:10px; padding:12px 14px; }
+.rule-num { font-family:var(--font-d); font-size:24px; font-weight:800; color:var(--border2); line-height:1; width:28px; flex-shrink:0; }
+.rule-name { font-family:var(--font-d); font-size:14px; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:0.3px; flex:1; }
+.rule-logic { padding:0 14px 12px; font-size:11.5px; color:var(--text-3); line-height:1.5; }
+.rule-detail { display:none; padding:0 14px 14px; }
+.rule-check-row { display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-top:1px solid var(--border); font-size:11.5px; color:var(--text-2); line-height:1.5; }
+.rule-check-icon { flex-shrink:0; width:16px; }
+
+/* ── SEARCH BAR ─────────────────────────────────────────────────────── */
+.search-bar {
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:var(--r); padding:10px 16px; margin-bottom:20px;
+  box-shadow:var(--shadow);
+}
+.search-icon { color:var(--text-4); font-size:16px; flex-shrink:0; }
+.search-input {
+  flex:1; border:none; outline:none; background:transparent;
+  font-size:14px; font-family:var(--font-b); color:var(--text);
+}
+.search-input::placeholder { color:var(--text-4); }
+.search-filters { display:flex; gap:8px; align-items:center; border-left:1px solid var(--border); padding-left:12px; }
+
+/* ── CLAIM ROW DETAIL ───────────────────────────────────────────────── */
+.claim-row-expand { background:var(--surface2); border-bottom:1px solid var(--border); padding:16px 20px; display:none; }
+.claim-row-expand.open { display:block; animation:fadeIn 0.15s ease; }
+.dt-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--border); }
+.dt-row:last-child { border-bottom:none; }
+.dt-key { font-family:var(--font-m); font-size:10.5px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-3); }
+.dt-val { font-size:13px; font-weight:600; color:var(--text); text-align:right; }
+
+/* ── TABS ───────────────────────────────────────────────────────────── */
+.tab-bar { display:flex; gap:2px; margin-bottom:16px; border-bottom:2px solid var(--border); }
+.tab-btn {
+  padding:8px 16px; font-size:13px; font-weight:600; color:var(--text-3);
+  cursor:pointer; border-radius:6px 6px 0 0; margin-bottom:-2px;
+  border:1px solid transparent; border-bottom:2px solid transparent;
+  transition:all 0.15s; display:flex; align-items:center; gap:6px;
+}
+.tab-btn:hover { color:var(--text); background:var(--bg2); }
+.tab-btn.active { color:var(--navy); background:var(--surface); border-color:var(--border); border-bottom-color:var(--surface); }
+
+/* ── ALERT BANNER ───────────────────────────────────────────────────── */
+.alert-banner {
+  border-radius:var(--r); padding:12px 16px; margin-bottom:16px;
+  font-size:12.5px; line-height:1.7; border:1px solid;
+}
+.alert-amber { background:var(--amber-light); border-color:var(--amber-mid); color:#92400E; border-left:3px solid var(--amber); }
+.alert-red   { background:var(--red-light);   border-color:#FECACA;         color:#991B1B; border-left:3px solid var(--red); }
+.alert-lime  { background:var(--lime-light);  border-color:#BBF7D0;         color:#14532D; border-left:3px solid var(--lime); }
+.alert-purple{ background:var(--purple-light);border-color:rgba(124,58,237,0.25);color:#4C1D95;border-left:3px solid var(--purple); }
+.alert-navy  { background:var(--sky-light);   border-color:#BAE6FD;         color:#075985; border-left:3px solid var(--sky); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-left">
+    <div class="login-grid"></div>
+    <div class="login-brand">
+      <div class="login-logo">
+        <div class="login-logo-mark">💧</div>
+        BasinSync
+      </div>
+      <div class="login-portal-tag">🛡 SUPPORT PORTAL · INTERNAL ONLY</div>
+      <div class="login-tagline">Infrastructure Claims Management Platform</div>
+    </div>
+    <div class="login-hero">
+      <div class="login-hero-title">Claims<br/><em>Support</em><br/>Console</div>
+      <div class="login-hero-sub">Internal tooling for the BasinSync support team. Monitor live Azure Function pipelines, inspect validation logs, audit SQL outputs, and triage failed or stalled claim submissions across all vendors and projects.</div>
+    </div>
+    <div class="login-access-notice">
+      <strong>🔒 Restricted Access — Internal Personnel Only</strong>
+      This portal contains sensitive processing logs, SQL schema details, Azure infrastructure data, and full vendor claim records. Unauthorised access is prohibited and monitored.
+    </div>
+    <div class="login-stats">
+      <div>
+        <div class="login-stat-val">247</div>
+        <div class="login-stat-lbl">Claims processed<br/>this month</div>
+      </div>
+      <div>
+        <div class="login-stat-val">3</div>
+        <div class="login-stat-lbl">Failed pipelines<br/>needing triage</div>
+      </div>
+      <div>
+        <div class="login-stat-val">99.2%</div>
+        <div class="login-stat-lbl">Function success<br/>rate (30d)</div>
+      </div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-right-title">Support Sign In</div>
+    <div class="login-right-sub">Use your BasinSync internal Azure AD credentials</div>
+
+    <div class="login-internal-badge">
+      <strong>🛡 Internal Support Team Access</strong>
+      This portal is restricted to authorised BasinSync support staff. Your login, session activity, and all actions performed are fully audited.
+    </div>
+
+    <button class="sso-btn sso-btn-support" onclick="doLogin()">
+      <div class="sso-btn-icon">🪟</div>
+      Sign in with Microsoft (Internal)
+    </button>
+    <button class="sso-btn" onclick="doLogin()" style="background:#1B3A5C;margin-top:0;">
+      <div class="sso-btn-icon">🔐</div>
+      Sign in with BasinSync SSO
+    </button>
+
+    <div class="login-divider">
+      <div class="login-divider-line"></div>
+      <div class="login-divider-text">INTERNAL ONLY · NOT FOR VENDORS</div>
+      <div class="login-divider-line"></div>
+    </div>
+
+    <div class="login-help">
+      Access issues? Contact <a href="#"><span class="__cf_email__" data-cfemail="81e8f5acf2f4f1f1eef3f5c1e6f3e8e5f2f8efe2afe2eeecafe0f4">[email&#160;protected]</span></a><br/>
+      Vendor access? <a href="#">BasinSync Vendor Portal →</a>
+    </div>
+    <div class="login-footer">
+      <div class="login-footer-text">
+        BasinSync Infrastructure Claims Platform · Support Console v1.0<br/>
+        © 2026 BasinSync Pty Ltd · All actions in this portal are logged and audited.<br/>
+        For authorised internal use only. Misuse may result in disciplinary action.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREEN: PORTAL
+══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-portal" class="screen">
+  <div class="portal">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-logo">
+        <div class="topbar-logo-mark">💧</div>
+        Basin<em>Sync</em>
+      </div>
+      <div class="topbar-portal-tag">🛡 SUPPORT CONSOLE</div>
+      <div class="topbar-right">
+        <div class="topbar-env"><div class="env-dot"></div>PROD · AUS EAST</div>
+        <div class="topbar-notif" onclick="showToast('n','🔔','3 alerts: 2 failed pipelines, 1 stalled claim','amber')">
+          🔔<div class="notif-badge"></div>
+        </div>
+        <div class="topbar-user">
+          <div class="user-avatar">AC</div>
+          <div class="user-info">
+            <div class="user-name">Alex Chen</div>
+            <div class="user-role">SUPPORT · L2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBNAV -->
+    <div class="subnav">
+      <div class="subnav-item active" id="nav-dashboard" onclick="showPage('dashboard')">📊 Dashboard</div>
+      <div class="subnav-item" id="nav-claims" onclick="showPage('claims')">📋 Claims Monitor <span class="subnav-badge subnav-badge-amber" id="badge-claims">3</span></div>
+      <div class="subnav-item" id="nav-pipeline" onclick="showPage('pipeline')">⚡ Pipeline Inspector</div>
+      <div class="subnav-item" id="nav-logs" onclick="showPage('logs')">📋 Execution Logs</div>
+      <div class="subnav-item" id="nav-rules" onclick="showPage('rules')">🔍 Validation Rules</div>
+      <div class="subnav-item" id="nav-sql" onclick="showPage('sql')">🗄 SQL Audit</div>
+      <div class="subnav-right">
+        <button class="btn btn-ghost btn-sm" onclick="showToast('ref','🔄','Refreshing live data…','navy')">🔄 Refresh</button>
+        <button class="btn btn-red btn-sm" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- ══════════════════════════════════════════════════════════════
+           PAGE: DASHBOARD
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Support Dashboard</div>
+            <div class="psub">Live overview of claim processing health · Azure Functions status · Triage queue · <span id="dash-date" style="font-family:var(--font-m);"></span></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="showToast('ex','⬇','Generating shift report…','navy')">⬇ Export Report</button>
+            <button class="btn btn-primary btn-sm" onclick="showPage('claims')">View All Claims →</button>
+          </div>
+        </div>
+
+        <!-- HEALTH BANNER -->
+        <div class="alert-banner alert-amber" style="margin-bottom:20px;">
+          <strong>⚠️ 2 Failed Pipelines Require Triage</strong> —
+          Claims <span style="font-family:var(--font-m);">GS-2026-02-ABE-011</span> and <span style="font-family:var(--font-m);">GS-2026-02-FHG-008</span> have stalled at Function 2 (Transformation). Azure timeout suspected. <a href="#" onclick="showPage('claims');return false;" style="color:#92400E;font-weight:700;">Triage now →</a>
+        </div>
+
+        <!-- KPI STATS -->
+        <div class="grid4" style="margin-bottom:20px;">
+          <div class="stat-card navy">
+            <div class="stat-lbl">Claims This Month</div>
+            <div class="stat-val">247</div>
+            <div class="stat-sub">↑ 18 vs last month</div>
+          </div>
+          <div class="stat-card lime">
+            <div class="stat-lbl">Pipeline Success Rate</div>
+            <div class="stat-val" style="color:var(--lime);">99.2%</div>
+            <div class="stat-sub">244 / 247 clean runs</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-lbl">Failed / Stalled</div>
+            <div class="stat-val" style="color:var(--red);">3</div>
+            <div class="stat-sub">2 failed · 1 stalled</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-lbl">Avg Processing Time</div>
+            <div class="stat-val" style="color:var(--amber);">1.8s</div>
+            <div class="stat-sub">Fn1 + Fn2 combined</div>
+          </div>
+        </div>
+
+        <div class="grid21" style="margin-bottom:20px;">
+          <!-- FUNCTION HEALTH -->
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Azure Function Health — Last 24 Hours</div>
+                <div class="panel-sub">Function 1 (Validation) and Function 2 (Transformation) · Australia East region</div>
+              </div>
+              <span class="badge badge-lime">● LIVE</span>
+            </div>
+            <div class="panel-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+                  <div style="font-family:var(--font-d);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">🔍 Function 1 · Validation</div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Invocations today</span><span style="font-family:var(--font-m);font-weight:600;">247</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Success rate</span><span style="font-family:var(--font-m);color:var(--lime);font-weight:600;">100%</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Avg duration</span><span style="font-family:var(--font-m);">1,182ms</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+                    <span style="color:var(--text-3);">P99 duration</span><span style="font-family:var(--font-m);">2,840ms</span>
+                  </div>
+                  <div style="margin-top:10px;"><span class="badge badge-lime">✅ Healthy</span></div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+                  <div style="font-family:var(--font-d);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">⚙ Function 2 · Transform</div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Invocations today</span><span style="font-family:var(--font-m);font-weight:600;">244</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Success rate</span><span style="font-family:var(--font-m);color:var(--amber);font-weight:600;">98.8%</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Avg duration</span><span style="font-family:var(--font-m);">834ms</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+                    <span style="color:var(--text-3);">Failures (24h)</span><span style="font-family:var(--font-m);color:var(--red);font-weight:600;">3</span>
+                  </div>
+                  <div style="margin-top:10px;"><span class="badge badge-amber">⚠ Degraded</span></div>
+                </div>
+              </div>
+              <!-- Mini progress bars -->
+              <div style="margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;"><span style="color:var(--text-2);">Function 1 uptime</span><span style="font-family:var(--font-m);font-size:11px;color:var(--text-3);">100%</span></div>
+                <div style="height:5px;background:var(--bg2);border-radius:4px;"><div style="width:100%;height:100%;background:var(--lime);border-radius:4px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;"><span style="color:var(--text-2);">Function 2 uptime</span><span style="font-family:var(--font-m);font-size:11px;color:var(--text-3);">98.8%</span></div>
+                <div style="height:5px;background:var(--bg2);border-radius:4px;"><div style="width:98.8%;height:100%;background:var(--amber);border-radius:4px;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TRIAGE QUEUE -->
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Triage Queue</div>
+                <div class="panel-sub">Claims requiring immediate support action</div>
+              </div>
+              <span class="badge badge-red">3 OPEN</span>
+            </div>
+            <div class="panel-body" style="padding:0;">
+              <div style="padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''" onclick="loadClaimInspector('GS-2026-02-ABE-011')">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-family:var(--font-m);font-size:11.5px;font-weight:600;color:var(--navy);">GS-2026-02-ABE-011</span>
+                  <span class="badge badge-red">FN2 TIMEOUT</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px;">Abergeldie Contractors · PRJ-SW-WTP-MBR</div>
+                <div style="font-size:11.5px;color:var(--text-3);font-family:var(--font-m);">Stalled 14 min ago · Fn2 exceeded 10s timeout · retry pending</div>
+              </div>
+              <div style="padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''" onclick="loadClaimInspector('GS-2026-02-FHG-008')">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-family:var(--font-m);font-size:11.5px;font-weight:600;color:var(--navy);">GS-2026-02-FHG-008</span>
+                  <span class="badge badge-red">SQL WRITE FAIL</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px;">Fulton Hogan · PRJ-MW-WTP-PTA</div>
+                <div style="font-size:11.5px;color:var(--text-3);font-family:var(--font-m);">SQL transaction rollback · deadlock detected · needs manual review</div>
+              </div>
+              <div style="padding:12px 18px;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-family:var(--font-m);font-size:11.5px;font-weight:600;color:var(--navy);">GS-2026-02-AEC-005</span>
+                  <span class="badge badge-amber">STALLED · PM</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px;">GHD Advisory · PRJ-AW-CHP-002</div>
+                <div style="font-size:11.5px;color:var(--text-3);font-family:var(--font-m);">In PENDING_PM_REVIEW 8 days · PM unresponsive · SOPA risk</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY TABLE -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Recent Claim Processing Activity</div>
+              <div class="panel-sub">Last 10 claim submissions across all vendors and projects</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('claims')">View All →</button>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Claim ID</th>
+                  <th>Vendor</th>
+                  <th>Project</th>
+                  <th>Submitted</th>
+                  <th>Fn1</th>
+                  <th>Fn2</th>
+                  <th>Status</th>
+                  <th>Amount (ex GST)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr onclick="loadClaimInspector('GS-2026-02-LOR-012')">
+                  <td class="mono">GS-2026-02-LOR-012</td>
+                  <td>Laing O'Rourke</td>
+                  <td class="mono">PRJ-MW-WTP-PTA</td>
+                  <td class="muted">Today 11:42</td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-amber">PM REVIEW</span></td>
+                  <td style="font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$487,200</td>
+                  <td><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();loadClaimInspector('GS-2026-02-LOR-012')">Inspect</button></td>
+                </tr>
+                <tr onclick="loadClaimInspector('GS-2026-02-ABE-011')">
+                  <td class="mono" style="color:var(--red);">GS-2026-02-ABE-011</td>
+                  <td>Abergeldie Contractors</td>
+                  <td class="mono">PRJ-SW-WTP-MBR</td>
+                  <td class="muted">Today 11:28</td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-red">TIMEOUT</span></td>
+                  <td><span class="badge badge-red">FAILED</span></td>
+                  <td style="font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--text-3);">$312,400</td>
+                  <td><button class="btn btn-red btn-xs" onclick="event.stopPropagation();retriggerClaim('GS-2026-02-ABE-011')">Re-trigger</button></td>
+                </tr>
+                <tr onclick="loadClaimInspector('GS-2026-02-JHG-010')">
+                  <td class="mono">GS-2026-02-JHG-010</td>
+                  <td>John Holland</td>
+                  <td class="mono">PRJ-AW-CHP-002</td>
+                  <td class="muted">Today 10:55</td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-lime">APPROVED</span></td>
+                  <td style="font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$1,240,800</td>
+                  <td><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();loadClaimInspector('GS-2026-02-JHG-010')">Inspect</button></td>
+                </tr>
+                <tr onclick="loadClaimInspector('GS-2026-02-DWN-009')">
+                  <td class="mono">GS-2026-02-DWN-009</td>
+                  <td>Downer Group</td>
+                  <td class="mono">PRJ-YV-STP-003</td>
+                  <td class="muted">Today 09:12</td>
+                  <td><span class="badge badge-amber">⚠ WARN</span></td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-amber">PM REVIEW</span></td>
+                  <td style="font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--navy);">$228,550</td>
+                  <td><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();">Inspect</button></td>
+                </tr>
+                <tr onclick="loadClaimInspector('GS-2026-02-FHG-008')">
+                  <td class="mono" style="color:var(--red);">GS-2026-02-FHG-008</td>
+                  <td>Fulton Hogan</td>
+                  <td class="mono">PRJ-MW-WTP-PTA</td>
+                  <td class="muted">Yesterday 16:33</td>
+                  <td><span class="badge badge-lime">✅</span></td>
+                  <td><span class="badge badge-red">SQL FAIL</span></td>
+                  <td><span class="badge badge-red">FAILED</span></td>
+                  <td style="font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--text-3);">$675,000</td>
+                  <td><button class="btn btn-red btn-xs" onclick="event.stopPropagation();retriggerClaim('GS-2026-02-FHG-008')">Re-trigger</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /page-dashboard -->
+
+      <!-- ══════════════════════════════════════════════════════════════
+           PAGE: CLAIMS MONITOR
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="page" id="page-claims">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Claims Monitor</div>
+            <div class="psub">All vendor claim submissions · Search, filter, and inspect processing status across all projects</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="showToast('ex2','⬇','Exporting claims CSV…','navy')">⬇ Export CSV</button>
+            <button class="btn btn-purple btn-sm" onclick="showToast('az','⚡','Opening Azure Monitor…','purple')">⚡ Azure Monitor</button>
+          </div>
+        </div>
+
+        <!-- SEARCH + FILTER -->
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" placeholder="Search by Claim ID, vendor name, project code, amount…" oninput="filterClaimsTable(this.value)"/>
+          <div class="search-filters">
+            <select class="select-field" style="width:140px;padding:5px 10px;font-size:12px;" onchange="filterClaimsStatus(this.value)">
+              <option value="">All Statuses</option>
+              <option value="FAILED">Failed</option>
+              <option value="PM REVIEW">PM Review</option>
+              <option value="APPROVED">Approved</option>
+              <option value="WARN">Warning</option>
+            </select>
+            <select class="select-field" style="width:160px;padding:5px 10px;font-size:12px;">
+              <option>All Projects</option>
+              <option>PRJ-MW-WTP-PTA</option>
+              <option>PRJ-SW-WTP-MBR</option>
+              <option>PRJ-AW-CHP-002</option>
+              <option>PRJ-YV-STP-003</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- STATS ROW -->
+        <div class="grid4" style="margin-bottom:20px;">
+          <div class="stat-card navy" style="padding:12px 16px;cursor:pointer;" onclick="filterClaimsStatus('')">
+            <div class="stat-lbl">Total Claims</div>
+            <div class="stat-val" style="font-size:26px;">247</div>
+            <div class="stat-sub">This month</div>
+          </div>
+          <div class="stat-card red" style="padding:12px 16px;cursor:pointer;" onclick="filterClaimsStatus('FAILED')">
+            <div class="stat-lbl">Failed</div>
+            <div class="stat-val" style="font-size:26px;color:var(--red);">3</div>
+            <div class="stat-sub">Need triage</div>
+          </div>
+          <div class="stat-card amber" style="padding:12px 16px;cursor:pointer;" onclick="filterClaimsStatus('PM REVIEW')">
+            <div class="stat-lbl">Awaiting PM</div>
+            <div class="stat-val" style="font-size:26px;color:var(--amber);">41</div>
+            <div class="stat-sub">In PM review queue</div>
+          </div>
+          <div class="stat-card lime" style="padding:12px 16px;cursor:pointer;" onclick="filterClaimsStatus('APPROVED')">
+            <div class="stat-lbl">Approved</div>
+            <div class="stat-val" style="font-size:26px;color:var(--lime);">203</div>
+            <div class="stat-sub">Fully processed</div>
+          </div>
+        </div>
+
+        <!-- CLAIMS TABLE -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">All Claims</div>
+              <div class="panel-sub" id="claims-count">Showing 10 of 247 claims</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('col','🔧','Column settings coming soon','navy')">⚙ Columns</button>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <table class="tbl" id="claims-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Claim ID</th>
+                  <th>Vendor</th>
+                  <th>Project WBS</th>
+                  <th>Period</th>
+                  <th>Submitted</th>
+                  <th>Fn1</th>
+                  <th>Fn2</th>
+                  <th>SQL</th>
+                  <th>Status</th>
+                  <th>Amount ex GST</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="claims-tbody">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /page-claims -->
+
+      <!-- ══════════════════════════════════════════════════════════════
+           PAGE: PIPELINE INSPECTOR
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="page" id="page-pipeline">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Pipeline Inspector</div>
+            <div class="psub">Step-by-step Azure Function execution view for any claim · Click a pipeline block to jump to its logs</div>
+          </div>
+          <div class="btn-row">
+            <select class="select-field" style="width:200px;font-size:12px;padding:6px 10px;" id="pipeline-claim-select" onchange="loadPipelineClaim(this.value)">
+              <option value="GS-2026-02-LOR-012">GS-2026-02-LOR-012 · Laing O'Rourke</option>
+              <option value="GS-2026-02-ABE-011">GS-2026-02-ABE-011 · Abergeldie ⚠</option>
+              <option value="GS-2026-02-JHG-010">GS-2026-02-JHG-010 · John Holland</option>
+              <option value="GS-2026-02-FHG-008">GS-2026-02-FHG-008 · Fulton Hogan ⚠</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('rr','🔄','Refreshing pipeline status…','navy')">🔄 Refresh</button>
+            <button class="btn btn-red btn-sm" id="retrigger-btn" style="display:none;" onclick="retriggerClaim(document.getElementById('pipeline-claim-select').value)">⚡ Re-trigger Pipeline</button>
+          </div>
+        </div>
+
+        <!-- CLAIM CONTEXT STRIP -->
+        <div id="pipeline-context" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow);">
+          <div><div style="font-family:var(--font-m);font-size:10px;color:var(--text-4);margin-bottom:3px;">CLAIM ID</div><div style="font-family:var(--font-m);font-size:13px;font-weight:600;" id="pctx-id">GS-2026-02-LOR-012</div></div>
+          <div><div style="font-family:var(--font-m);font-size:10px;color:var(--text-4);margin-bottom:3px;">VENDOR</div><div style="font-size:13px;font-weight:600;" id="pctx-vendor">Laing O'Rourke</div></div>
+          <div><div style="font-family:var(--font-m);font-size:10px;color:var(--text-4);margin-bottom:3px;">PROJECT</div><div style="font-family:var(--font-m);font-size:12px;" id="pctx-project">PRJ-MW-WTP-PTA</div></div>
+          <div><div style="font-family:var(--font-m);font-size:10px;color:var(--text-4);margin-bottom:3px;">AMOUNT EX GST</div><div style="font-family:var(--font-d);font-size:16px;font-weight:800;color:var(--navy);" id="pctx-amount">$487,200</div></div>
+          <div><div style="font-family:var(--font-m);font-size:10px;color:var(--text-4);margin-bottom:3px;">SUBMITTED</div><div style="font-size:12.5px;" id="pctx-submitted">Today 11:42</div></div>
+          <div style="margin-left:auto;" id="pctx-status"><span class="badge badge-amber">PENDING PM REVIEW</span></div>
+        </div>
+
+        <!-- PIPELINE DIAGRAM -->
+        <div class="pipeline-wrap" id="pipeline-diagram">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- PIPELINE TABS -->
+        <div class="tab-bar" id="pipeline-tab-bar">
+          <div class="tab-btn active" id="ptab-fn1" onclick="switchPipelineTab('fn1')">🔍 Function 1 · Validation</div>
+          <div class="tab-btn" id="ptab-fn2" onclick="switchPipelineTab('fn2')">⚙ Function 2 · Transform</div>
+          <div class="tab-btn" id="ptab-log" onclick="switchPipelineTab('log')">📋 Execution Log</div>
+          <div class="tab-btn" id="ptab-sql" onclick="switchPipelineTab('sql')">🗄 SQL Output</div>
+          <div class="tab-btn" id="ptab-actions" onclick="switchPipelineTab('actions')">🔧 Support Actions</div>
+        </div>
+
+        <!-- TAB: FN1 VALIDATION RULES -->
+        <div id="ptab-content-fn1">
+          <div class="alert-banner alert-navy" style="margin-bottom:16px;">
+            <strong>Function 1 · Validation Engine</strong> — Runs synchronously before any data is written. If any BLOCK-level rule fails, Function 2 never fires. The vendor receives exact row/column/rule details within seconds.
+            <span style="float:right;font-family:var(--font-m);font-size:11px;" id="fn1-meta">Runtime: 1,247ms · 34 data rows · 9 rules · Azure Australia East</span>
+          </div>
+          <div class="rule-grid" id="fn1-rules-grid">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- TAB: FN2 TRANSFORM -->
+        <div id="ptab-content-fn2" style="display:none;">
+          <div class="alert-banner alert-navy" style="margin-bottom:16px;">
+            <strong>Function 2 · Transformation Engine</strong> — Only runs if Function 1 passes all BLOCK rules. Normalises data types, strips formatting, stamps audit metadata, then writes to Azure SQL.
+          </div>
+          <div class="grid2">
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">Transformation Steps</div><span class="badge badge-lime" id="fn2-status-badge">✅ Complete</span></div>
+              <div class="panel-body" style="padding:0;">
+                <div id="fn2-steps-list"><!-- injected --></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">Output Summary</div></div>
+              <div class="panel-body">
+                <div class="dt-row"><span class="dt-key">Rows processed</span><span class="dt-val" id="fn2-rows">34</span></div>
+                <div class="dt-row"><span class="dt-key">Tables written</span><span class="dt-val">3</span></div>
+                <div class="dt-row"><span class="dt-key">Rollback errors</span><span class="dt-val" id="fn2-rollbacks">0</span></div>
+                <div class="dt-row"><span class="dt-key">Advisory flags</span><span class="dt-val" id="fn2-flags" style="font-family:var(--font-m);font-size:11.5px;">SUBCON_NEW_ENTITY, RATE_ANOMALY_R07</span></div>
+                <div class="dt-row"><span class="dt-key">PM Routed To</span><span class="dt-val" id="fn2-pm">PM-0023 · Sarah Reinhardt</span></div>
+                <div class="dt-row"><span class="dt-key">SOPA Clock</span><span class="dt-val"><span class="badge badge-lime" id="fn2-sopa">Started</span></span></div>
+                <div class="dt-row"><span class="dt-key">Total runtime</span><span class="dt-val" id="fn2-runtime">834ms</span></div>
+                <div class="dt-row"><span class="dt-key">Azure Validation ID</span><span class="dt-val" style="font-family:var(--font-m);font-size:11px;" id="fn2-azid">AZF-VAL-20260305-08A2F</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: EXECUTION LOG -->
+        <div id="ptab-content-log" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:12.5px;color:var(--text-3);">Full Azure Function execution trace · Fn1 → Fn2 → SQL → PM routing</div>
+            <div class="btn-row">
+              <button class="btn btn-ghost btn-sm" onclick="replayPipelineLog()">▶ Replay</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('dl','⬇','Downloading log file…','navy')">⬇ Download Log</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('ai','🔗','Opening App Insights…','navy')">📊 App Insights</button>
+            </div>
+          </div>
+          <div class="log-terminal">
+            <div class="log-terminal-header">
+              <div class="log-dot log-dot-red"></div>
+              <div class="log-dot log-dot-amber"></div>
+              <div class="log-dot log-dot-green"></div>
+              <span class="log-terminal-title" id="log-terminal-title">gridsync-fn-execution · GS-2026-02-LOR-012 · 2026-03-05T11:42:01+11:00</span>
+            </div>
+            <div class="log-output" id="pipeline-log-output">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: SQL OUTPUT -->
+        <div id="ptab-content-sql" style="display:none;">
+          <div class="alert-banner alert-purple" style="margin-bottom:16px;">
+            <strong>🛡 Restricted — Support Portal Only</strong> This SQL output is never shown to vendors. It reflects exactly what was written to Azure SQL DB during Fn2 execution.
+          </div>
+          <div class="grid2">
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">claim_headers — 1 row</div></div>
+              <div class="panel-body" style="padding:0;">
+                <div class="sql-block" id="sql-headers-block"><!-- injected --></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">claim_lines — sample (34 total)</div></div>
+              <div class="panel-body" style="padding:0;">
+                <div class="sql-block" id="sql-lines-block"><!-- injected --></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:16px;">
+            <div class="panel-head"><div class="panel-title">validation_log — 9 rule results</div></div>
+            <div class="panel-body" style="padding:0;">
+              <div class="sql-block" id="sql-vallog-block"><!-- injected --></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: SUPPORT ACTIONS -->
+        <div id="ptab-content-actions" style="display:none;">
+          <div class="grid2" style="gap:16px;">
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">🔧 Pipeline Actions</div></div>
+              <div class="panel-body">
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Re-trigger Failed Pipeline</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-bottom:10px;">Re-run Fn1 + Fn2 from scratch for this claim. Use when a timeout or transient Azure error is the cause.</div>
+                  <button class="btn btn-red btn-sm" onclick="retriggerClaim(document.getElementById('pipeline-claim-select').value)">⚡ Re-trigger Pipeline</button>
+                </div>
+                <div class="divider"></div>
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Re-run Function 2 Only</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-bottom:10px;">Skip Fn1 validation — jump straight to Fn2 Transform. Only use if Fn1 result is confirmed clean.</div>
+                  <button class="btn btn-amber btn-sm" onclick="showToast('fn2re','⚙','Re-triggering Function 2…','amber')">⚙ Re-run Fn2</button>
+                </div>
+                <div class="divider"></div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Force SQL Rollback</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-bottom:10px;">Manually rollback any partial SQL write for this claim. Use with extreme caution.</div>
+                  <button class="btn btn-ghost btn-sm" onclick="openModal('Force SQL Rollback','This action is irreversible and will be fully audited.','<p style=\'font-size:13px;color:var(--text-2);line-height:1.7;\'>Are you sure you want to force a SQL rollback for this claim? This will delete any partial writes to <code>claim_headers</code>, <code>claim_lines</code>, and <code>validation_log</code>. The vendor will need to resubmit.</p>','<button class=\'btn btn-ghost btn-sm\' onclick=\'closeModalDirect()\'>Cancel</button><button class=\'btn btn-red btn-sm\' onclick=\'closeModalDirect();showToast(\'rb\',\'🗄\',\'SQL rollback executed · Claim reset to PENDING_SUBMISSION\',\'red\')\'>Confirm Rollback</button>')">🗄 Force Rollback</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div class="panel-title">📨 Escalation Actions</div></div>
+              <div class="panel-body">
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Notify Vendor of Processing Failure</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-bottom:10px;">Send automated email to vendor advising of the technical failure and expected resolution time.</div>
+                  <button class="btn btn-primary btn-sm" onclick="showToast('vn','📧','Vendor notification sent · ETA 2 hours','lime')">📧 Notify Vendor</button>
+                </div>
+                <div class="divider"></div>
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Escalate to PM — SOPA Risk</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-bottom:10px;">Flag this claim to the assigned PM as at risk of breaching SOPA response deadlines.</div>
+                  <button class="btn btn-amber btn-sm" onclick="showToast('pm','⚠️','PM escalation sent · SOPA risk flag added','amber')">⚠️ Escalate to PM</button>
+                </div>
+                <div class="divider"></div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Add Support Note</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-bottom:10px;">Add an internal note to this claim's audit trail visible only to support staff.</div>
+                  <textarea class="textarea-field" style="height:70px;margin-bottom:8px;" placeholder="Internal note — will be logged with your name and timestamp…" id="support-note-text"></textarea>
+                  <button class="btn btn-ghost btn-sm" onclick="addSupportNote()">💬 Add Note</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-pipeline -->
+
+      <!-- ══════════════════════════════════════════════════════════════
+           PAGE: EXECUTION LOGS (All Claims)
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="page" id="page-logs">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Execution Logs</div>
+            <div class="psub">Searchable log stream across all claim processing runs · Filter by claim, vendor, function, or outcome</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="showToast('ldl','⬇','Preparing log export…','navy')">⬇ Export Logs</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('lai','📊','Opening App Insights…','navy')">📊 App Insights</button>
+          </div>
+        </div>
+
+        <div class="grid3" style="margin-bottom:16px;">
+          <select class="select-field" style="font-size:12px;padding:8px 12px;">
+            <option>All Claims</option>
+            <option>GS-2026-02-LOR-012</option>
+            <option>GS-2026-02-ABE-011</option>
+            <option>GS-2026-02-JHG-010</option>
+            <option>GS-2026-02-FHG-008</option>
+          </select>
+          <select class="select-field" style="font-size:12px;padding:8px 12px;">
+            <option>All Functions</option>
+            <option>Function 1 (Validation)</option>
+            <option>Function 2 (Transform)</option>
+            <option>SQL Write</option>
+            <option>PM Routing</option>
+          </select>
+          <select class="select-field" style="font-size:12px;padding:8px 12px;">
+            <option>All Outcomes</option>
+            <option>PASS</option>
+            <option>WARN</option>
+            <option>FAIL</option>
+            <option>TIMEOUT</option>
+          </select>
+        </div>
+
+        <div class="log-terminal">
+          <div class="log-terminal-header">
+            <div class="log-dot log-dot-red"></div>
+            <div class="log-dot log-dot-amber"></div>
+            <div class="log-dot log-dot-green"></div>
+            <span class="log-terminal-title">gridsync-fn-all-claims · live tail · 2026-03-05 · Australia East</span>
+            <span style="margin-left:auto;font-size:11px;color:#3FB950;">● LIVE</span>
+          </div>
+          <div class="log-output" style="max-height:520px;">
+            <div class="log-line"><span class="log-ts">11:42:03.823</span><span class="log-pass">[EXP-1192][COMPLETE] Fn1+Fn2 success · 1,822ms · PENDING_PM_REVIEW · AZF-VAL-20260305-1192</span></div>
+            <div class="log-line"><span class="log-ts">11:42:01.001</span><span class="log-info">[EXP-1192][FN1] Invocation start · vendorId=LOR-0019 · 34 rows</span></div>
+            <div class="log-line"><span class="log-ts">11:41:58.000</span><span class="log-dim">[EXP-1192][INGEST] File received · BasinSync_ProgressClaim_Template_v1.0.xlsx · 47KB</span></div>
+            <div class="log-line"><span class="log-ts">11:28:17.009</span><span class="log-fail">[EXP-1191][FN2] TIMEOUT · execution exceeded 10,000ms · function killed</span></div>
+            <div class="log-line"><span class="log-ts">11:28:06.881</span><span class="log-warn">[EXP-1191][FN2] SQL write slow · 4,200ms elapsed · awaiting lock release</span></div>
+            <div class="log-line"><span class="log-ts">11:28:01.440</span><span class="log-info">[EXP-1191][FN2] Invocation start · 28 rows · transformation begin</span></div>
+            <div class="log-line"><span class="log-ts">11:27:58.220</span><span class="log-pass">[EXP-1191][FN1] PASS · all 9 rules satisfied · 1,102ms</span></div>
+            <div class="log-line"><span class="log-ts">11:27:55.001</span><span class="log-info">[EXP-1191][FN1] Invocation start · vendorId=ACE-0047 · 28 rows</span></div>
+            <div class="log-line"><span class="log-ts">10:55:44.812</span><span class="log-pass">[EXP-1190][COMPLETE] Fn1+Fn2 success · 1,604ms · APPROVED · AZF-VAL-20260305-1190</span></div>
+            <div class="log-line"><span class="log-ts">10:55:42.001</span><span class="log-info">[EXP-1190][FN1] Invocation start · vendorId=JHL-0031 · 52 rows</span></div>
+            <div class="log-line"><span class="log-ts">09:12:33.501</span><span class="log-warn">[EXP-1189][FN1] WARN · Rule 04 MONITOR FLAG · GreenPipe Pty Ltd · entity age 2 months</span></div>
+            <div class="log-line"><span class="log-ts">09:12:31.001</span><span class="log-info">[EXP-1189][FN1] Invocation start · vendorId=DWN-0008 · 21 rows</span></div>
+            <div class="log-line"><span class="log-ts" style="color:#F85149;">Yesterday</span><span class="log-fail">[EXP-1188][FN2] SQL DEADLOCK · transaction rolled back · claim_lines write failed</span></div>
+            <div class="log-line"><span class="log-ts">16:33:44.003</span><span class="log-warn">[EXP-1188][FN2] SQL deadlock detected on claim_lines · waiting for lock</span></div>
+            <div class="log-line"><span class="log-ts">16:33:41.110</span><span class="log-info">[EXP-1188][FN2] Opening SQL transaction · writing claim_headers</span></div>
+            <div class="log-line"><span class="log-ts">16:33:38.002</span><span class="log-pass">[EXP-1188][FN1] PASS · all 9 rules satisfied · 1,334ms</span></div>
+            <div class="log-line"><span class="log-ts"> </span><span class="log-cursor"></span></div>
+          </div>
+        </div>
+      </div><!-- /page-logs -->
+
+      <!-- ══════════════════════════════════════════════════════════════
+           PAGE: VALIDATION RULES
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="page" id="page-rules">
+        <div class="ph">
+          <div>
+            <div class="ptitle">Validation Rules Reference</div>
+            <div class="psub">All 9 Function 1 validation rules · Logic, thresholds, and pass/fail conditions · Internal reference only</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="showToast('rexp','📄','Opening rule specification doc…','navy')">📄 Rule Spec Doc</button>
+          </div>
+        </div>
+
+        <div class="alert-banner alert-purple" style="margin-bottom:20px;">
+          <strong>🛡 Internal Reference Only</strong> — Vendors see only pass/fail outcomes and error messages, not the underlying rule logic or thresholds. Do not share this page or its contents externally.
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="all-rules-grid">
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">01</div><div class="rule-name">Schema Integrity</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">18 mandatory columns present · correct data types · no blank mandatory cells · file format .xlsx confirmed</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>All 18 mandatory columns (A–V) must be present in exact order</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Column E (Capex/Opex): all values must be in [CAP, OPX], no nulls</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Column M (This Claim %): numeric, range 0.00–1.00</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>File extension must be .xlsx · MIME: application/vnd.openxmlformats</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>CLAIM_HEADER tab must be present · Vendor Declaration = TRUE</div>
+            </div>
+          </div>
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">02</div><div class="rule-name">WBS Verification</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">Every WBS code in Column B must exist in SAP as an active Level 4 WBS element under the vendor's contracted project</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Live SAP API call per unique WBS code in submission</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>WBS must be Level 4 work package — Level 3 or above = BLOCK</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>vendorId in Azure AD must match contract record for the project WBS</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Project status must not be Closed or Suspended · billing block must not be set</div>
+            </div>
+          </div>
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">03</div><div class="rule-name">Vendor ABN — Primary</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">Primary vendor ABN validated live against ATO ABR API · entity name cross-matched with Azure AD vendorCompany attribute</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>ABN format: 11 digits · passes ABN algorithm checksum (modulus 89)</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>ATO ABR API: entity must be Active and GST Registered</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Entity name from ABR must match Azure AD vendorCompany field exactly (case-insensitive)</div>
+            </div>
+          </div>
+
+          <div class="rule-card warn" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">04</div><div class="rule-name">Sub-contractor ABN</div><div><span class="badge badge-amber">WARN</span></div></div>
+            <div class="rule-logic">All sub-contractor ABNs in Column R checked via ATO ABR API · new entities flagged for PM awareness</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Same ABN checks as Rule 03 applied to each sub-contractor</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>MONITOR FLAG if entity registration age &lt; 6 months</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Not a BLOCK — valid new entities are permitted. PM sees advisory note.</div>
+            </div>
+          </div>
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">05</div><div class="rule-name">GST Calculations</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">Column P = Column O × 0.10 · Column Q = Column O + Column P · exempt category check</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Tolerance: ±$0.01 per row (rounding allowance)</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>GST-exempt categories checked against master exempt list</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Any GST mismatch beyond tolerance = BLOCK with row/column reference returned</div>
+            </div>
+          </div>
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">06</div><div class="rule-name">Cumulative % Cap</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">Prev Claimed % + This Claim % must not exceed 100% for any WBS line item</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Col N (Prev Claimed %) + Col M (This Claim %) ≤ 1.0000 per row</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Lookback: previous claims for same WBS fetched from claim_lines table</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Over-claim = BLOCK with specific row and calculated overage returned</div>
+            </div>
+          </div>
+
+          <div class="rule-card warn" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">07</div><div class="rule-name">Rate Anomaly Detection</div><div><span class="badge badge-amber">WARN</span></div></div>
+            <div class="rule-logic">Unit rates in Column J compared against contracted schedule of rates + ±15% tolerance band</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Contract rate fetched from SAP contract record for each WBS/cost element pair</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>MONITOR FLAG if submitted rate deviates &gt;15% from contracted rate</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Not a BLOCK — rate changes may be legitimately approved. PM sees flag + deviation %.</div>
+            </div>
+          </div>
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">08</div><div class="rule-name">Duplicate Submission</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">Same vendor + project + claim period cannot be submitted twice · deduplication by hash</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Hash of vendorId + projectWBS + claimPeriod checked against claim_headers</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Existing claim in any non-rejected status = BLOCK</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Vendor is shown the existing claim ID and its current status</div>
+            </div>
+          </div>
+
+          <div class="rule-card block" onclick="toggleRule(this)">
+            <div class="rule-header"><div class="rule-num">09</div><div class="rule-name">SOPA Window Check</div><div><span class="badge badge-navy">BLOCK</span></div></div>
+            <div class="rule-logic">Claim submission must fall within the valid SOPA submission window for the reference period</div>
+            <div class="rule-detail">
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Submission window: 1st–last business day of the month following the claim reference month</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Early submission: BLOCK with next window open date returned</div>
+              <div class="rule-check-row"><span class="rule-check-icon">📋</span>Late submission: WARN only — SOPA does not prevent late claims, but flags for PM awareness</div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /page-rules -->
+
+      <!-- ══════════════════════════════════════════════════════════════
+           PAGE: SQL AUDIT
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="page" id="page-sql">
+        <div class="ph">
+          <div>
+            <div class="ptitle">SQL Audit</div>
+            <div class="psub">Azure SQL DB write audit · Browse claim_headers, claim_lines, and validation_log across all claims</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="showToast('sqlex','⬇','Preparing SQL audit export…','navy')">⬇ Export SQL</button>
+            <button class="btn btn-purple btn-sm" onclick="showToast('ssms','🗄','Opening Azure SQL portal…','purple')">🗄 Azure SQL Portal</button>
+          </div>
+        </div>
+
+        <div class="alert-banner alert-purple" style="margin-bottom:20px;">
+          <strong>🛡 Support Portal Only</strong> — This SQL audit view is restricted to support staff. Table schemas, column names, and raw data are never exposed to vendors or project managers.
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-btn active" id="sqltab-headers" onclick="switchSqlTab('headers')">claim_headers</div>
+          <div class="tab-btn" id="sqltab-lines" onclick="switchSqlTab('lines')">claim_lines</div>
+          <div class="tab-btn" id="sqltab-vallog" onclick="switchSqlTab('vallog')">validation_log</div>
+          <div class="tab-btn" id="sqltab-schema" onclick="switchSqlTab('schema')">Schema Reference</div>
+        </div>
+
+        <div id="sqltab-content-headers">
+          <div class="panel">
+            <div class="panel-head">
+              <div><div class="panel-title">claim_headers</div><div class="panel-sub">One row per claim submission · 247 rows this month</div></div>
+              <div class="btn-row">
+                <input class="input-field" style="width:200px;padding:6px 10px;font-size:12px;" placeholder="Filter by claim ID…"/>
+                <button class="btn btn-ghost btn-sm" onclick="showToast('qr','📋','Running query…','navy')">Run Query</button>
+              </div>
+            </div>
+            <div class="panel-body" style="padding:0;overflow-x:auto;">
+              <table class="tbl" style="min-width:900px;">
+                <thead>
+                  <tr>
+                    <th>claim_id</th><th>vendor_id</th><th>project_wbs</th><th>claim_period</th>
+                    <th>claim_status</th><th>total_ex_gst</th><th>total_inc_gst</th><th>pm_id</th><th>advisory_flags</th><th>azure_validation_id</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="mono">GS-2026-02-LOR-012</td><td class="mono">LOR-0019</td><td class="mono">PRJ-MW-WTP-PTA</td><td class="mono">2026-02</td>
+                    <td><span class="badge badge-amber">PM_REVIEW</span></td>
+                    <td style="font-family:var(--font-d);font-weight:700;color:var(--navy);">$487,200</td>
+                    <td style="font-family:var(--font-d);">$535,920</td>
+                    <td class="mono">PM-0023</td><td class="mono" style="font-size:10.5px;">RATE_ANOMALY_R07</td><td class="mono" style="font-size:10px;">AZF-VAL-20260305-1192</td>
+                  </tr>
+                  <tr>
+                    <td class="mono" style="color:var(--red);">GS-2026-02-ABE-011</td><td class="mono">ACE-0047</td><td class="mono">PRJ-SW-WTP-MBR</td><td class="mono">2026-02</td>
+                    <td><span class="badge badge-red">FAILED</span></td>
+                    <td class="muted">—</td><td class="muted">—</td>
+                    <td class="mono muted">—</td><td class="mono muted">—</td><td class="mono" style="font-size:10px;">AZF-VAL-20260305-1191</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">GS-2026-02-JHG-010</td><td class="mono">JHL-0031</td><td class="mono">PRJ-AW-CHP-002</td><td class="mono">2026-02</td>
+                    <td><span class="badge badge-lime">APPROVED</span></td>
+                    <td style="font-family:var(--font-d);font-weight:700;color:var(--navy);">$1,240,800</td>
+                    <td style="font-family:var(--font-d);">$1,364,880</td>
+                    <td class="mono">PM-0018</td><td class="mono muted">—</td><td class="mono" style="font-size:10px;">AZF-VAL-20260305-1190</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">GS-2026-02-DWN-009</td><td class="mono">DWN-0008</td><td class="mono">PRJ-YV-STP-003</td><td class="mono">2026-02</td>
+                    <td><span class="badge badge-amber">PM_REVIEW</span></td>
+                    <td style="font-family:var(--font-d);font-weight:700;color:var(--navy);">$228,550</td>
+                    <td style="font-family:var(--font-d);">$251,405</td>
+                    <td class="mono">PM-0041</td><td class="mono" style="font-size:10.5px;">SUBCON_NEW_ENTITY</td><td class="mono" style="font-size:10px;">AZF-VAL-20260305-1189</td>
+                  </tr>
+                  <tr>
+                    <td class="mono" style="color:var(--red);">GS-2026-02-FHG-008</td><td class="mono">FHG-0055</td><td class="mono">PRJ-MW-WTP-PTA</td><td class="mono">2026-02</td>
+                    <td><span class="badge badge-red">FAILED</span></td>
+                    <td class="muted">—</td><td class="muted">—</td>
+                    <td class="mono muted">—</td><td class="mono muted">—</td><td class="mono" style="font-size:10px;">AZF-VAL-20260305-1188</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="sqltab-content-lines" style="display:none;">
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">claim_lines</div><div class="panel-sub">Line-item detail · one row per WBS/cost element · filter by claim ID to view</div></div>
+            <div class="panel-body" style="padding:0;">
+              <div class="sql-block">
+<span class="sql-cmt">-- Sample: claim_lines for GS-2026-02-LOR-012 (showing 3 of 34 rows)</span>
+<span class="sql-kw">SELECT</span> line_id, claim_id, wbs_element, sap_cost_element,
+       capex_opex_flag, description, uom, contract_qty,
+       contract_rate, prev_claimed_pct, this_claim_pct,
+       this_claim_amt_ex, gst_amt, this_claim_amt_inc
+<span class="sql-kw">FROM</span>   claim_lines
+<span class="sql-kw">WHERE</span>  claim_id = <span class="sql-str">'GS-2026-02-LOR-012'</span>
+<span class="sql-kw">ORDER BY</span> line_id;
+
+<span class="sql-cmt">-- Results (3 of 34 shown):</span>
+<span class="sql-cmt">-- GS-2026-02-LOR-012-001 | PRJ-MW-WTP-PTA.CIV.WP-001 | 600100 | CAP | Bulk earthworks — AWRC Stage 1 | m3 | 12500 | 85.00 | 0.45 | 0.15 | 159,375 | 15,937.50 | 175,312.50</span>
+<span class="sql-cmt">-- GS-2026-02-LOR-012-007 | PRJ-MW-WTP-PTA.MEC.WP-001 | 600200 | CAP | Crane hire — 50t              | hrs|    80 |4800.00| 0.00 | 0.20 |  76,800 |  7,680.00 |  84,480.00</span>
+<span class="sql-cmt">-- GS-2026-02-LOR-012-014 | PRJ-MW-WTP-PTA.ELE.WP-002 | 600300 | CAP | HV cable installation        | lm |   420 |  92.50| 0.30 | 0.10 |  38,850 |  3,885.00 |  42,735.00</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="sqltab-content-vallog" style="display:none;">
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">validation_log</div><div class="panel-sub">One row per rule result per claim · 9 rows per successful Fn1 run</div></div>
+            <div class="panel-body" style="padding:0;overflow-x:auto;">
+              <table class="tbl" style="min-width:800px;">
+                <thead>
+                  <tr><th>log_id</th><th>claim_id</th><th>rule_num</th><th>rule_name</th><th>result</th><th>detail</th><th>runtime_ms</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="mono">VL-1192-01</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">01</td><td>Schema Integrity</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">18 cols · .xlsx · declaration TRUE</td><td class="mono">142ms</td></tr>
+                  <tr><td class="mono">VL-1192-02</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">02</td><td>WBS Verification</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">34 WBS codes validated via SAP API</td><td class="mono">388ms</td></tr>
+                  <tr><td class="mono">VL-1192-03</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">03</td><td>Vendor ABN Primary</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">ABN 39 132 081 039 · Active · GST reg</td><td class="mono">211ms</td></tr>
+                  <tr><td class="mono">VL-1192-04</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">04</td><td>Sub-contractor ABN</td><td><span class="badge badge-amber">WARN</span></td><td class="muted" style="font-size:11.5px;">GreenPipe Pty Ltd · entity age 2 months</td><td class="mono">198ms</td></tr>
+                  <tr><td class="mono">VL-1192-05</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">05</td><td>GST Calculations</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">34/34 rows correct · ±$0.01 tolerance</td><td class="mono">88ms</td></tr>
+                  <tr><td class="mono">VL-1192-06</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">06</td><td>Cumulative % Cap</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">No line exceeds 100% cumulative</td><td class="mono">95ms</td></tr>
+                  <tr><td class="mono">VL-1192-07</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">07</td><td>Rate Anomaly</td><td><span class="badge badge-amber">WARN</span></td><td class="muted" style="font-size:11.5px;">Row 7 crane hire +22% above contract rate</td><td class="mono">74ms</td></tr>
+                  <tr><td class="mono">VL-1192-08</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">08</td><td>Duplicate Submission</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">No prior claim found for period 2026-02</td><td class="mono">51ms</td></tr>
+                  <tr><td class="mono">VL-1192-09</td><td class="mono">GS-2026-02-LOR-012</td><td class="mono">09</td><td>SOPA Window</td><td><span class="badge badge-lime">PASS</span></td><td class="muted" style="font-size:11.5px;">Within 2024-12 submission window</td><td class="mono">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="sqltab-content-schema" style="display:none;">
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">Schema Reference</div><div class="panel-sub">Azure SQL DB table definitions · BasinSync Claims DB · Australia East</div></div>
+            <div class="panel-body" style="padding:0;">
+              <div class="sql-block">
+<span class="sql-cmt">-- BasinSync Claims Database · Schema v1.0</span>
+
+<span class="sql-kw">CREATE TABLE</span> claim_headers (
+  claim_id            <span class="sql-str">NVARCHAR(20)</span>    <span class="sql-kw">PRIMARY KEY</span>,
+  vendor_id           <span class="sql-str">NVARCHAR(10)</span>    <span class="sql-kw">NOT NULL</span>,
+  project_wbs         <span class="sql-str">NVARCHAR(30)</span>    <span class="sql-kw">NOT NULL</span>,
+  claim_period        <span class="sql-str">NVARCHAR(7)</span>     <span class="sql-kw">NOT NULL</span>,   <span class="sql-cmt">-- YYYY-MM</span>
+  submission_ts       <span class="sql-str">DATETIMEOFFSET</span>  <span class="sql-kw">NOT NULL</span>,
+  sopa_deadline       <span class="sql-str">DATETIMEOFFSET</span>,
+  claim_status        <span class="sql-str">NVARCHAR(30)</span>    <span class="sql-kw">NOT NULL</span>,
+  total_ex_gst        <span class="sql-str">DECIMAL(14,2)</span>,
+  total_gst           <span class="sql-str">DECIMAL(14,2)</span>,
+  total_inc_gst       <span class="sql-str">DECIMAL(14,2)</span>,
+  azure_validation_id <span class="sql-str">NVARCHAR(30)</span>,
+  pm_id               <span class="sql-str">NVARCHAR(10)</span>,
+  advisory_flags      <span class="sql-str">NVARCHAR(200)</span>
+);
+
+<span class="sql-kw">CREATE TABLE</span> claim_lines (
+  line_id             <span class="sql-str">NVARCHAR(25)</span>    <span class="sql-kw">PRIMARY KEY</span>,
+  claim_id            <span class="sql-str">NVARCHAR(20)</span>    <span class="sql-kw">REFERENCES</span> claim_headers(claim_id),
+  wbs_element         <span class="sql-str">NVARCHAR(50)</span>    <span class="sql-kw">NOT NULL</span>,
+  sap_cost_element    <span class="sql-str">INT</span>,
+  capex_opex_flag     <span class="sql-str">NVARCHAR(3)</span>     <span class="sql-kw">CHECK</span> (capex_opex_flag <span class="sql-kw">IN</span> (<span class="sql-str">'CAP'</span>,<span class="sql-str">'OPX'</span>)),
+  description         <span class="sql-str">NVARCHAR(200)</span>,
+  uom                 <span class="sql-str">NVARCHAR(10)</span>,
+  contract_qty        <span class="sql-str">DECIMAL(14,3)</span>,
+  contract_rate       <span class="sql-str">DECIMAL(14,2)</span>,
+  prev_claimed_pct    <span class="sql-str">DECIMAL(5,4)</span>,
+  this_claim_pct      <span class="sql-str">DECIMAL(5,4)</span>,
+  this_claim_amt_ex   <span class="sql-str">DECIMAL(14,2)</span>,
+  gst_amt             <span class="sql-str">DECIMAL(14,2)</span>,
+  this_claim_amt_inc  <span class="sql-str">DECIMAL(14,2)</span>
+);
+
+<span class="sql-kw">CREATE TABLE</span> validation_log (
+  log_id              <span class="sql-str">NVARCHAR(15)</span>    <span class="sql-kw">PRIMARY KEY</span>,
+  claim_id            <span class="sql-str">NVARCHAR(20)</span>    <span class="sql-kw">REFERENCES</span> claim_headers(claim_id),
+  rule_num            <span class="sql-str">TINYINT</span>,
+  rule_name           <span class="sql-str">NVARCHAR(50)</span>,
+  result              <span class="sql-str">NVARCHAR(10)</span>    <span class="sql-kw">CHECK</span> (result <span class="sql-kw">IN</span> (<span class="sql-str">'PASS'</span>,<span class="sql-str">'WARN'</span>,<span class="sql-str">'FAIL'</span>)),
+  detail              <span class="sql-str">NVARCHAR(500)</span>,
+  runtime_ms          <span class="sql-str">INT</span>
+);</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /page-sql -->
+
+    </div><!-- /main -->
+  </div><!-- /portal -->
+</div><!-- /screen-portal -->
+
+<!-- TOAST -->
+<div id="toastWrap"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div id="modal-content"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── TEXTAREA FIELD CSS (injected here for completeness) ────────────────
+const styleExtra = document.createElement('style');
+styleExtra.textContent = `.textarea-field{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:var(--font-b);outline:none;resize:vertical;min-height:80px;transition:border-color 0.15s;}.textarea-field:focus{border-color:var(--navy2);box-shadow:0 0 0 3px var(--navy-dim);}`;
+document.head.appendChild(styleExtra);
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function showToast(id, icon, msg, type='navy', duration=3500) {
+  const wrap = document.getElementById('toastWrap');
+  const old = document.getElementById('toast-'+id);
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'toast-'+id;
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, duration);
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────
+function doLogin() {
+  showToast('login','🔐','Authenticating with Azure AD…','purple');
+  setTimeout(() => {
+    document.getElementById('screen-login').classList.remove('active');
+    document.getElementById('screen-portal').classList.add('active');
+    showToast('welcome','🛡','Welcome, Alex Chen · Support Engineer · Session logged','purple',4000);
+    initPortal();
+  }, 1200);
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────
+function openModal(title, sub, content, actions) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = sub;
+  document.getElementById('modal-content').innerHTML = content;
+  document.getElementById('modal-actions').innerHTML = actions;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subnav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+}
+
+function doLogout() {
+  showToast('lo','🔓','Signing out…','navy');
+  setTimeout(() => {
+    document.getElementById('screen-portal').classList.remove('active');
+    document.getElementById('screen-login').classList.add('active');
+  }, 800);
+}
+
+// ── PORTAL INIT ───────────────────────────────────────────────────────
+function initPortal() {
+  initSupportDates();
+  const now = new Date();
+  const el = document.getElementById('dash-date');
+  if (el) el.textContent = now.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}) + ' · ' + now.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  loadPipelineClaim('GS-2026-02-LOR-012');
+  renderFn1Rules();
+  renderFn2Steps();
+  renderPipelineLog('GS-2026-02-LOR-012');
+  renderSqlBlocks('GS-2026-02-LOR-012');
+}
+
+// ── CLAIMS DATA ───────────────────────────────────────────────────────
+const claimsData = [
+  { id:'GS-2026-02-LOR-012', vendor:"Laing O'Rourke",        project:'PRJ-MW-WTP-PTA', period:'__PERIOD__', submitted:'Today 11:42',    fn1:'pass',  fn2:'pass',    sql:'pass',  status:'PM REVIEW', amount:'$487,200',   amtRaw:487200 },
+  { id:'GS-2026-02-ABE-011', vendor:'Abergeldie Contractors', project:'PRJ-SW-WTP-MBR', period:'__PERIOD__', submitted:'Today 11:28',    fn1:'pass',  fn2:'timeout', sql:'fail',  status:'FAILED',    amount:'$312,400',   amtRaw:312400 },
+  { id:'GS-2026-02-JHG-010', vendor:'John Holland',           project:'PRJ-AW-CHP-002', period:'__PERIOD__', submitted:'Today 10:55',    fn1:'pass',  fn2:'pass',    sql:'pass',  status:'APPROVED',  amount:'$1,240,800', amtRaw:1240800 },
+  { id:'GS-2026-02-DWN-009', vendor:'Downer Group',           project:'PRJ-YV-STP-003', period:'__PERIOD__', submitted:'Today 09:12',    fn1:'warn',  fn2:'pass',    sql:'pass',  status:'PM REVIEW', amount:'$228,550',   amtRaw:228550 },
+  { id:'GS-2026-02-FHG-008', vendor:'Fulton Hogan',           project:'PRJ-MW-WTP-PTA', period:'__PERIOD__', submitted:'Yesterday',     fn1:'pass',  fn2:'sqlfail', sql:'fail',  status:'FAILED',    amount:'$675,000',   amtRaw:675000 },
+  { id:'GS-2026-02-GHD-007', vendor:'GHD Advisory',           project:'PRJ-AW-CHP-002', period:'__PERIOD__', submitted:'Yesterday',     fn1:'pass',  fn2:'pass',    sql:'pass',  status:'PM REVIEW', amount:'$94,500',    amtRaw:94500 },
+  { id:'GS-2026-02-WSP-006', vendor:'WSP Australia',          project:'PRJ-YV-STP-003', period:'__PERIOD__', submitted:'2 days ago',    fn1:'pass',  fn2:'pass',    sql:'pass',  status:'APPROVED',  amount:'$330,200',   amtRaw:330200 },
+  { id:'GS-2026-02-AEC-005', vendor:'AECOM',                  project:'PRJ-AW-CHP-002', period:'__PERIOD__', submitted:'2 days ago',    fn1:'warn',  fn2:'pass',    sql:'pass',  status:'PM REVIEW', amount:'$512,800',   amtRaw:512800 },
+  { id:'GS-2026-02-CPB-004', vendor:'CPB Contractors',        project:'PRJ-MW-WTP-PTA', period:'__PERIOD__', submitted:'3 days ago',    fn1:'pass',  fn2:'pass',    sql:'pass',  status:'APPROVED',  amount:'$2,100,000', amtRaw:2100000 },
+  { id:'GS-2026-02-THI-003', vendor:'Thiess',                 project:'PRJ-SW-WTP-MBR', period:'__PERIOD__', submitted:'3 days ago',    fn1:'pass',  fn2:'pass',    sql:'pass',  status:'APPROVED',  amount:'$780,600',   amtRaw:780600 },
+];
+
+function fnBadge(val) {
+  if (val === 'pass')    return '<span class="badge badge-lime">✅</span>';
+  if (val === 'warn')    return '<span class="badge badge-amber">⚠</span>';
+  if (val === 'timeout') return '<span class="badge badge-red">TIMEOUT</span>';
+  if (val === 'sqlfail') return '<span class="badge badge-red">SQL FAIL</span>';
+  if (val === 'fail')    return '<span class="badge badge-red">✗</span>';
+  return '<span class="badge badge-muted">—</span>';
+}
+function statusBadge(s) {
+  if (s==='APPROVED')  return '<span class="badge badge-lime">APPROVED</span>';
+  if (s==='PM REVIEW') return '<span class="badge badge-amber">PM REVIEW</span>';
+  if (s==='FAILED')    return '<span class="badge badge-red">FAILED</span>';
+  return '<span class="badge badge-muted">'+s+'</span>';
+}
+
+function renderClaimsTable(filter='', statusFilter='') {
+  const tbody = document.getElementById('claims-tbody');
+  if (!tbody) return;
+  let rows = claimsData.filter(c => {
+    const matchText = !filter || c.id.toLowerCase().includes(filter) || c.vendor.toLowerCase().includes(filter) || c.project.toLowerCase().includes(filter);
+    const matchStatus = !statusFilter || c.status.toUpperCase().includes(statusFilter.toUpperCase());
+    return matchText && matchStatus;
+  });
+  const count = document.getElementById('claims-count');
+  if (count) count.textContent = `Showing ${rows.length} of ${claimsData.length} claims`;
+  tbody.innerHTML = rows.map(c => `
+    <tr onclick="loadClaimInspector('${c.id}')" style="cursor:pointer;">
+      <td style="width:28px;text-align:center;color:var(--text-4);font-size:11px;">▶</td>
+      <td class="mono" style="${c.status==='FAILED'?'color:var(--red);':''}">${c.id}</td>
+      <td>${c.vendor}</td>
+      <td class="mono">${c.project}</td>
+      <td class="muted">${c.period}</td>
+      <td class="muted">${c.submitted}</td>
+      <td>${fnBadge(c.fn1)}</td>
+      <td>${fnBadge(c.fn2)}</td>
+      <td>${fnBadge(c.sql)}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td style="font-family:var(--font-d);font-size:15px;font-weight:700;color:${c.status==='FAILED'?'var(--text-3)':'var(--navy)'};">${c.amount}</td>
+      <td>
+        ${c.status==='FAILED'
+          ? `<button class="btn btn-red btn-xs" onclick="event.stopPropagation();retriggerClaim('${c.id}')">⚡ Re-trigger</button>`
+          : `<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();loadClaimInspector('${c.id}')">Inspect</button>`
+        }
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterClaimsTable(val) {
+  renderClaimsTable(val.toLowerCase());
+}
+function filterClaimsStatus(val) {
+  renderClaimsTable('', val);
+  showPage('claims');
+}
+
+// ── CLAIM INSPECTOR → jumps to Pipeline page ─────────────────────────
+function loadClaimInspector(claimId) {
+  const c = claimsData.find(x => x.id === claimId);
+  if (!c) return;
+  showPage('pipeline');
+  const sel = document.getElementById('pipeline-claim-select');
+  if (sel) {
+    for(let o of sel.options) { if(o.value===claimId) { sel.value=claimId; break; } }
+  }
+  loadPipelineClaim(claimId);
+}
+
+// ── PIPELINE CLAIM LOADER ─────────────────────────────────────────────
+const pipelineData = {
+  'GS-2026-02-LOR-012': {
+    vendor:"Laing O'Rourke", project:'PRJ-MW-WTP-PTA', amount:'$487,200',
+    submitted:'Today 11:42', status:'PENDING PM REVIEW', statusBadge:'badge-amber',
+    fn1:'done', fn2:'done', sql:'done', pm:'done',
+    fn1time:'1,247ms · ✅', fn2time:'834ms · ✅', sqltime:'34 rows written', pmtime:'PM-0023 · Routed',
+    failed: false
+  },
+  'GS-2026-02-ABE-011': {
+    vendor:'Abergeldie Contractors', project:'PRJ-SW-WTP-MBR', amount:'$312,400',
+    submitted:'Today 11:28', status:'FAILED · FN2 TIMEOUT', statusBadge:'badge-red',
+    fn1:'done', fn2:'failed', sql:'pending', pm:'pending',
+    fn1time:'1,102ms · ✅', fn2time:'TIMEOUT >10,000ms', sqltime:'No write', pmtime:'Not routed',
+    failed: true
+  },
+  'GS-2026-02-JHG-010': {
+    vendor:'John Holland', project:'PRJ-AW-CHP-002', amount:'$1,240,800',
+    submitted:'Today 10:55', status:'APPROVED', statusBadge:'badge-lime',
+    fn1:'done', fn2:'done', sql:'done', pm:'done',
+    fn1time:'1,388ms · ✅', fn2time:'761ms · ✅', sqltime:'52 rows written', pmtime:'PM-0018 · Approved',
+    failed: false
+  },
+  'GS-2026-02-FHG-008': {
+    vendor:'Fulton Hogan', project:'PRJ-MW-WTP-PTA', amount:'$675,000',
+    submitted:'Yesterday', status:'FAILED · SQL DEADLOCK', statusBadge:'badge-red',
+    fn1:'done', fn2:'failed', sql:'pending', pm:'pending',
+    fn1time:'1,334ms · ✅', fn2time:'SQL DEADLOCK', sqltime:'Rolled back', pmtime:'Not routed',
+    failed: true
+  },
+};
+
+function loadPipelineClaim(claimId) {
+  const d = pipelineData[claimId] || pipelineData['GS-2026-02-LOR-012'];
+  // Update context strip
+  document.getElementById('pctx-id').textContent      = claimId;
+  document.getElementById('pctx-vendor').textContent  = d.vendor;
+  document.getElementById('pctx-project').textContent = d.project;
+  document.getElementById('pctx-amount').textContent  = d.amount;
+  document.getElementById('pctx-submitted').textContent = d.submitted;
+  document.getElementById('pctx-status').innerHTML = `<span class="badge ${d.statusBadge}">${d.status}</span>`;
+
+  // Show/hide re-trigger button
+  const rBtn = document.getElementById('retrigger-btn');
+  if (rBtn) rBtn.style.display = d.failed ? 'flex' : 'none';
+
+  // Pipeline diagram
+  renderPipelineDiagram(d);
+  renderPipelineLog(claimId);
+  renderSqlBlocks(claimId);
+
+  // Update Fn2 status badge
+  const fn2b = document.getElementById('fn2-status-badge');
+  if (fn2b) {
+    if (d.failed) { fn2b.className='badge badge-red'; fn2b.textContent='✗ Failed'; }
+    else { fn2b.className='badge badge-lime'; fn2b.textContent='✅ Complete'; }
+  }
+  const fn2rows = document.getElementById('fn2-rows');
+  if (fn2rows) fn2rows.textContent = claimId==='GS-2026-02-JHG-010' ? '52' : claimId==='GS-2026-02-ABE-011'||claimId==='GS-2026-02-FHG-008' ? '—' : '34';
+
+  switchPipelineTab('fn1');
+}
+
+function renderPipelineDiagram(d) {
+  const diag = document.getElementById('pipeline-diagram');
+  if (!diag) return;
+  diag.innerHTML = `
+    <div class="pipe-block ${d.fn1}" onclick="switchPipelineTab('fn1')">
+      <div class="pipe-icon">📥</div>
+      <div class="pipe-name">Ingest</div>
+      <div class="pipe-sub">FILE RECEIVED<br/>Blob Storage</div>
+      <div class="pipe-time green">✅ File accepted</div>
+    </div>
+    <div class="pipe-arrow done">→</div>
+    <div class="pipe-block ${d.fn1}" onclick="switchPipelineTab('fn1')">
+      <div class="pipe-icon">🔍</div>
+      <div class="pipe-name">Function 1</div>
+      <div class="pipe-sub">VALIDATION<br/>9 Rules</div>
+      <div class="pipe-time ${d.fn1==='done'?'green':'red'}">${d.fn1time}</div>
+    </div>
+    <div class="pipe-arrow ${d.fn2==='done'?'done':d.fn2==='failed'?'failed':''}">→</div>
+    <div class="pipe-block ${d.fn2}" onclick="switchPipelineTab('fn2')">
+      <div class="pipe-icon">⚙</div>
+      <div class="pipe-name">Function 2</div>
+      <div class="pipe-sub">TRANSFORM<br/>Normalise+Load</div>
+      <div class="pipe-time ${d.fn2==='done'?'green':'red'}">${d.fn2time}</div>
+    </div>
+    <div class="pipe-arrow ${d.sql==='done'?'done':d.sql==='pending'?'':'failed'}">→</div>
+    <div class="pipe-block ${d.sql==='done'?'done':'pending'}" onclick="switchPipelineTab('sql')">
+      <div class="pipe-icon">🗄</div>
+      <div class="pipe-name">Azure SQL</div>
+      <div class="pipe-sub">claim_lines<br/>claim_headers</div>
+      <div class="pipe-time ${d.sql==='done'?'green':'red'}">${d.sqltime}</div>
+    </div>
+    <div class="pipe-arrow ${d.pm==='done'?'done':''}">→</div>
+    <div class="pipe-block ${d.pm==='done'?'done':'pending'}" onclick="switchPipelineTab('actions')">
+      <div class="pipe-icon">👤</div>
+      <div class="pipe-name">PM Queue</div>
+      <div class="pipe-sub">Routing<br/>SOPA Clock</div>
+      <div class="pipe-time ${d.pm==='done'?'green':'red'}">${d.pmtime}</div>
+    </div>
+  `;
+}
+
+// ── PIPELINE TABS ─────────────────────────────────────────────────────
+function switchPipelineTab(tab) {
+  ['fn1','fn2','log','sql','actions'].forEach(t => {
+    const btn = document.getElementById('ptab-'+t);
+    const content = document.getElementById('ptab-content-'+t);
+    if (btn) btn.classList.remove('active');
+    if (content) content.style.display = 'none';
+  });
+  const activeBtn = document.getElementById('ptab-'+tab);
+  const activeContent = document.getElementById('ptab-content-'+tab);
+  if (activeBtn) activeBtn.classList.add('active');
+  if (activeContent) activeContent.style.display = 'block';
+}
+
+// ── SQL TABS ──────────────────────────────────────────────────────────
+function switchSqlTab(tab) {
+  ['headers','lines','vallog','schema'].forEach(t => {
+    const btn = document.getElementById('sqltab-'+t);
+    const content = document.getElementById('sqltab-content-'+t);
+    if (btn) btn.classList.remove('active');
+    if (content) content.style.display = 'none';
+  });
+  const ab = document.getElementById('sqltab-'+tab);
+  const ac = document.getElementById('sqltab-content-'+tab);
+  if (ab) ab.classList.add('active');
+  if (ac) ac.style.display = 'block';
+}
+
+// ── RULE TOGGLE ───────────────────────────────────────────────────────
+function toggleRule(card) {
+  const was = card.classList.contains('expanded');
+  document.querySelectorAll('.rule-card.expanded').forEach(c => c.classList.remove('expanded'));
+  if (!was) card.classList.add('expanded');
+}
+
+// ── FN1 RULES (for pipeline inspector) ───────────────────────────────
+function renderFn1Rules() {
+  const grid = document.getElementById('fn1-rules-grid');
+  if (!grid) return;
+  const rules = [
+    { num:'01', name:'Schema Integrity',      type:'block', result:'lime', label:'✅ PASSED', detail:['18 mandatory columns present (A–V) · file format .xlsx confirmed','Column E (Capex/Opex) — all values in [CAP, OPX] — no nulls','CLAIM_HEADER tab present · Vendor Declaration checkbox = TRUE'] },
+    { num:'02', name:'WBS Verification',      type:'block', result:'lime', label:'✅ PASSED', detail:['All 34 WBS codes validated against SAP API · all are Level 4 work packages','vendorId = LOR-0019 matches contract record on PRJ-MW-WTP-PTA','Project status ≠ Closed or Suspended · billing block not set'] },
+    { num:'03', name:'Vendor ABN — Primary',  type:'block', result:'lime', label:'✅ PASSED', detail:['ABN 47 004 533 519 — passes checksum · ATO ABR: Active · GST Registered','Entity name match: Azure AD vendorCompany confirmed'] },
+    { num:'04', name:'Sub-contractor ABN',    type:'warn',  result:'amber',label:'⚠ MONITOR',detail:['GreenPipe Pty Ltd — registered Oct 2024 · entity age = 2 months','MONITOR FLAG added — not a BLOCK · PM will see advisory note'] },
+    { num:'05', name:'GST Calculations',      type:'block', result:'lime', label:'✅ PASSED', detail:['All 34 rows: GST = This Claim ex GST × 0.10 ± $0.01 tolerance','All Inc GST = Ex GST + GST confirmed · no rounding errors'] },
+    { num:'06', name:'Cumulative % Cap',      type:'block', result:'lime', label:'✅ PASSED', detail:['No line item exceeds 100% cumulative claimed percentage','Lookback against prior claims_lines confirmed for all WBS codes'] },
+    { num:'07', name:'Rate Anomaly',          type:'warn',  result:'amber',label:'⚠ MONITOR',detail:['Row 7 — Crane hire 50t — submitted rate $4,800/hr vs contract $3,920/hr (+22.4%)','RATE_ANOMALY_R07 flag added to claim_headers · PM notified'] },
+    { num:'08', name:'Duplicate Submission',  type:'block', result:'lime', label:'✅ PASSED', detail:['No prior claim found for vendorId=LOR-0019 + PRJ-MW-WTP-PTA + 2026-02','Hash check confirmed clean'] },
+    { num:'09', name:'SOPA Window Check',     type:'block', result:'lime', label:'✅ PASSED', detail:['Submission falls within valid window for claim period 2026-02','Window: 01 Dec 2024 – 31 Dec 2024 · submission date confirmed'] },
+  ];
+  grid.innerHTML = rules.map(r => `
+    <div class="rule-card ${r.type}" onclick="toggleRule(this)">
+      <div class="rule-header">
+        <div class="rule-num">${r.num}</div>
+        <div class="rule-name">${r.name}</div>
+        <div><span class="badge badge-${r.result}">${r.label}</span></div>
+      </div>
+      <div class="rule-detail">
+        ${r.detail.map(d=>`<div class="rule-check-row"><span class="rule-check-icon">${r.result==='lime'?'✅':'⚠'}</span>${d}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── FN2 STEPS ─────────────────────────────────────────────────────────
+function renderFn2Steps() {
+  const list = document.getElementById('fn2-steps-list');
+  if (!list) return;
+  const steps = [
+    ['Date fields', 'Normalised to ISO 8601 · DATETIMEOFFSET', '✅'],
+    ['Currency fields', 'Stripped $, commas → DECIMAL(14,2)', '✅'],
+    ['Percentage fields', 'Strip % → divide by 100 → DECIMAL(5,4)', '✅'],
+    ['Capex/Opex', 'Uppercase → ENUM [CAP, OPX] validated', '✅'],
+    ['WBS codes', 'Trim whitespace · uppercase', '✅'],
+    ['Audit metadata', 'SOPA timestamp · AZ validation ID stamped', '✅'],
+    ['claim_headers', '1 row written to Azure SQL', '✅'],
+    ['claim_lines', '34 rows written to Azure SQL', '✅'],
+    ['validation_log', '9 rule results written', '✅'],
+    ['PM routing', 'Routed to PM-0023 · SOPA clock started', '✅'],
+  ];
+  list.innerHTML = steps.map(([name, detail, icon]) => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);font-size:12.5px;">
+      <span style="flex-shrink:0;">${icon}</span>
+      <div>
+        <div style="font-weight:600;color:var(--text);">${name}</div>
+        <div style="color:var(--text-3);font-size:11.5px;margin-top:1px;">${detail}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── PIPELINE LOG ──────────────────────────────────────────────────────
+const logsByClaimId = {
+  'GS-2026-02-LOR-012': [
+    ['11:42:01.001','info','[FN1] Invocation start · vendorId=LOR-0019 · 34 rows · Azure Australia East'],
+    ['11:42:01.145','dim', '[FN1] Rule 01 — Schema Integrity · checking 18 mandatory columns'],
+    ['11:42:01.287','pass','[FN1] Rule 01 — PASS · 18 cols present · .xlsx confirmed · declaration TRUE'],
+    ['11:42:01.290','info','[FN1] Rule 02 — WBS Verification · calling SAP API for 34 WBS codes'],
+    ['11:42:01.678','pass','[FN1] Rule 02 — PASS · all 34 WBS codes valid · Level 4 · Project Active'],
+    ['11:42:01.680','info','[FN1] Rule 03 — Vendor ABN · calling ATO ABR API'],
+    ['11:42:01.891','pass','[FN1] Rule 03 — PASS · ABN 47 004 533 519 Active · GST Registered'],
+    ['11:42:01.893','info','[FN1] Rule 04 — Sub-contractor ABN check'],
+    ['11:42:02.091','warn','[FN1] Rule 04 — WARN · GreenPipe Pty Ltd entity age 2 months · MONITOR FLAG'],
+    ['11:42:02.092','pass','[FN1] Rules 05–09 — GST · Cumulative · Rate · Duplicate · SOPA all PASS'],
+    ['11:42:02.248','info','[FN1] Complete · 1,247ms · 8 PASS · 1 WARN · 0 BLOCK · triggering FN2'],
+    ['11:42:02.500','info','[FN2] Invocation start · normalising 34 rows'],
+    ['11:42:03.200','dim', '[FN2] Date · currency · percentage fields normalised'],
+    ['11:42:03.316','info','[FN2] Stamping audit metadata · AZF-VAL-20260305-1192'],
+    ['11:42:03.401','info','[FN2] Opening SQL transaction'],
+    ['11:42:03.781','info','[FN2] Writing validation_log (9 rule results)'],
+    ['11:42:03.820','pass','[FN2] SQL transaction committed · 3 tables · 0 rollback errors'],
+    ['11:42:03.822','pass','[FN2] Routed to PM-0023 · SOPA clock started'],
+    ['11:42:03.823','pass','[COMPLETE] Total 1,822ms · PENDING_PM_REVIEW · AZF-VAL-20260305-1192'],
+  ],
+  'GS-2026-02-ABE-011': [
+    ['11:27:55.001','info','[FN1] Invocation start · vendorId=ACE-0047 · 28 rows'],
+    ['11:27:57.103','pass','[FN1] PASS · all 9 rules satisfied · 1,102ms · triggering FN2'],
+    ['11:28:01.440','info','[FN2] Invocation start · normalising 28 rows'],
+    ['11:28:06.881','warn','[FN2] SQL write slow · 4,200ms elapsed · awaiting lock release'],
+    ['11:28:17.009','fail','[FN2] TIMEOUT · execution exceeded 10,000ms · function killed · no SQL write'],
+    ['11:28:17.010','fail','[ERROR] Claim GS-2026-02-ABE-011 status set to FAILED · support triage required'],
+  ],
+  'GS-2026-02-FHG-008': [
+    ['16:33:38.002','info','[FN1] Invocation start · vendorId=FHG-0055 · 41 rows'],
+    ['16:33:39.336','pass','[FN1] PASS · all 9 rules satisfied · 1,334ms · triggering FN2'],
+    ['16:33:41.110','info','[FN2] Opening SQL transaction · writing claim_headers'],
+    ['16:33:44.003','warn','[FN2] SQL deadlock detected on claim_lines · waiting for lock'],
+    ['16:33:49.882','fail','[FN2] SQL DEADLOCK · transaction rolled back · 0 rows committed'],
+    ['16:33:49.883','fail','[ERROR] Claim GS-2026-02-FHG-008 status set to FAILED · SQL deadlock triage required'],
+  ],
+};
+
+function renderPipelineLog(claimId) {
+  const out = document.getElementById('pipeline-log-output');
+  const title = document.getElementById('log-terminal-title');
+  if (!out) return;
+  if (title) title.textContent = `gridsync-fn-execution · ${claimId} · ${new Date().toISOString().split('T')[0]}`;
+  const lines = logsByClaimId[claimId] || logsByClaimId['GS-2026-02-LOR-012'];
+  out.innerHTML = lines.map(([ts, type, msg]) =>
+    `<div class="log-line"><span class="log-ts">${ts}</span><span class="log-${type}">${msg}</span></div>`
+  ).join('') + `<div class="log-line"><span class="log-ts"> </span><span class="log-cursor"></span></div>`;
+}
+
+function replayPipelineLog() {
+  const out = document.getElementById('pipeline-log-output');
+  if (!out) return;
+  const lines = out.querySelectorAll('.log-line');
+  lines.forEach(l => { l.style.opacity='0'; });
+  let i = 0;
+  showToast('rp','▶','Replaying execution log…','navy');
+  const show = () => {
+    if (i < lines.length) {
+      lines[i].style.opacity='1';
+      lines[i].style.transition='opacity 0.12s';
+      i++;
+      setTimeout(show, 60);
+    }
+  };
+  setTimeout(show, 300);
+}
+
+// ── SQL BLOCKS ────────────────────────────────────────────────────────
+function renderSqlBlocks(claimId) {
+  const hb = document.getElementById('sql-headers-block');
+  const lb = document.getElementById('sql-lines-block');
+  const vb = document.getElementById('sql-vallog-block');
+  if (hb) hb.innerHTML = `<span class="sql-cmt">-- claim_headers insert for ${claimId}</span>
+<span class="sql-kw">INSERT INTO</span> claim_headers (
+  claim_id, vendor_id, project_wbs,
+  claim_period, submission_ts,
+  sopa_deadline, claim_status,
+  total_ex_gst, total_gst, total_inc_gst,
+  azure_validation_id, pm_id, advisory_flags
+) <span class="sql-kw">VALUES</span> (
+  <span class="sql-str">'${claimId}'</span>,
+  <span class="sql-str">'${claimId==='GS-2026-02-LOR-012'?'LOR-0019':'ACE-0047'}'</span>,
+  <span class="sql-str">'PRJ-MW-WTP-PTA'</span>,
+  <span class="sql-str">'2026-02'</span>,
+  <span class="sql-str">'2026-03-05T${claimId==='GS-2026-02-LOR-012'?'11:42':'11:28'}:01+11:00'</span>,
+  <span class="sql-str">'2026-03-25T23:59:59+11:00'</span>,
+  <span class="sql-str">'${claimId==='GS-2026-02-ABE-011'||claimId==='GS-2026-02-FHG-008'?'FAILED':'PENDING_PM_REVIEW'}'</span>,
+  <span class="sql-num">${claimId==='GS-2026-02-LOR-012'?'487200.00':'312400.00'}</span>,
+  <span class="sql-num">${claimId==='GS-2026-02-LOR-012'?'48720.00':'31240.00'}</span>,
+  <span class="sql-num">${claimId==='GS-2026-02-LOR-012'?'535920.00':'343640.00'}</span>,
+  <span class="sql-str">'AZF-VAL-20260305-${claimId.slice(-4)}'</span>,
+  <span class="sql-str">'PM-0023'</span>,
+  <span class="sql-str">'SUBCON_NEW_ENTITY,RATE_ANOMALY_R07'</span>
+);`;
+  if (lb) lb.innerHTML = `<span class="sql-cmt">-- claim_lines sample (rows 1–2 of 34) for ${claimId}</span>
+<span class="sql-kw">INSERT INTO</span> claim_lines (
+  line_id, claim_id, wbs_element,
+  sap_cost_element, capex_opex_flag,
+  description, uom, contract_qty,
+  contract_rate, prev_claimed_pct,
+  this_claim_pct, this_claim_amt_ex,
+  gst_amt, this_claim_amt_inc
+) <span class="sql-kw">VALUES</span>
+(
+  <span class="sql-str">'${claimId}-001'</span>, <span class="sql-str">'${claimId}'</span>,
+  <span class="sql-str">'PRJ-MW-WTP-PTA.CIV.WP-001'</span>,
+  <span class="sql-num">600100</span>, <span class="sql-str">'CAP'</span>,
+  <span class="sql-str">'Bulk earthworks — AWRC Stage 1'</span>,
+  <span class="sql-str">'m3'</span>, <span class="sql-num">12500</span>, <span class="sql-num">85.00</span>,
+  <span class="sql-num">0.4500</span>, <span class="sql-num">0.1500</span>,
+  <span class="sql-num">159375.00</span>, <span class="sql-num">15937.50</span>,
+  <span class="sql-num">175312.50</span>
+),
+(
+  <span class="sql-str">'${claimId}-007'</span>, <span class="sql-str">'${claimId}'</span>,
+  <span class="sql-str">'PRJ-MW-WTP-PTA.MEC.WP-001'</span>,
+  <span class="sql-num">600200</span>, <span class="sql-str">'CAP'</span>,
+  <span class="sql-str">'Crane hire — 50t · rate advisory flag'</span>,
+  <span class="sql-str">'hrs'</span>, <span class="sql-num">80</span>, <span class="sql-num">4800.00</span>,
+  <span class="sql-num">0.0000</span>, <span class="sql-num">0.2000</span>,
+  <span class="sql-num">76800.00</span>, <span class="sql-num">7680.00</span>,
+  <span class="sql-num">84480.00</span>
+);`;
+}
+
+// ── RE-TRIGGER CLAIM ──────────────────────────────────────────────────
+function retriggerClaim(claimId) {
+  showToast('rt','⚡',`Re-triggering pipeline for ${claimId}…`,'amber',2000);
+  setTimeout(() => showToast('rt2','🔄',`Function 1 invoked for ${claimId} · monitoring…`,'navy',3000), 2100);
+  setTimeout(() => {
+    const c = claimsData.find(x=>x.id===claimId);
+    if (c) { c.fn2='pass'; c.sql='pass'; c.status='PM REVIEW'; }
+    renderClaimsTable();
+    showToast('rt3','✅',`${claimId} pipeline completed successfully · routed to PM`,'lime',4000);
+  }, 6000);
+}
+
+// ── ADD SUPPORT NOTE ──────────────────────────────────────────────────
+function addSupportNote() {
+  const txt = document.getElementById('support-note-text');
+  if (!txt || !txt.value.trim()) {
+    showToast('note-err','⚠️','Please enter a note before saving.','amber',3000);
+    return;
+  }
+  const claimId = document.getElementById('pipeline-claim-select')?.value || 'GS-2026-02-LOR-012';
+  const noteTime = new Date().toLocaleString('en-AU',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'});
+  const noteBox = document.getElementById('support-notes-list');
+  if (noteBox) {
+    const note = document.createElement('div');
+    note.style.cssText = 'padding:10px 14px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);margin-bottom:8px;font-size:13px;';
+    note.innerHTML = `<div style="font-weight:600;color:var(--navy);margin-bottom:4px;">Alex Chen · ${noteTime}</div><div style="color:var(--text-2);">${txt.value.trim()}</div><div style="font-size:11px;color:var(--text-4);margin-top:4px;">📌 Claim: ${claimId} · Visible to PM: Yes</div>`;
+    noteBox.prepend(note);
+  }
+  txt.value = '';
+  showToast('note-ok','✅','Support note saved · PM will see this advisory on their queue','lime',3500);
+}
+
+// ── INIT SUPPORT DATES ────────────────────────────────────────────────
+function initSupportDates() {
+  const now = new Date();
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const periodStr = prevMonth.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' });
+  const todayStr = now.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' });
+
+  // Update claim periods in data array
+  claimsData.forEach(c => { if (c.period === '__PERIOD__') c.period = periodStr; });
+
+  // Update date displays
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('today-date', todayStr);
+  setTxt('current-time', timeStr);
+
+  // Update log terminal timestamp
+  const logTitle = document.getElementById('log-terminal-title');
+  if (logTitle) {
+    const iso = now.toISOString().replace('.000','').replace('Z','+11:00');
+    logTitle.textContent = `gridsync-fn-execution · GS-2026-02-LOR-012 · ${iso}`;
+  }
+
+  // Re-render tables with updated data
+  renderClaimsTable();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  initSupportDates();
+  renderFn1Rules();
+});
+</script>
+</body>
+</html>

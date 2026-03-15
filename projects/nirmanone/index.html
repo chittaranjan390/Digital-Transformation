@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NirmanOne — Case Study · Chittaranjan Sahu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080A0E;--bg2:#0F1118;--bg3:#161B26;--border:rgba(200,185,140,0.12);--border-strong:rgba(200,185,140,0.25);--cream:#EDE8DC;--cream-muted:rgba(237,232,220,0.55);--gold:#C8A96E;--gold-light:#DFC08A;--steel:#5B9EC9;--font-display:'Cormorant Garamond',Georgia,serif;--font-ui:'Syne',sans-serif;--font-mono:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--cream);font-family:var(--font-ui);font-size:16px;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4}
+
+/* BACK BUTTON */
+.back-btn{position:fixed;top:28px;left:32px;z-index:200;display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--cream-muted);text-decoration:none;background:rgba(8,10,14,0.85);backdrop-filter:blur(12px);border:1px solid var(--border);padding:10px 18px;transition:color 0.2s,border-color 0.2s}
+.back-btn:hover{color:var(--gold);border-color:var(--gold)}
+.back-btn svg{width:14px;height:14px;flex-shrink:0}
+
+/* HERO */
+.case-hero{min-height:70vh;display:flex;flex-direction:column;justify-content:flex-end;padding:100px 80px 80px;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 80% 30%,rgba(91,158,201,0.1) 0%,transparent 70%),radial-gradient(ellipse 40% 50% at 20% 80%,rgba(200,169,110,0.08) 0%,transparent 70%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(200,169,110,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.03) 1px,transparent 1px);background-size:60px 60px}
+.case-hero-inner{position:relative;z-index:1;max-width:900px}
+.case-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px}
+.meta-tag{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;padding:5px 12px;border:1px solid var(--border-strong);color:var(--cream-muted)}
+.meta-tag.highlight{border-color:rgba(200,169,110,0.4);color:var(--gold)}
+.meta-tag.blue{border-color:rgba(91,158,201,0.4);color:var(--steel)}
+.case-hero h1{font-family:var(--font-display);font-size:clamp(3.5rem,7vw,7rem);font-weight:300;line-height:1;color:var(--cream);margin-bottom:16px}
+.case-hero h1 em{font-style:italic;color:var(--gold-light)}
+.case-tagline{font-size:1.1rem;color:var(--cream-muted);max-width:640px;line-height:1.75;margin-bottom:40px}
+.case-tagline strong{color:var(--cream)}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap}
+.h-stat{border-left:2px solid var(--gold);padding-left:16px}
+.h-stat-val{font-family:var(--font-display);font-size:2rem;font-weight:600;color:var(--cream);line-height:1}
+.h-stat-val span{color:var(--gold)}
+.h-stat-label{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream-muted);margin-top:4px}
+
+/* CONTENT SECTIONS */
+.case-section{padding:80px;border-bottom:1px solid var(--border)}
+.case-section:last-child{border-bottom:none}
+.sec-label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.sec-label::before{content:'';display:block;width:28px;height:1px;background:var(--gold)}
+.sec-title{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;color:var(--cream);margin-bottom:28px;line-height:1.15}
+.sec-title em{font-style:italic;color:var(--gold-light)}
+.body-text{font-size:0.97rem;color:var(--cream-muted);line-height:1.85;max-width:760px}
+.body-text strong{color:var(--cream)}
+.body-text + .body-text{margin-top:16px}
+
+/* TWO-COL LAYOUT */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+
+/* ROLE CARDS */
+.role-card{background:var(--bg2);border:1px solid var(--border);padding:28px;transition:border-color 0.2s}
+.role-card:hover{border-color:var(--border-strong)}
+.role-card-title{font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.role-card-body{font-size:0.88rem;color:var(--cream-muted);line-height:1.7}
+
+/* DELIVERABLES */
+.deliverables-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:36px}
+.deliverable{background:var(--bg2);border:1px solid var(--border);padding:20px 24px;display:flex;gap:14px;align-items:flex-start;transition:border-left-color 0.2s;border-left:2px solid transparent}
+.deliverable:hover{border-left-color:var(--gold)}
+.d-icon{color:var(--gold);font-size:1rem;flex-shrink:0;margin-top:2px;font-family:var(--font-mono)}
+.d-text{font-size:0.88rem;color:var(--cream-muted);line-height:1.6}
+.d-text strong{color:var(--cream);display:block;margin-bottom:4px;font-size:0.82rem;letter-spacing:0.04em}
+
+/* METRICS */
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:40px}
+.metric-box{background:var(--bg2);padding:36px 28px;text-align:center;transition:background 0.2s}
+.metric-box:hover{background:var(--bg3)}
+.m-val{font-family:var(--font-display);font-size:3.2rem;font-weight:600;color:var(--cream);line-height:1;margin-bottom:8px}
+.m-val span{color:var(--gold)}
+.m-label{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream-muted)}
+.m-desc{font-family:var(--font-mono);font-size:0.62rem;color:var(--steel);margin-top:6px}
+
+/* TECH STACK */
+.tech-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+.tech-item{background:var(--bg2);border:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:10px;transition:border-color 0.2s}
+.tech-item:hover{border-color:var(--border-strong)}
+.tech-dot{width:6px;height:6px;background:var(--gold);flex-shrink:0}
+.tech-dot.blue{background:var(--steel)}
+.tech-name{font-size:0.82rem;font-weight:600;color:var(--cream)}
+.tech-cat{font-family:var(--font-mono);font-size:0.6rem;color:var(--cream-muted);margin-top:2px;letter-spacing:0.06em}
+
+/* PORTAL CARDS */
+.portals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.portal-card{background:var(--bg2);border:1px solid var(--border);padding:32px 28px;position:relative;overflow:hidden;transition:border-color 0.3s,transform 0.2s;text-decoration:none;display:block;color:inherit}
+.portal-card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.portal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--steel));opacity:0;transition:opacity 0.3s}
+.portal-card:hover::before{opacity:1}
+.portal-label{font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--steel);margin-bottom:12px}
+.portal-name{font-family:var(--font-display);font-size:1.4rem;font-weight:600;color:var(--cream);margin-bottom:10px;line-height:1.2}
+.portal-desc{font-size:0.83rem;color:var(--cream-muted);line-height:1.6;margin-bottom:20px}
+.portal-link{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
+
+/* MOCKUP PREVIEW */
+.preview-container{background:var(--bg2);border:1px solid var(--border);overflow:hidden;margin-top:40px}
+.preview-bar{background:var(--bg3);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:8px}
+.preview-dot{width:10px;height:10px;border-radius:50%;background:var(--border-strong)}
+.preview-dot.r{background:rgba(194,92,74,0.5)}
+.preview-dot.y{background:rgba(200,169,110,0.5)}
+.preview-dot.g{background:rgba(91,158,201,0.3)}
+.preview-url{font-family:var(--font-mono);font-size:0.65rem;color:var(--cream-muted);margin-left:12px;letter-spacing:0.05em}
+.preview-frame{width:100%;height:420px;border:none;background:var(--bg)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .case-hero{padding:100px 32px 60px}
+  .case-section{padding:60px 32px}
+  .two-col{grid-template-columns:1fr}
+  .three-col,.portals-grid{grid-template-columns:1fr}
+  .deliverables-grid{grid-template-columns:1fr}
+  .metrics-row{grid-template-columns:1fr}
+  .back-btn{top:16px;left:16px}
+}
+</style>
+</head>
+<body>
+
+<a href="../../index.html" class="back-btn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+  Back to Portfolio
+</a>
+
+<!-- HERO -->
+<div class="case-hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-grid"></div>
+  <div class="case-hero-inner">
+    <div class="case-meta">
+      <span class="meta-tag highlight">Case Study · 01</span>
+      <span class="meta-tag blue">Salesforce Implementation</span>
+      <span class="meta-tag">B2B Marketplace</span>
+      <span class="meta-tag">Mindsprint Technology · 2025</span>
+    </div>
+    <h1>Nirman<em>One</em></h1>
+    <p class="case-tagline">Building India's first <strong>integrated B2B digital marketplace</strong> for Steel, Cement & Industrial Materials — powered by Salesforce Sales Cloud and Experience Cloud.</p>
+    <div class="hero-stats">
+      <div class="h-stat"><div class="h-stat-val">2<span>×</span></div><div class="h-stat-label">Deal Velocity</div></div>
+      <div class="h-stat"><div class="h-stat-val">100<span>%</span></div><div class="h-stat-label">API-Driven Pricing</div></div>
+      <div class="h-stat"><div class="h-stat-val">0<span>→1</span></div><div class="h-stat-label">Platform Built</div></div>
+      <div class="h-stat"><div class="h-stat-val">3<span>+</span></div><div class="h-stat-label">Portals Launched</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="case-section">
+  <div class="two-col">
+    <div>
+      <div class="sec-label">Overview & Problem</div>
+      <div class="sec-title">The procurement problem <em>no one had solved</em></div>
+      <p class="body-text">India's B2B market for Steel, Cement and Industrial Materials was fragmented, opaque, and deeply offline. Buyers relied on phone calls and spreadsheets to source materials; sellers had no scalable way to manage catalogs, pricing, or buyer relationships.</p>
+      <p class="body-text" style="margin-top:16px">Mindsprint Technology engaged to build <strong>NirmanOne</strong> — a unified digital marketplace that would connect industrial buyers with verified sellers, automate the RFQ-to-Quote lifecycle, and give both sides real-time pricing visibility.</p>
+      <p class="body-text" style="margin-top:16px">The challenge wasn't just technical. It required <strong>end-to-end functional ownership</strong> — from solution design and pre-sales to live delivery — across a complex Salesforce ecosystem with external API dependencies and multi-persona user journeys.</p>
+    </div>
+    <div>
+      <div class="sec-label" style="margin-top:0">Context</div>
+      <div class="three-col" style="grid-template-columns:1fr;gap:12px;margin-top:0">
+        <div class="role-card"><div class="role-card-title">Client</div><div class="role-card-body">Mindsprint Technology (Olam Information Services) — a global digital transformation firm</div></div>
+        <div class="role-card"><div class="role-card-title">Industry</div><div class="role-card-body">Industrial Materials — Steel, Cement, and B2B commodity procurement in India</div></div>
+        <div class="role-card"><div class="role-card-title">Engagement Type</div><div class="role-card-body">Full implementation: Pre-sales → Solution Design → Delivery → Go-Live</div></div>
+        <div class="role-card"><div class="role-card-title">Timeline</div><div class="role-card-body">2025 · Lead Functional Consultant at Mindsprint</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY ROLE -->
+<div class="case-section" style="background:var(--bg2)">
+  <div class="sec-label">My Role</div>
+  <div class="sec-title">Lead Functional Consultant — <em>end to end</em></div>
+  <p class="body-text">I owned this engagement across every phase — from initial scoping to final delivery. This was not a handoff role; I was the single point of accountability between the client's business requirements and Salesforce's technical implementation.</p>
+  <div class="three-col" style="margin-top:40px">
+    <div class="role-card">
+      <div class="role-card-title">Pre-Sales & Solutioning</div>
+      <div class="role-card-body">Led RFP/RFQ responses, defined solution scope, assessed technical and delivery risk, and co-authored the SOW in collaboration with Sales, Pre-Sales, and Finance teams.</div>
+    </div>
+    <div class="role-card">
+      <div class="role-card-title">Functional Design</div>
+      <div class="role-card-body">Translated business requirements into Salesforce configurations — Accounts, Opportunities, standard Quotes, real-time API pricing, and role-based access design across buyer and seller personas.</div>
+    </div>
+    <div class="role-card">
+      <div class="role-card-title">Delivery & Stakeholder Management</div>
+      <div class="role-card-body">Managed cross-functional delivery with internal Salesforce developers, external API teams, and client business stakeholders to ensure go-live on schedule and within scope.</div>
+    </div>
+    <div class="role-card">
+      <div class="role-card-title">GTM Enablement</div>
+      <div class="role-card-body">Built pitch decks, solution demos, and reusable accelerators to support the sales team's deal pipeline — directly contributing to improved conversion and follow-on engagement opportunities.</div>
+    </div>
+    <div class="role-card">
+      <div class="role-card-title">KPI & Governance</div>
+      <div class="role-card-body">Owned practice governance reporting: certifications, CSAT, SLA compliance, and pipeline health — feeding directly into leadership decision-making.</div>
+    </div>
+    <div class="role-card">
+      <div class="role-card-title">Cross-sell Identification</div>
+      <div class="role-card-body">Identified upsell and cross-sell opportunities during delivery and supported proposal development for follow-on engagements, expanding the account footprint.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DELIVERABLES -->
+<div class="case-section">
+  <div class="sec-label">Key Deliverables</div>
+  <div class="sec-title">What was <em>actually built</em></div>
+  <p class="body-text">The NirmanOne platform comprised three interconnected modules, each addressing a distinct user persona and business need.</p>
+  <div class="deliverables-grid">
+    <div class="deliverable"><div class="d-icon">01</div><div class="d-text"><strong>Salesforce Sales Cloud Core</strong>Accounts, Opportunities, and standard Quotes — configured to support the B2B industrial procurement lifecycle with product catalog management and multi-level approval workflows.</div></div>
+    <div class="deliverable"><div class="d-icon">02</div><div class="d-text"><strong>Real-Time External Pricing API</strong>Replaced manual price list management with a live pricing engine integrated via external APIs — ensuring buyers always see accurate, market-driven prices without seller intervention.</div></div>
+    <div class="deliverable"><div class="d-icon">03</div><div class="d-text"><strong>Experience Cloud Buyer Marketplace</strong>End-to-end buyer journey: business registration, product discovery, RFQ submission, quote comparison, order confirmation, and payment history — all within a branded Salesforce Experience Cloud site.</div></div>
+    <div class="deliverable"><div class="d-icon">04</div><div class="d-text"><strong>Experience Cloud Seller Portal</strong>External sellers can manage their onboarding, product catalog, serviceable pin codes, and inventory through a self-service portal with role-based access control and API-level integrations.</div></div>
+    <div class="deliverable"><div class="d-icon">05</div><div class="d-text"><strong>Salesforce Console (Internal)</strong>Role-based internal console for operations and admin teams — covering deal management, seller verification, order tracking, and real-time reporting dashboards.</div></div>
+    <div class="deliverable"><div class="d-icon">06</div><div class="d-text"><strong>Opportunity-to-Quote Automation</strong>End-to-end automation of the opportunity lifecycle — from lead qualification and product selection through quote generation, approval routing, and order confirmation — reducing sales cycle friction significantly.</div></div>
+  </div>
+</div>
+
+<!-- METRICS -->
+<div class="case-section" style="background:var(--bg2)">
+  <div class="sec-label">Impact & Metrics</div>
+  <div class="sec-title">Outcomes that <em>spoke for themselves</em></div>
+  <div class="metrics-row">
+    <div class="metric-box"><div class="m-val">2<span>×</span></div><div class="m-label">Deal Velocity</div><div class="m-desc">Faster quote turnaround via automation</div></div>
+    <div class="metric-box"><div class="m-val">100<span>%</span></div><div class="m-label">API-Driven Pricing</div><div class="m-desc">Eliminated manual price list management</div></div>
+    <div class="metric-box"><div class="m-val">0<span>→1</span></div><div class="m-label">Seller Portal</div><div class="m-desc">Net-new digital channel for external sellers</div></div>
+    <div class="metric-box"><div class="m-val">3<span>+</span></div><div class="m-label">Portals Launched</div><div class="m-desc">Buyer marketplace · Seller portal · Internal console</div></div>
+    <div class="metric-box"><div class="m-val">↑</div><div class="m-label">Pipeline Growth</div><div class="m-desc">Accelerators & demos improved deal conversion</div></div>
+    <div class="metric-box"><div class="m-val">∞</div><div class="m-label">Scalability</div><div class="m-desc">Built on Salesforce — infinitely extensible</div></div>
+  </div>
+</div>
+
+<!-- PORTALS -->
+<div class="case-section">
+  <div class="sec-label">Live Portals</div>
+  <div class="sec-title">Explore the <em>platform modules</em></div>
+  <p class="body-text">Each module was designed for a distinct persona. Click any card to open the live interactive prototype.</p>
+  <div class="portals-grid">
+    <a href="nirmanone_v3.html" class="portal-card" target="_blank">
+      <div class="portal-label">Module 01 · Buyer-Facing</div>
+      <div class="portal-name">B2B Buyer Marketplace</div>
+      <div class="portal-desc">Full buyer journey — registration, product discovery, RFQ submission, quote comparison, and order management for industrial material procurement.</div>
+      <div class="portal-link">Open Portal <span>→</span></div>
+    </a>
+    <a href="nirmanone_seller.html" class="portal-card" target="_blank">
+      <div class="portal-label">Module 02 · Seller-Facing</div>
+      <div class="portal-name">Seller Portal</div>
+      <div class="portal-desc">External seller onboarding, product catalog management, serviceable pin code configuration, inventory tracking, and RFQ response workflows.</div>
+      <div class="portal-link">Open Portal <span>→</span></div>
+    </a>
+    <a href="nirmanone_sf_console.html" class="portal-card" target="_blank">
+      <div class="portal-label">Module 03 · Internal Ops</div>
+      <div class="portal-name">Salesforce Console</div>
+      <div class="portal-desc">Role-based internal operations console for deal management, seller verification, pipeline reporting, and order lifecycle tracking.</div>
+      <div class="portal-link">Open Portal <span>→</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div class="case-section" style="background:var(--bg2)">
+  <div class="sec-label">Platform Preview</div>
+  <div class="sec-title">Buyer marketplace — <em>live prototype</em></div>
+  <div class="preview-container">
+    <div class="preview-bar">
+      <div class="preview-dot r"></div><div class="preview-dot y"></div><div class="preview-dot g"></div>
+      <div class="preview-url">nirmanone.in — B2B Industrial Marketplace</div>
+    </div>
+    <iframe class="preview-frame" src="nirmanone_v3.html" title="NirmanOne Marketplace Preview"></iframe>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="case-section">
+  <div class="sec-label">Technology Stack</div>
+  <div class="sec-title">Built on <em>enterprise-grade</em> foundations</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-dot"></div><div><div class="tech-name">Salesforce Sales Cloud</div><div class="tech-cat">CRM · Accounts · Opportunities · Quotes</div></div></div>
+    <div class="tech-item"><div class="tech-dot"></div><div><div class="tech-name">Salesforce Experience Cloud</div><div class="tech-cat">Buyer Marketplace · Seller Portal</div></div></div>
+    <div class="tech-item"><div class="tech-dot blue"></div><div><div class="tech-name">External Pricing APIs</div><div class="tech-cat">Real-time market price integration</div></div></div>
+    <div class="tech-item"><div class="tech-dot blue"></div><div><div class="tech-name">Role-Based Access Control</div><div class="tech-cat">Multi-persona security model</div></div></div>
+    <div class="tech-item"><div class="tech-dot"></div><div><div class="tech-name">Salesforce Flows & Automation</div><div class="tech-cat">Opportunity-to-Quote lifecycle</div></div></div>
+    <div class="tech-item"><div class="tech-dot"></div><div><div class="tech-name">Salesforce Agentforce</div><div class="tech-cat">AI-powered service capabilities</div></div></div>
+    <div class="tech-item"><div class="tech-dot blue"></div><div><div class="tech-name">Salesforce Data Cloud</div><div class="tech-cat">Unified customer data platform</div></div></div>
+  </div>
+</div>
+
+</body>
+</html>

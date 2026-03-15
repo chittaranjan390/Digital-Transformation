@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NirmanOne — Salesforce Console · Role-Based Access</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   NIRMANONE SF CONSOLE — Lightning Design System · 4 Personas
+   Adapted from Veltrac India SF Console architecture
+   ════════════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* SF Lightning base */
+  --sf-navy:#032D60;--sf-blue:#0176D3;--sf-blue-lt:#EEF4FF;
+  --sf-bg:#F3F2F2;--sf-bg2:#FAFAF9;--sf-white:#FFFFFF;
+  --sf-border:#DDDBDA;--sf-border-dk:#C9C7C5;
+  --sf-t1:#181818;--sf-t2:#444444;--sf-t3:#706E6B;--sf-t4:#969492;
+  /* NirmanOne brand */
+  --n1-orange:#D95F08;--n1-orange2:#F07020;--n1-navy:#06111E;
+  /* Semantic */
+  --green:#2E844A;--green-lt:#EEF7EE;--green-dk:#194E31;
+  --amber:#A16207;--amber-lt:#FFF7EC;--amber-raw:#F59E0B;
+  --red:#EA001E;--red-lt:#FFF1EF;
+  --purple:#5A1BA9;--purple-lt:#F3EEFF;
+  --teal:#0B827C;--teal-lt:#E8F7F7;
+  /* Persona accents */
+  --p1:#0176D3;  /* Buyer AM - SF blue */
+  --p2:#059669;  /* Ops/KYC - green */
+  --p3:#D97706;  /* Seller RM - amber */
+  --p4:#032D60;  /* Admin - navy */
+  --radius:4px;--radius-md:8px;--radius-lg:12px;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.09);--shadow:0 4px 16px rgba(0,0,0,.1);
+  --font:'DM Sans','Helvetica Neue',sans-serif;
+  --font-disp:'DM Serif Display',Georgia,serif;
+  --nav-h:52px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--sf-bg);color:var(--sf-t1);font-size:13px;line-height:1.5;overflow-x:hidden;min-height:100vh}
+
+/* ── UTILS ── */
+.hidden{display:none!important}
+.flex{display:flex}.ai-c{align-items:center}.jc-sb{justify-content:space-between}
+.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.flex-1{flex:1}.fw-6{font-weight:600}.fw-7{font-weight:700}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.text-muted{color:var(--sf-t3)}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}
+.mono{font-family:'Consolas',monospace;font-size:11.5px}
+.two-col{display:grid;grid-template-columns:1fr 300px;gap:14px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.b-green{background:var(--green-lt);color:var(--green);border:1px solid #B3D9B6}
+.b-amber{background:var(--amber-lt);color:var(--amber);border:1px solid #F5D5A0}
+.b-red{background:var(--red-lt);color:var(--red);border:1px solid #FFBBB8}
+.b-blue{background:var(--sf-blue-lt);color:var(--sf-blue);border:1px solid #A8C7F0}
+.b-purple{background:var(--purple-lt);color:var(--purple);border:1px solid #C9B1E8}
+.b-gray{background:#F3F2F2;color:#706E6B;border:1px solid #DDDBDA}
+.b-navy{background:var(--sf-navy);color:white;border:1px solid var(--sf-navy)}
+.b-orange{background:#FFF0E6;color:#8A3A00;border:1px solid #F5B88A}
+.b-live{background:#fff0f0;color:#cc0000;border:1px solid #ffaaaa;animation:livepulse 2s infinite}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ── CARDS ── */
+.sf-card{background:var(--sf-white);border:1px solid var(--sf-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);margin-bottom:14px}
+.sf-card-hdr{padding:11px 16px;border-bottom:1px solid var(--sf-border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sf-card-title{font-weight:700;font-size:13.5px;color:var(--sf-t1);display:flex;align-items:center;gap:7px}
+.sf-card-body{padding:14px 16px}
+
+/* ── KPI GRID ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:var(--sf-white);border:1px solid var(--sf-border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.kpi-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);margin-bottom:3px}
+.kpi-val{font-family:var(--font-disp);font-size:28px;color:var(--sf-t1);line-height:1;margin-bottom:2px}
+.kpi-sub{font-size:11.5px;color:var(--sf-t3)}
+
+/* ── TABLES ── */
+.t-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:#F3F2F2;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--sf-t3);padding:8px 14px;border-bottom:1px solid var(--sf-border);text-align:left;white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid #F3F2F2;color:var(--sf-t2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAF9}
+.sf-link{color:var(--sf-blue);cursor:pointer;font-weight:600;text-decoration:none}
+.sf-link:hover{text-decoration:underline}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:var(--radius);font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--sf-blue);color:white;border-color:var(--sf-blue)}.btn-primary:hover{background:#014FA1}
+.btn-success{background:var(--green);color:white;border-color:var(--green)}.btn-success:hover{background:#1a5c2e}
+.btn-danger{background:var(--red);color:white;border-color:var(--red)}
+.btn-neutral{background:white;color:var(--sf-t2);border-color:var(--sf-border-dk)}.btn-neutral:hover{background:#F3F2F2}
+.btn-orange{background:var(--n1-orange);color:white;border-color:var(--n1-orange)}.btn-orange:hover{background:var(--n1-orange2)}
+.btn-sm{padding:4px 10px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px}
+
+/* ── FORMS ── */
+.sf-input{padding:7px 10px;border:1px solid var(--sf-border-dk);border-radius:var(--radius);font-family:var(--font);font-size:12.5px;color:var(--sf-t1);background:white;outline:none;transition:border-color .15s;width:100%}
+.sf-input:focus{border-color:var(--sf-blue);box-shadow:0 0 0 3px rgba(1,118,211,.12)}
+.sf-select{padding:6px 10px;border:1px solid var(--sf-border-dk);border-radius:var(--radius);font-family:var(--font);font-size:12.5px;background:white;cursor:pointer;outline:none}
+.sf-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--sf-t2);display:block;margin-bottom:4px}
+
+/* ── LIGHTNING PATH ── */
+.lpath{display:flex;background:white;border:1px solid var(--sf-border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:14px}
+.lpath-step{flex:1;padding:9px 12px;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%,12px 50%);text-align:center;cursor:default}
+.lpath-step:first-child{clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%)}
+.lpath-step:last-child{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,12px 50%)}
+.lpath-step .ls-chk{font-size:13px;display:block;margin-bottom:1px}
+.lpath-step .ls-lbl{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lpath-step.done{background:#EEF7EE;color:var(--green)}
+.lpath-step.active{background:var(--sf-blue);color:white}
+.lpath-step.future{background:#F3F2F2;color:var(--sf-t3)}
+.lpath-step[onclick]:hover{filter:brightness(.92);cursor:pointer}
+
+/* ── TIMELINE ── */
+.timeline-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #F3F2F2}
+.timeline-item:last-child{border-bottom:none}
+.tl-icon{width:28px;height:28px;border-radius:50%;background:#F3F2F2;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.tl-title{font-size:12.5px;font-weight:600;color:var(--sf-t1)}
+.tl-sub{font-size:11.5px;color:var(--sf-t3);margin-top:1px}
+.tl-time{font-size:11px;color:var(--sf-t4);margin-top:1px}
+
+/* ── SAP/INTEGRATION PILL ── */
+.int-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.int-ok{background:#EEF7EE;color:#2E844A}.int-pend{background:#FFF7EC;color:#A16207}.int-fail{background:#FFF1EF;color:#EA001E}
+.int-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.int-pend .int-dot{animation:intpulse 1.5s infinite}
+@keyframes intpulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── PROGRESS BAR ── */
+.prog{height:6px;background:#DDDBDA;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:var(--sf-blue)}
+.prog-fill.green{background:var(--green)}.prog-fill.amber{background:var(--amber-raw)}.prog-fill.red{background:var(--red)}
+
+/* ── SIDEBAR ── */
+.side-card{background:var(--sf-white);border:1px solid var(--sf-border);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
+.side-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);margin-bottom:10px}
+.side-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #F3F2F2;font-size:12.5px}
+.side-row:last-child{border-bottom:none}
+
+/* ── PERMISSION MATRIX ── */
+.perm-matrix th,.perm-matrix td{padding:8px 12px;font-size:12px}
+.perm-cell{text-align:center}
+.perm-y{color:var(--green);font-size:14px;font-weight:700}
+.perm-n{color:#DDDBDA;font-size:14px}
+.perm-r{color:var(--amber);font-size:12px;font-weight:600}
+
+/* ── GLOBAL NAV ── */
+#gnav{height:var(--nav-h);background:var(--n1-navy);display:flex;align-items:center;padding:0 14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3);gap:0}
+.gnav-appname{color:white;font-weight:700;font-size:14px;padding:0 12px 0 6px;border-right:1px solid rgba(255,255,255,.2);margin-right:10px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.gnav-tabs{display:flex;height:100%;flex:1;overflow-x:auto;scrollbar-width:none}
+.gnav-tabs::-webkit-scrollbar{display:none}
+.gnav-tab{display:flex;align-items:center;gap:5px;padding:0 14px;color:rgba(255,255,255,.7);font-size:12.5px;font-weight:500;cursor:pointer;height:100%;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.gnav-tab:hover{color:white;background:rgba(255,255,255,.07)}
+.gnav-tab.active{color:white;border-bottom-color:var(--n1-orange)}
+.gnav-tab-close{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;margin-left:4px;color:rgba(255,255,255,.5);font-size:10px;transition:all .12s}
+.gnav-tab-close:hover{background:rgba(255,255,255,.2);color:white}
+.gnav-more-btn{display:flex;align-items:center;gap:4px;padding:0 12px;color:rgba(255,255,255,.7);font-size:12.5px;font-weight:600;cursor:pointer;height:100%;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.gnav-more-btn:hover{color:white;background:rgba(255,255,255,.07)}
+.gnav-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.back-to-app{display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,.9);font-size:12px;font-weight:600;transition:all .15s;white-space:nowrap;text-decoration:none}
+.back-to-app:hover{background:rgba(217,95,8,.4);border-color:var(--n1-orange)}
+.persona-switch-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,.9);font-size:12px;font-weight:600;transition:all .15s}
+.persona-switch-btn:hover{background:rgba(255,255,255,.18)}
+.persona-avatar{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0}
+.persona-accent-bar{width:3px;height:18px;border-radius:2px}
+#sf-content{padding:14px 22px;min-height:calc(100vh - var(--nav-h))}
+
+/* ── RECORD HEADER ── */
+.rec-hdr{background:var(--sf-white);border:1px solid var(--sf-border);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.rec-name{font-family:var(--font-disp);font-size:20px;color:var(--sf-t1);margin-bottom:10px}
+.rec-highlights{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.rec-hl-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--sf-t3);margin-bottom:2px}
+.rec-hl-val{font-size:13px;font-weight:600;color:var(--sf-t1)}
+.rec-actions{display:flex;gap:7px;flex-wrap:wrap}
+
+/* ── FIELDS GRID ── */
+.fields-grid{display:grid;grid-template-columns:1fr 1fr}
+.f-row{padding:8px 10px;border-bottom:1px solid #F3F2F2}
+.f-row:nth-child(even){border-left:1px solid #F3F2F2}
+.f-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--sf-t3);margin-bottom:2px}
+.f-val{font-size:12.5px;color:var(--sf-t1);font-weight:500}
+.fields-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);padding:10px 0 6px;border-bottom:1px solid var(--sf-border);margin-bottom:4px}
+
+/* ── RELATED LISTS ── */
+.rec-layout{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+.rec-tab-bar{display:flex;border-bottom:2px solid var(--sf-border);padding:0 2px}
+.rec-tab-item{padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--sf-t3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.rec-tab-item:hover{color:var(--sf-t1)}
+.rec-tab-item.active{color:var(--sf-blue);border-bottom-color:var(--sf-blue)}
+.rec-tab-content{padding:16px}
+.rs{border:1px solid var(--sf-border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden;background:white}
+.rs-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;background:#FAFAF9;user-select:none}
+.rs-hdr:hover{background:#F3F2F2}
+.rs-left{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--sf-t1)}
+.rs-obj-icon{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:white}
+.rs-count{color:var(--sf-t3);font-weight:500;font-size:12px}
+.rs-actions{display:flex;align-items:center;gap:6px}
+.rs-chev{color:var(--sf-t4);font-size:11px;transition:transform .2s;margin-left:4px}
+.rs-chev.closed{transform:rotate(-90deg)}
+.rs-body{border-top:1px solid var(--sf-border)}
+.rs-empty{padding:12px 16px;font-size:12.5px;color:var(--sf-t3);font-style:italic}
+
+/* ── LIST VIEW ── */
+.lv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.lv-title{font-family:var(--font-disp);font-size:20px;color:var(--sf-t1);display:flex;align-items:center;gap:10px}
+.lv-view-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;background:white;border:1px solid var(--sf-border-dk);border-radius:var(--radius);font-size:12.5px;font-weight:600;cursor:pointer;color:var(--sf-t2)}
+.lv-view-btn:hover{background:#F3F2F2}
+
+/* ── ACCESS WALL ── */
+.access-wall{background:#FFF7EC;border:1px solid #F5D5A0;border-radius:var(--radius-md);padding:12px 16px;color:var(--amber);font-size:12.5px;font-weight:600;margin-top:10px}
+
+/* ── MORE DROPDOWN ── */
+#more-menu{display:none;position:fixed;z-index:500;background:var(--sf-white);border:1px solid var(--sf-border);border-radius:var(--radius-md);box-shadow:0 8px 32px rgba(0,0,0,.18);width:230px;overflow:hidden}
+#more-menu.open{display:block}
+.more-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid #F3F2F2;font-size:13px;color:var(--sf-t1);transition:background .1s}
+.more-item:last-child{border-bottom:none}
+.more-item:hover{background:var(--sf-blue-lt);color:var(--sf-blue)}
+.more-item.is-open{font-weight:600;color:var(--sf-blue)}
+.more-item-icon{width:26px;height:26px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+#more-backdrop{display:none;position:fixed;inset:0;z-index:499}
+#more-backdrop.open{display:block}
+
+/* ── PERSONA MODAL ── */
+#persona-modal{display:none;position:fixed;inset:0;background:rgba(3,45,96,.88);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#persona-modal.open{display:flex}
+.pm-wrap{background:var(--sf-white);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.3);width:780px;max-width:96vw;overflow:hidden}
+.pm-header{background:var(--n1-navy);padding:28px 32px;position:relative}
+.pm-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pm-logo-mark{width:34px;height:34px;background:var(--n1-orange);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.pm-logo-mark svg{width:20px;height:20px}
+.pm-title{font-family:var(--font-disp);font-size:24px;color:white;margin-bottom:2px}
+.pm-sub{font-size:12.5px;color:rgba(255,255,255,.45);letter-spacing:.3px}
+.pm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0}
+.pm-card{padding:22px 24px;cursor:pointer;border-right:1px solid var(--sf-border);border-bottom:1px solid var(--sf-border);transition:all .15s;position:relative;overflow:hidden}
+.pm-card:nth-child(2n){border-right:none}
+.pm-card:nth-child(3),.pm-card:nth-child(4){border-bottom:none}
+.pm-card:hover{background:#F8FAFC}
+.pm-card.active-persona{background:var(--sf-blue-lt)}
+.pm-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.pm-card:nth-child(1)::before{background:var(--p1)}
+.pm-card:nth-child(2)::before{background:var(--p2)}
+.pm-card:nth-child(3)::before{background:var(--p3)}
+.pm-card:nth-child(4)::before{background:var(--p4)}
+.pm-persona-icon{font-size:26px;margin-bottom:8px}
+.pm-persona-name{font-weight:700;font-size:14px;color:var(--sf-t1);margin-bottom:2px}
+.pm-persona-role{font-size:12px;color:var(--sf-t3);margin-bottom:8px}
+.pm-caps{font-size:11px;color:var(--sf-t2);line-height:1.7}
+.pm-license{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:3px;background:#F1F5F9;color:#64748B;display:inline-block;margin-top:8px}
+.pm-footer{padding:12px 24px;background:#F8FAFC;border-top:1px solid var(--sf-border);font-size:11.5px;color:var(--sf-t3);display:flex;align-items:center;justify-content:space-between}
+.live-indicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--red)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:intpulse 1.2s infinite}
+
+/* ── SIGNZY KYC MODAL ── */
+#signzy-modal{display:none;position:fixed;inset:0;background:rgba(3,45,96,.82);z-index:4000;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+#signzy-modal.open{display:flex}
+.sz-wrap{background:white;border-radius:var(--radius-lg);box-shadow:0 24px 80px rgba(0,0,0,.25);width:600px;max-width:96vw;overflow:hidden;max-height:92vh;overflow-y:auto}
+.sz-header{background:var(--n1-navy);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.sz-title{font-family:var(--font-disp);font-size:18px;color:white}
+.sz-close{color:rgba(255,255,255,.6);cursor:pointer;font-size:20px;line-height:1;padding:2px 6px}
+.sz-close:hover{color:white}
+.sz-steps{display:flex;background:#F8FAFC;border-bottom:1px solid var(--sf-border)}
+.sz-step{flex:1;padding:12px 8px;text-align:center;font-size:11.5px;font-weight:600;color:var(--sf-t3);border-bottom:2px solid transparent;position:relative}
+.sz-step.active{color:var(--sf-blue);border-bottom-color:var(--sf-blue);background:white}
+.sz-step.done{color:var(--green);border-bottom-color:var(--green)}
+.sz-step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:2px solid currentColor;font-size:11px;font-weight:700;margin-bottom:4px}
+.sz-body{padding:20px 24px}
+.sz-company-banner{background:linear-gradient(135deg,var(--n1-navy),#0C1D30);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.sz-result-card{border:1px solid var(--sf-border);border-radius:var(--radius-md);overflow:hidden;margin:14px 0}
+.sz-result-hdr{background:#F8FAFC;padding:8px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);border-bottom:1px solid var(--sf-border);display:flex;align-items:center;justify-content:space-between}
+.sz-result-row{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #F3F2F2;font-size:12.5px}
+.sz-result-row:last-child{border-bottom:none}
+.sz-result-lbl{color:var(--sf-t3);font-weight:500}
+.sz-result-val{font-weight:600;color:var(--sf-t1)}
+.sz-ref{font-family:'Consolas',monospace;font-size:11px;color:var(--sf-t4);margin-top:4px}
+.sz-check-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #F3F2F2;font-size:12.5px;transition:background .2s}
+.sz-check-item:last-child{border-bottom:none}
+.sz-check-item.checking{background:#EEF4FF}
+.sz-check-item.done-ok{background:#EEF7EE}
+.sz-check-item.done-fail{background:#FFF1EF}
+.sz-check-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.sz-running-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--sf-blue);border-top-color:transparent;animation:szSpin .7s linear infinite;flex-shrink:0}
+@keyframes szSpin{to{transform:rotate(360deg)}}
+.sz-footer{padding:16px 24px;border-top:1px solid var(--sf-border);display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FAFAF9}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:12px;flex-wrap:wrap}
+.breadcrumb a{color:var(--sf-blue);cursor:pointer;font-weight:500}
+.breadcrumb a:hover{text-decoration:underline}
+.breadcrumb span{color:var(--sf-t4)}
+
+/* ── TOAST ── */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.sf-toast{background:var(--n1-navy);color:white;padding:10px 14px;border-radius:var(--radius-md);font-size:12.5px;font-weight:500;box-shadow:var(--shadow);max-width:360px;animation:toastIn .2s ease;display:flex;gap:8px;align-items:flex-start;border-left:3px solid rgba(255,255,255,.3);pointer-events:all}
+.sf-toast.success{border-left-color:#6EE7B7;background:#064E3B}
+.sf-toast.error{border-left-color:var(--red);background:#7F1D1D}
+.sf-toast.warning{border-left-color:var(--amber-raw);background:#78350F}
+@keyframes toastIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<!-- GLOBAL NAV -->
+<nav id="gnav">
+  <div class="gnav-appname">
+    <div style="width:28px;height:28px;background:var(--n1-orange);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><rect x="2" y="8" width="7" height="10" rx="1" fill="white" opacity=".9"/><rect x="11" y="4" width="7" height="14" rx="1" fill="white"/><rect x="2" y="2" width="7" height="4" rx="1" fill="white" opacity=".5"/></svg>
+    </div>
+    <span>NirmanOne · Salesforce</span>
+  </div>
+  <div class="gnav-tabs" id="gnav-tabs"></div>
+  <div class="gnav-right">
+    <a class="back-to-app" href="nirmanone_v3.html" target="_blank">← Buyer App</a>
+    <div class="persona-switch-btn" onclick="openPersonaModal()">
+      <div class="persona-accent-bar" id="gnav-accent"></div>
+      <div class="persona-avatar" id="gnav-avatar">—</div>
+      <span id="gnav-persona-name">Select Persona</span>
+      ▾
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div id="sf-content"></div>
+
+<!-- MORE MENU -->
+<div id="more-backdrop" onclick="closeMoreMenu()"></div>
+<div id="more-menu"></div>
+
+<!-- PERSONA MODAL -->
+<div id="persona-modal">
+  <div class="pm-wrap">
+    <div class="pm-header">
+      <div class="pm-logo">
+        <div class="pm-logo-mark"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="2" y="8" width="7" height="10" rx="1" fill="white" opacity=".9"/><rect x="11" y="4" width="7" height="14" rx="1" fill="white"/><rect x="2" y="2" width="7" height="4" rx="1" fill="white" opacity=".5"/></svg></div>
+        <div>
+          <div class="pm-title">NirmanOne — Salesforce Console</div>
+          <div class="pm-sub">Role-Based Access · 4 Personas · Sales Cloud</div>
+        </div>
+      </div>
+    </div>
+    <div class="pm-grid" id="pm-grid"></div>
+    <div class="pm-footer">
+      <span>All personas run on <strong>Sales Cloud</strong> — single license type</span>
+      <span class="live-indicator"><span class="live-dot"></span> Live data from NirmanOne Buyer App</span>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNZY KYC MODAL -->
+<div id="signzy-modal">
+  <div class="sz-wrap">
+    <div class="sz-header">
+      <div>
+        <div class="sz-title">Signzy KYC Verification</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,.5);margin-top:2px" id="sz-company-label">—</div>
+      </div>
+      <span class="sz-close" onclick="closeSignzy()">✕</span>
+    </div>
+    <div class="sz-steps">
+      <div class="sz-step active" id="sz-s1"><div class="sz-step-num">1</div><br>GST Verification</div>
+      <div class="sz-step future" id="sz-s2"><div class="sz-step-num">2</div><br>PAN &amp; Director</div>
+      <div class="sz-step future" id="sz-s3"><div class="sz-step-num">3</div><br>Bank Penny Drop</div>
+    </div>
+    <div class="sz-body" id="sz-body"></div>
+    <div class="sz-footer" id="sz-footer"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// LIVE BRIDGE — read from NirmanOne buyer app localStorage
+// ════════════════════════════════════════════════════════════════════
+const LIVE = {
+  user:   () => { try { return JSON.parse(localStorage.getItem('n1_user') || 'null'); } catch(e){ return null; } },
+  rfqs:   () => { try { return JSON.parse(localStorage.getItem('n1_rfqs') || '[]'); } catch(e){ return []; } },
+  orders: () => { try { return JSON.parse(localStorage.getItem('n1_orders') || '[]'); } catch(e){ return []; } },
+};
+
+// ════════════════════════════════════════════════════════════════════
+// MOCK DATA
+// ════════════════════════════════════════════════════════════════════
+const BUYER_ACCOUNTS_MOCK = [
+  {id:'BA-001',company:'Sharma Construction Pvt. Ltd.',gst:'27AABCS1429B1Z1',pan:'AABCS1429B',sfId:'ACC-2025-00001',type:'Contractor',territory:'Pune / Maharashtra',owner:'Priya Menon',kycStatus:'Approved',creditLimit:5000000,creditUsed:1200000,paymentTerms:'Net 30',annualSpend:8400000,phone:'+91 98765 43210',email:'contact@sharmaconst.com',contacts:[{name:'Rajesh Sharma',title:'MD',phone:'+91 98765 43210',email:'contact@sharmaconst.com',primary:true}]},
+  {id:'BA-002',company:'Patel Infratech Ltd.',gst:'24AABCP4567C2Z6',pan:'AABCP4567C',sfId:'ACC-2025-00002',type:'Infrastructure',territory:'Ahmedabad / Gujarat',owner:'Priya Menon',kycStatus:'Approved',creditLimit:8000000,creditUsed:3200000,paymentTerms:'Net 45',annualSpend:14200000,phone:'+91 97277 88901',email:'procurement@patelinf.co.in',contacts:[{name:'Anand Patel',title:'Purchase Manager',phone:'+91 97277 88901',email:'procurement@patelinf.co.in',primary:true}]},
+  {id:'BA-003',company:'Nair Builders & Developers',gst:'32AAACN7890D3Z5',pan:'AAACN7890D',sfId:'ACC-2025-00003',type:'Real Estate Developer',territory:'Kochi / Kerala',owner:'Sanjay Iyer',kycStatus:'Approved',creditLimit:3000000,creditUsed:0,paymentTerms:'Net 60',annualSpend:4100000,phone:'+91 94470 33210',email:'md@nairbuilders.in',contacts:[{name:'Vijay Nair',title:'Director',phone:'+91 94470 33210',email:'md@nairbuilders.in',primary:true}]},
+  {id:'BA-004',company:'Sunrise Logistics Pvt Ltd',gst:'27AABCS1234A1Z5',pan:'AABCS1234A',sfId:'ACC-2025-00004',type:'Contractor',territory:'Mumbai / Maharashtra',owner:'Priya Menon',kycStatus:'Pending',creditLimit:0,creditUsed:0,paymentTerms:'—',annualSpend:0,phone:'+91 98200 33441',email:'deepak@sunriselogistics.in',contacts:[{name:'Deepak Shah',title:'MD',phone:'+91 98200 33441',email:'deepak@sunriselogistics.in',primary:true}]},
+];
+
+const RFQ_STAGES = ['New RFQ','Seller Matching','Quotes Received','Quote Selected','Order Placed','In Transit','Fulfilled'];
+
+const RFQ_MOCK = [
+  {id:'RFQ-2025-0041',oppId:'OPP-10041',oppName:'Sharma Construction — Fe 500D TMT Q1 2025',accountId:'BA-001',account:'Sharma Construction Pvt. Ltd.',product:'Fe 500D TMT Bars',qty:50,unit:'MT',pin:'411019',date:'10 Jan 2025',closeDate:'31 Jan 2025',probability:90,stage:3,status:'Quoted',quotes:3,selectedQuote:'QT-10048',owner:'Priya Menon',amount:3425000,blackbuckSync:'synced'},
+  {id:'RFQ-2025-0039',oppId:'OPP-10039',oppName:'Sharma Construction — OPC 53 Cement Q1 2025',accountId:'BA-001',account:'Sharma Construction Pvt. Ltd.',product:'OPC 53 Cement',qty:200,unit:'bags',pin:'411019',date:'08 Jan 2025',closeDate:'15 Feb 2025',probability:40,stage:1,status:'Pending',quotes:0,selectedQuote:null,owner:'Priya Menon',amount:84000,blackbuckSync:'pending'},
+  {id:'RFQ-2025-0031',oppId:'OPP-10031',oppName:'Sharma Construction — Bitumen VG-30 Dec 2024',accountId:'BA-001',account:'Sharma Construction Pvt. Ltd.',product:'Bitumen VG-30',qty:20,unit:'MT',pin:'411019',date:'02 Jan 2025',closeDate:'20 Jan 2025',probability:100,stage:6,status:'Fulfilled',quotes:2,selectedQuote:'QT-10036',owner:'Priya Menon',amount:1160000,blackbuckSync:'synced'},
+  {id:'RFQ-2025-0044',oppId:'OPP-10044',oppName:'Patel Infratech — MS ERW Pipes Q1 2025',accountId:'BA-002',account:'Patel Infratech Ltd.',product:'MS ERW Pipes B Class',qty:30,unit:'MT',pin:'380001',date:'12 Jan 2025',closeDate:'28 Jan 2025',probability:70,stage:4,status:'Order Placed',quotes:4,selectedQuote:'QT-10051',owner:'Priya Menon',amount:2220000,blackbuckSync:'synced'},
+  {id:'RFQ-2025-0040',oppId:'OPP-10040',oppName:'Nair Builders — Fe 550D TMT Q1 2025',accountId:'BA-003',account:'Nair Builders & Developers',product:'Fe 550D TMT Bars',qty:80,unit:'MT',pin:'682024',date:'09 Jan 2025',closeDate:'05 Feb 2025',probability:60,stage:2,status:'Quotes Received',quotes:3,selectedQuote:null,owner:'Sanjay Iyer',amount:5696000,blackbuckSync:'pending'},
+];
+
+const QUOTE_MOCK = [
+  {id:'QT-10048',rfqId:'RFQ-2025-0041',seller:'Steel Mart India Pvt. Ltd.',product:'Fe 500D TMT Bars',qty:50,unitPrice:68200,freight:3200,landingCost:71400,grandTotal:3425000,status:'Accepted',validUntil:'25 Jan 2025'},
+  {id:'QT-10049',rfqId:'RFQ-2025-0041',seller:'JSR Steel Works',product:'Fe 500D TMT Bars',qty:50,unitPrice:68500,freight:1800,landingCost:70300,grandTotal:3374400,status:'Declined',validUntil:'22 Jan 2025'},
+  {id:'QT-10036',rfqId:'RFQ-2025-0031',seller:'Road Tech Materials',product:'Bitumen VG-30',qty:20,unitPrice:57200,freight:2800,landingCost:60000,grandTotal:1416000,status:'Accepted',validUntil:'18 Jan 2025'},
+  {id:'QT-10051',rfqId:'RFQ-2025-0044',seller:'Pipe Works India',product:'MS ERW Pipes B Class',qty:30,unitPrice:73600,freight:1800,landingCost:75400,grandTotal:2671200,status:'Accepted',validUntil:'28 Jan 2025'},
+];
+
+const SELLER_ACCOUNTS = [
+  {id:'S001',name:'Steel Mart India Pvt. Ltd.',gst:'27AABCS9999A1Z1',type:'Manufacturer',rm:'Arjun Khanna',kycStatus:'Approved',rating:4.8,transactions:2840,categories:['Steel TMT','Steel Pipes'],monthlyGMV:4200000,godownPin:'411001',city:'Pune',status:'Active',disputesOpen:0,catalogItems:12},
+  {id:'S002',name:'JSR Steel Works',gst:'27AAAJSR1234B2Z2',type:'Manufacturer',rm:'Arjun Khanna',kycStatus:'Approved',rating:4.9,transactions:3100,categories:['Steel TMT'],monthlyGMV:3800000,godownPin:'400001',city:'Mumbai',status:'Active',disputesOpen:0,catalogItems:8},
+  {id:'S003',name:'Maharashtra Steel Hub',gst:'27AAAMS5678C3Z3',type:'Dealer',rm:'Arjun Khanna',kycStatus:'Approved',rating:4.3,transactions:680,categories:['Steel TMT','Steel Coils'],monthlyGMV:1100000,godownPin:'421301',city:'Thane',status:'Active',disputesOpen:1,catalogItems:6},
+  {id:'S004',name:'Cement Corp Maharashtra',gst:'27AAACC2345D4Z4',type:'Manufacturer',rm:'Arjun Khanna',kycStatus:'Approved',rating:4.6,transactions:1640,categories:['Cement'],monthlyGMV:2600000,godownPin:'411014',city:'Pune',status:'Active',disputesOpen:0,catalogItems:4},
+  {id:'S005',name:'Bitumen India Corp',gst:'27AAABI7890E5Z5',type:'Distributor',rm:'Arjun Khanna',kycStatus:'Approved',rating:4.5,transactions:980,categories:['Bitumen'],monthlyGMV:1800000,godownPin:'400088',city:'Mumbai',status:'Active',disputesOpen:0,catalogItems:3},
+  {id:'S006',name:'Hollow Section Hub',gst:'27AAAHSH3456F6Z6',type:'Dealer',rm:'Arjun Khanna',kycStatus:'Pending',rating:4.3,transactions:510,categories:['Steel Pipes'],monthlyGMV:620000,godownPin:'400705',city:'Navi Mumbai',status:'Active',disputesOpen:0,catalogItems:5},
+];
+
+const CATALOG_MOCK = [
+  {sellerId:'S001',seller:'Steel Mart India',sku:'P001',product:'Fe 500D TMT Bars',category:'Steel TMT',price:68200,stock:200,unit:'MT',grade:'IS:1786',lastUpdated:'Today'},
+  {sellerId:'S002',seller:'JSR Steel Works',sku:'P001',product:'Fe 500D TMT Bars',category:'Steel TMT',price:68500,stock:150,unit:'MT',grade:'IS:1786',lastUpdated:'Today'},
+  {sellerId:'S003',seller:'Maharashtra Steel Hub',sku:'P001',product:'Fe 500D TMT Bars',category:'Steel TMT',price:67800,stock:300,unit:'MT',grade:'IS:1786',lastUpdated:'Yesterday'},
+  {sellerId:'S004',seller:'Cement Corp Maharashtra',sku:'P002',product:'OPC 53 Grade Cement',category:'Cement',price:418,stock:5000,unit:'bags',grade:'IS:12269',lastUpdated:'Today'},
+  {sellerId:'S005',seller:'Bitumen India Corp',sku:'P003',product:'Bitumen VG-30',category:'Bitumen',price:57800,stock:100,unit:'MT',grade:'IS:73',lastUpdated:'2 days ago'},
+  {sellerId:'S001',seller:'Steel Mart India',sku:'P004',product:'MS ERW Pipes B Class',category:'Steel Pipes',price:73800,stock:80,unit:'MT',grade:'IS:1239',lastUpdated:'Today'},
+  {sellerId:'S002',seller:'JSR Steel Works',sku:'P008',product:'Fe 550D TMT Bars',category:'Steel TMT',price:71200,stock:90,unit:'MT',grade:'IS:1786',lastUpdated:'Today'},
+];
+
+const KYC_QUEUE_MOCK = [
+  {id:'KYC-001',company:'Sunrise Logistics Pvt Ltd',gst:'27AABCS1234A1Z5',pan:'AABCS1234A',contact:'Deepak Shah',mobile:'98200 33441',source:'B2B Portal',submitted:'2 hrs ago',bank:'',ifsc:'',status:'Ready',docs:{gst:true,trade:true,pan:true,bank:false}},
+  {id:'KYC-003',company:'Bharat Mining Equip Co',gst:'36AADCB5678B2Z6',pan:'AADCB5678B',contact:'Ravi Naidu',mobile:'90002 11987',source:'IndiaMart',submitted:'4 hrs ago',bank:'',ifsc:'',status:'Incomplete',docs:{gst:true,trade:true,pan:false,bank:false}},
+  {id:'KYC-004',company:'Kiran Fleet Solutions',gst:'24AABCK3456D4Z8',pan:'AABCK3456D',contact:'Kiran Mehta',mobile:'98790 22341',source:'B2B Portal',submitted:'3 days ago',bank:'',ifsc:'',status:'Ready',docs:{gst:true,trade:true,pan:true,bank:true}},
+];
+
+const DISPUTES_MOCK = [
+  {id:'DSP-001',rfqId:'RFQ-2025-0028',buyer:'Sharma Construction',seller:'Steel Mart India',issue:'Short delivery — 48 MT received vs 50 MT ordered',raised:'5 Jan 2025',status:'Open',priority:'High'},
+  {id:'DSP-002',rfqId:'RFQ-2025-0019',buyer:'Patel Infratech Ltd.',seller:'Maharashtra Steel Hub',issue:'Grade mismatch — Fe 500 supplied instead of Fe 500D',raised:'28 Dec 2024',status:'Resolved',priority:'Medium'},
+];
+
+const AUDIT_LOG = [
+  {time:'2025-01-14 15:42',level:'INFO', service:'Signzy',     user:'Meera Iyer',    msg:'KYC Approved: Sharma Construction Pvt. Ltd. — ACC-2025-00001 created. Credit limit ₹50L set.'},
+  {time:'2025-01-14 14:10',level:'INFO', service:'SF-Flow',    user:'System',         msg:'RFQ-2025-0041 auto-matched 3 sellers. OPP-10041 created. Quotes generated.'},
+  {time:'2025-01-13 11:30',level:'WARN', service:'BlackBuck',  user:'System',         msg:'Freight webhook timeout for RFQ-2025-0039. Retry #2 failed. Manual rate applied.'},
+  {time:'2025-01-12 09:15',level:'INFO', service:'Signzy',     user:'Meera Iyer',    msg:'KYC Approved: Patel Infratech Ltd. — ACC-2025-00002 created. Credit limit ₹80L set.'},
+  {time:'2025-01-10 16:05',level:'INFO', service:'SF-Flow',    user:'Priya Menon',   msg:'Order placed: RFQ-2025-0031 → ORD-2025-3812 · Bitumen VG-30 · ₹11,60,000'},
+  {time:'2025-01-08 10:20',level:'ERROR',service:'Payment',    user:'System',         msg:'NEFT confirmation not received for ORD-2025-3801. Auto-reminder sent to Sharma Construction.'},
+  {time:'2025-01-07 08:00',level:'INFO', service:'Admin',      user:'Suresh K',       msg:'Named Credential SIGNZY_PROD OAuth token refreshed successfully.'},
+];
+
+// ════════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════════
+const state = {
+  persona: null,
+  activeTab: null,
+  openTabs: [],
+  selectedAccount: null,
+  selectedAccountTab: 'details',
+  selectedRFQ: null,
+  selectedRFQTab: 'details',
+  selectedSeller: null,
+  selectedSellerTab: 'details',
+  accountListView: 'My Accounts',
+};
+
+// Merge live user into KYC queue + buyer accounts at runtime
+function getLiveKYCQueue() {
+  const q = [...KYC_QUEUE_MOCK];
+  const u = LIVE.user();
+  if (u && u.gst && !KYC_QUEUE_MOCK.find(k => k.gst === u.gst) && !BUYER_ACCOUNTS_MOCK.find(a => a.gst === u.gst)) {
+    q.unshift({id:'KYC-LIVE',company:u.company||'New Company',gst:u.gst,pan:u.pan||'',contact:u.name||'—',mobile:u.phone||'—',source:'B2B Portal (Live)',submitted:'Just now',bank:'',ifsc:'',status:'Ready',docs:{gst:true,trade:true,pan:true,bank:false},isLive:true});
+  }
+  return q;
+}
+
+function getBuyerAccounts() {
+  const accts = [...BUYER_ACCOUNTS_MOCK];
+  const u = LIVE.user();
+  if (u && u.sfAccountId && !accts.find(a => a.sfAccountId === u.sfAccountId)) {
+    accts.unshift({id:'BA-LIVE',company:u.company,gst:u.gst,pan:u.pan,sfId:u.sfAccountId,type:u.bizType||'Contractor',territory:'Live · '+u.pin,owner:'Priya Menon',kycStatus:'Pending',creditLimit:0,creditUsed:0,paymentTerms:'—',annualSpend:0,phone:u.phone,email:u.email,contacts:[{name:u.name,title:'Contact',phone:u.phone,email:u.email,primary:true}],isLive:true});
+  }
+  return accts;
+}
+
+function getRFQData() {
+  const rfqs = [...RFQ_MOCK];
+  const u = LIVE.user();
+  LIVE.rfqs().forEach(r => {
+    if (!rfqs.find(x => x.id === r.id)) {
+      const u2 = LIVE.user();
+      const co = u2?.company?.split(' ').slice(0,2).join(' ') || 'Live Account';
+      rfqs.unshift({id:r.id,oppId:'OPP-LIVE-'+r.id,oppName:`${co} — ${r.product} Q1 2025`,accountId:'BA-LIVE',account:u2?.company||'Live Account',product:r.product,qty:r.qty,unit:'MT',pin:u2?.pin||'—',date:r.date,closeDate:'—',probability:40,stage:r.status==='Quoted'?2:r.status==='Fulfilled'?6:1,status:r.status,quotes:r.quotes||0,selectedQuote:null,owner:'Priya Menon',amount:0,blackbuckSync:'pending',isLive:true});
+    }
+  });
+  return rfqs;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PERSONAS
+// ════════════════════════════════════════════════════════════════════
+const PERSONAS = [
+  {
+    id:'buyer-am', name:'Priya Menon', role:'Buyer Account Manager — West India',
+    icon:'💼', license:'Sales Cloud · Standard User', accent:'var(--p1)', initials:'PM',
+    tabs:['home','accounts','rfqs','quotes'],
+    tabLabels:{'home':'🏠 Home','accounts':'🏢 Accounts','rfqs':'💼 Opportunities','quotes':'📄 Quotes'},
+    defaultTab:'home',
+    caps:['West territory buyer accounts','Opportunities auto-created from RFQs — drill to quote comparison','Full account record + credit details','Contacts, payment history'],
+    cannotSee:['KYC verification workflow','Seller accounts or catalog','Integration config','Other territory accounts'],
+  },
+  {
+    id:'ops-kyc', name:'Meera Iyer', role:'Ops / KYC Agent — National',
+    icon:'🔍', license:'Sales Cloud · Standard User', accent:'var(--p2)', initials:'MI',
+    tabs:['home','kyc-queue','accounts'],
+    tabLabels:{'home':'🏠 Home','kyc-queue':'🔍 KYC Queue','accounts':'🏢 Accounts'},
+    defaultTab:'home',
+    caps:['Live KYC queue (Signzy 3-step flow)','Account activation & credit limit set','All accounts — national view','Signzy reference IDs + decision log'],
+    cannotSee:['RFQ pricing data','Seller catalog or pricing','Opportunity pipeline','Discount approval workflow'],
+  },
+  {
+    id:'seller-rm', name:'Arjun Khanna', role:'Seller Relationship Manager',
+    icon:'🏭', license:'Sales Cloud · Standard User', accent:'var(--p3)', initials:'AK',
+    tabs:['home','sellers','catalog','disputes'],
+    tabLabels:{'home':'🏠 Home','sellers':'🏭 Sellers','catalog':'📦 Catalog','disputes':'⚠️ Disputes'},
+    defaultTab:'home',
+    caps:['Seller account records — drill to detail','Catalog: product listings, pricing, stock','Open disputes between buyers & sellers','Seller health KPIs & ratings'],
+    cannotSee:['Buyer account details or credit','KYC workflow','RFQ/Opportunity pipeline','Integration config or logs'],
+  },
+  {
+    id:'sys-admin', name:'Suresh K', role:'Platform Administrator',
+    icon:'🛡️', license:'System Administrator', accent:'var(--p4)', initials:'SK',
+    tabs:['home','integrations','permissions','logs'],
+    tabLabels:{'home':'🏠 Home','integrations':'🔌 Integrations','permissions':'🔐 Permissions','logs':'📋 Audit Log'},
+    defaultTab:'home',
+    caps:['Full org access — all objects','Signzy & BlackBuck integration health','Permission matrix — all profiles','Complete audit log with service tags'],
+    cannotSee:['Nothing — System Admin has unrestricted access'],
+  },
+];
+
+const WAFFLE_OBJECTS = {
+  'buyer-am':  [{icon:'🏠',bg:'var(--p1)',label:'Home',tab:'home'},{icon:'🏢',bg:'#7C3AED',label:'Accounts',tab:'accounts'},{icon:'💼',bg:'var(--n1-orange)',label:'Opportunities',tab:'rfqs'},{icon:'📄',bg:'var(--green)',label:'Quotes',tab:'quotes'}],
+  'ops-kyc':   [{icon:'🏠',bg:'var(--p2)',label:'Home',tab:'home'},{icon:'🔍',bg:'#0176D3',label:'KYC Queue',tab:'kyc-queue'},{icon:'🏢',bg:'#7C3AED',label:'Accounts',tab:'accounts'}],
+  'seller-rm': [{icon:'🏠',bg:'var(--p3)',label:'Home',tab:'home'},{icon:'🏭',bg:'#D97706',label:'Sellers',tab:'sellers'},{icon:'📦',bg:'#0176D3',label:'Catalog',tab:'catalog'},{icon:'⚠️',bg:'var(--red)',label:'Disputes',tab:'disputes'}],
+  'sys-admin': [{icon:'🏠',bg:'var(--p4)',label:'Home',tab:'home'},{icon:'🔌',bg:'#059669',label:'Integrations',tab:'integrations'},{icon:'🔐',bg:'#7C3AED',label:'Permissions',tab:'permissions'},{icon:'📋',bg:'#706E6B',label:'Audit Log',tab:'logs'}],
+};
+
+// ════════════════════════════════════════════════════════════════════
+// PERSONA MODAL
+// ════════════════════════════════════════════════════════════════════
+function openPersonaModal() {
+  const liveUser = LIVE.user();
+  document.getElementById('pm-grid').innerHTML = PERSONAS.map(p => `
+    <div class="pm-card ${state.persona?.id===p.id?'active-persona':''}" onclick="selectPersona('${p.id}')">
+      <div class="pm-persona-icon">${p.icon}</div>
+      <div class="pm-persona-name">${p.name}</div>
+      <div class="pm-persona-role">${p.role}</div>
+      <div class="pm-caps">${p.caps.slice(0,3).map(c=>`· ${c}`).join('<br>')}</div>
+      <span class="pm-license">${p.license}</span>
+      ${p.id==='buyer-am'&&liveUser?`<span class="badge b-live" style="margin-left:8px">● Live user</span>`:''}
+      ${p.id==='ops-kyc'&&getLiveKYCQueue().find(k=>k.isLive)?`<span class="badge b-live" style="margin-left:8px">● ${getLiveKYCQueue().filter(k=>k.isLive).length} new</span>`:''}
+    </div>`).join('');
+  document.getElementById('persona-modal').classList.add('open');
+}
+
+function selectPersona(id) {
+  const p = PERSONAS.find(x => x.id === id);
+  if (!p) return;
+  state.persona = p;
+  state.openTabs = [{id:p.defaultTab, label:p.tabLabels[p.defaultTab]}];
+  state.activeTab = p.defaultTab;
+  state.selectedAccount = null;
+  state.selectedRFQ = null;
+  state.selectedSeller = null;
+  document.getElementById('persona-modal').classList.remove('open');
+  document.getElementById('gnav-accent').style.background = p.accent;
+  document.getElementById('gnav-avatar').textContent = p.initials;
+  document.getElementById('gnav-avatar').style.background = p.accent;
+  document.getElementById('gnav-persona-name').textContent = p.name;
+  buildNav();
+  renderTab(p.defaultTab);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// NAV
+// ════════════════════════════════════════════════════════════════════
+function buildNav() {
+  const p = state.persona;
+  if (!p) return;
+  const wrap = document.getElementById('gnav-tabs');
+  const MAX_VISIBLE = 3;
+  const visible = state.openTabs.slice(0, MAX_VISIBLE);
+  const hasMore = (WAFFLE_OBJECTS[p.id]||[]).length > MAX_VISIBLE;
+  wrap.innerHTML = visible.map(t => `
+    <div class="gnav-tab ${t.id===state.activeTab?'active':''}" onclick="switchTab('${t.id}')">
+      ${p.tabLabels[t.id]||t.label}
+      <span class="gnav-tab-close" onclick="event.stopPropagation();closeNavTab('${t.id}')">✕</span>
+    </div>`).join('')
+  + (hasMore ? `<div class="gnav-more-btn" id="gnav-more-btn" onclick="toggleMoreMenu(event)">More ▾</div>` : '');
+}
+
+function switchTab(tab) {
+  state.activeTab = tab;
+  state.selectedAccount = null;
+  state.selectedRFQ = null;
+  state.selectedSeller = null;
+  buildNav();
+  renderTab(tab);
+}
+
+function closeNavTab(tabId) {
+  const idx = state.openTabs.findIndex(t => t.id === tabId);
+  if (idx === -1) return;
+  state.openTabs.splice(idx, 1);
+  if (state.activeTab === tabId) {
+    const next = state.openTabs[Math.max(0, idx - 1)];
+    state.activeTab = next ? next.id : null;
+  }
+  buildNav();
+  if (state.activeTab) renderTab(state.activeTab);
+  else document.getElementById('sf-content').innerHTML = `<div style="padding:40px;text-align:center;color:var(--sf-t3)">Open a tab from <strong>More ▾</strong></div>`;
+}
+
+function toggleMoreMenu(e) {
+  e && e.stopPropagation();
+  const menu = document.getElementById('more-menu');
+  const bd = document.getElementById('more-backdrop');
+  if (menu.classList.contains('open')) { closeMoreMenu(); return; }
+  const btn = document.getElementById('gnav-more-btn');
+  if (btn) { const r = btn.getBoundingClientRect(); menu.style.left = r.left + 'px'; menu.style.top = r.bottom + 'px'; }
+  const items = WAFFLE_OBJECTS[state.persona?.id] || [];
+  const openIds = state.openTabs.map(t => t.id);
+  menu.innerHTML = items.map(item => `
+    <div class="more-item ${openIds.includes(item.tab)?'is-open':''}" onclick="openFromMore('${item.tab}')">
+      <div class="more-item-icon" style="background:${item.bg}">${item.icon}</div>
+      <span>${item.label}</span>
+      ${openIds.includes(item.tab)?'<span style="margin-left:auto;font-size:11px;color:var(--sf-blue)">Open</span>':''}
+    </div>`).join('');
+  menu.classList.add('open');
+  bd.classList.add('open');
+}
+
+function openFromMore(tabId) {
+  closeMoreMenu();
+  const p = state.persona;
+  if (!state.openTabs.find(t => t.id === tabId)) {
+    state.openTabs.push({id:tabId, label:p.tabLabels[tabId]||tabId});
+  }
+  state.activeTab = tabId;
+  state.selectedAccount = null; state.selectedRFQ = null; state.selectedSeller = null;
+  buildNav();
+  renderTab(tabId);
+}
+
+function closeMoreMenu() {
+  document.getElementById('more-menu').classList.remove('open');
+  document.getElementById('more-backdrop').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════════
+const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+function breadcrumb(items) {
+  return `<div class="breadcrumb">${items.map((it,i) => i < items.length-1
+    ? `<a onclick="${it.action}">${it.label}</a><span>›</span>`
+    : `<span>${it.label}</span>`).join('')}</div>`;
+}
+
+function rsBlock(icon, bg, title, count, btnHtml, bodyHtml, open=true) {
+  const id = 'rs' + Math.random().toString(36).slice(2, 8);
+  return `<div class="rs"><div class="rs-hdr" onclick="toggleRS('${id}')">
+    <div class="rs-left"><div class="rs-obj-icon" style="background:${bg}">${icon}</div>${title}<span class="rs-count">(${count})</span></div>
+    <div class="rs-actions">${btnHtml}<span class="rs-chev ${open?'':'closed'}" id="${id}c">▾</span></div>
+  </div><div id="${id}" class="rs-body" style="${open?'':'display:none'}">${bodyHtml}</div></div>`;
+}
+
+function toggleRS(id) {
+  const el = document.getElementById(id);
+  const chev = document.getElementById(id + 'c');
+  if (!el) return;
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? '' : 'none';
+  if (chev) chev.classList.toggle('closed', !hidden);
+}
+
+function lpath(stages, activeIdx) {
+  return `<div class="lpath">${stages.map((s,i) => {
+    const cls = i < activeIdx ? 'done' : i === activeIdx ? 'active' : 'future';
+    const chk = i < activeIdx ? '✓' : i === activeIdx ? '●' : '○';
+    return `<div class="lpath-step ${cls}"><span class="ls-chk">${chk}</span><div class="ls-lbl">${s}</div></div>`;
+  }).join('')}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TAB ROUTER
+// ════════════════════════════════════════════════════════════════════
+function renderTab(tab) {
+  const el = document.getElementById('sf-content');
+  if (!state.persona) { el.innerHTML = ''; return; }
+  const id = state.persona.id;
+  if (id === 'buyer-am')  renderBuyerAM(tab, el);
+  else if (id === 'ops-kyc')   renderOpsKYC(tab, el);
+  else if (id === 'seller-rm') renderSellerRM(tab, el);
+  else if (id === 'sys-admin') renderAdmin(tab, el);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// P1 — BUYER ACCOUNT MANAGER
+// ════════════════════════════════════════════════════════════════════
+function renderBuyerAM(tab, el) {
+  const rfqs = getRFQData().filter(r => r.owner === 'Priya Menon');
+  const pipelineVal = rfqs.reduce((s, r) => s + r.amount, 0);
+  const accounts = getBuyerAccounts().filter(a => a.owner === 'Priya Menon');
+
+  if (tab === 'home') {
+    const liveUser = LIVE.user();
+    el.innerHTML = `
+    ${liveUser ? `<div style="background:linear-gradient(135deg,var(--n1-navy),#0C1D30);border-radius:var(--radius-md);padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div><span class="badge b-live">● Live</span> <strong style="color:white">${liveUser.company}</strong> <span style="color:rgba(255,255,255,.6);font-size:12px">just registered on the Buyer App — awaiting KYC approval</span></div>
+      <button class="btn btn-sm" style="background:var(--n1-orange);color:white;border-color:var(--n1-orange);flex-shrink:0" onclick="selectPersona('ops-kyc')">Switch to Ops → Approve KYC</button>
+    </div>` : ''}
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:3px solid var(--p1)"><div class="kpi-lbl">My Pipeline</div><div class="kpi-val">${fmt(pipelineVal).replace('₹','₹').replace(/(\d+)(\d{5})$/,'$1L')}</div><div class="kpi-sub">${rfqs.length} open opportunities</div></div>
+      <div class="kpi"><div class="kpi-lbl">Quotes Awaiting</div><div class="kpi-val">${rfqs.filter(r=>r.stage===2).length}</div><div class="kpi-sub">Buyer decision pending</div></div>
+      <div class="kpi"><div class="kpi-lbl">Orders In Transit</div><div class="kpi-val">${rfqs.filter(r=>r.stage===5).length}</div><div class="kpi-sub">BlackBuck tracking active</div></div>
+      <div class="kpi"><div class="kpi-lbl">Accounts — West</div><div class="kpi-val" style="color:var(--amber)">${accounts.length}</div><div class="kpi-sub">${accounts.filter(a=>a.kycStatus==='Pending').length} pending KYC</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="sf-card">
+          <div class="sf-card-hdr"><div class="sf-card-title">💼 My Opportunities — West India</div><button class="btn btn-primary btn-sm" onclick="toast('New Opportunity created','info')">+ New</button></div>
+          <div class="t-wrap"><table>
+            <thead><tr><th>Opportunity Name</th><th>Account</th><th>RFQ ID</th><th>Qty</th><th>Stage</th><th>Amount</th><th>Close Date</th><th>BlackBuck</th><th></th></tr></thead>
+            <tbody>${rfqs.map(r => `<tr>
+              <td><a class="sf-link" onclick="openRFQRecord('${r.id}')" style="font-weight:600">${r.oppName||r.product+' — '+r.account.split(' ')[0]}</a>${r.isLive?'<span class="badge b-live" style="margin-left:4px">Live</span>':''}</td>
+              <td class="text-muted">${r.account.split(' ').slice(0,2).join(' ')}</td>
+              <td><span class="mono text-xs text-muted">${r.id}</span></td>
+              <td>${r.qty} ${r.unit}</td>
+              <td>${lpath(RFQ_STAGES, r.stage).replace('class="lpath"','class="lpath" style="margin:0;font-size:9px"')}</td>
+              <td class="fw-7">${r.amount ? fmt(r.amount) : '—'}</td>
+              <td class="text-muted text-sm">${r.closeDate||'—'}</td>
+              <td><span class="int-pill ${r.blackbuckSync==='synced'?'int-ok':r.blackbuckSync==='pending'?'int-pend':'int-fail'}"><span class="int-dot" style="background:${r.blackbuckSync==='synced'?'var(--green)':r.blackbuckSync==='pending'?'var(--amber-raw)':'var(--red)'}"></span>${r.blackbuckSync}</span></td>
+              <td><button class="btn btn-neutral btn-xs" onclick="openRFQRecord('${r.id}')">Open →</button></td>
+            </tr>`).join('')}</tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="side-card">
+          <div class="side-title">🎯 Target vs Actual — West Q1 2025</div>
+          <div style="margin-bottom:8px">
+            <div class="flex jc-sb text-sm mb-8"><span>GMV Target</span><span class="fw-7">₹4.2Cr / ₹6Cr</span></div>
+            <div class="prog"><div class="prog-fill amber" style="width:70%"></div></div>
+          </div>
+          <div class="side-row"><span class="text-muted">Orders Fulfilled MTD</span><span class="fw-6">8</span></div>
+          <div class="side-row"><span class="text-muted">Avg RFQ → Order</span><span class="fw-6">3.2 days</span></div>
+          <div class="side-row"><span class="text-muted">Quote Acceptance Rate</span><span class="fw-6">71%</span></div>
+        </div>
+        <div class="side-card">
+          <div class="side-title">🕐 Recent Activity</div>
+          <div class="timeline-item"><div class="tl-icon">📋</div><div><div class="tl-title">RFQ-2025-0044 — Order Placed</div><div class="tl-sub">Patel Infratech · MS Pipes · ₹22.2L</div><div class="tl-time">Today 10:30</div></div></div>
+          <div class="timeline-item"><div class="tl-icon">🔓</div><div><div class="tl-title">Quote accepted — QT-10048</div><div class="tl-sub">Sharma Construction · TMT Bars</div><div class="tl-time">Yesterday</div></div></div>
+          <div class="timeline-item"><div class="tl-icon">📞</div><div><div class="tl-title">Call — Nair Builders procurement</div><div class="tl-time">2 days ago</div></div></div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  else if (tab === 'accounts') {
+    if (state.selectedAccount) {
+      const a = getBuyerAccounts().find(x => x.id === state.selectedAccount);
+      if (a) { renderBuyerAccountRecord(el, a, state.selectedAccountTab); return; }
+    }
+    el.innerHTML = `
+    <div class="lv-header">
+      <div class="lv-title">🏢 Buyer Accounts <span style="font-size:13px;color:var(--sf-t3);font-family:var(--font);margin-left:6px">${accounts.length} accounts</span></div>
+      <button class="btn btn-primary btn-sm" onclick="toast('New Account — KYC required first','info')">+ New Account</button>
+    </div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Company</th><th>SF Account ID</th><th>Type</th><th>Territory</th><th>KYC</th><th>Credit Limit</th><th>Opportunities</th><th></th></tr></thead>
+        <tbody>${accounts.map(a => {
+          const aRFQs = getRFQData().filter(r => r.accountId === a.id);
+          return `<tr>
+            <td><a class="sf-link" onclick="openBuyerAccount('${a.id}')">${a.company}</a>${a.isLive?'<span class="badge b-live" style="margin-left:4px">Live</span>':''}</td>
+            <td class="mono">${a.sfId}</td>
+            <td><span class="badge b-gray">${a.type}</span></td>
+            <td class="text-muted">${a.territory}</td>
+            <td>${a.kycStatus==='Approved'?'<span class="badge b-green">✓ Approved</span>':'<span class="badge b-amber">Pending</span>'}</td>
+            <td class="fw-6">${a.creditLimit ? fmt(a.creditLimit) : '—'}</td>
+            <td>${aRFQs.length}</td>
+            <td><button class="btn btn-neutral btn-xs" onclick="openBuyerAccount('${a.id}')">Open →</button></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>
+    <div class="access-wall">🔒 Showing West India territory accounts only. Accounts in other territories are not visible on this profile.</div>`;
+  }
+
+  else if (tab === 'rfqs') {
+    if (state.selectedRFQ) {
+      const r = getRFQData().find(x => x.id === state.selectedRFQ);
+      if (r) { renderRFQRecord(el, r, state.selectedRFQTab); return; }
+    }
+    el.innerHTML = `
+    <div class="lv-header">
+      <div class="lv-title">💼 Opportunities</div>
+      <button class="btn btn-primary btn-sm" onclick="toast('New Opportunity','info')">+ New</button>
+    </div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Opportunity Name</th><th>Account</th><th>RFQ ID</th><th>Stage</th><th>Amount</th><th>Close Date</th><th>Prob %</th><th>Owner</th><th></th></tr></thead>
+        <tbody>${getRFQData().map(r => `<tr>
+          <td><a class="sf-link fw-6" onclick="openRFQRecord('${r.id}')">${r.oppName||r.product+' — '+r.account.split(' ')[0]}</a>${r.isLive?'<span class="badge b-live" style="margin-left:4px">Live</span>':''}</td>
+          <td class="text-muted">${r.account.split(' ').slice(0,2).join(' ')}</td>
+          <td><span class="mono text-xs text-muted">${r.id}</span></td>
+          <td><span class="badge ${r.stage>=6?'b-green':r.stage>=3?'b-blue':r.stage>=1?'b-amber':'b-gray'}">${RFQ_STAGES[r.stage]}</span></td>
+          <td class="fw-7">${r.amount ? fmt(r.amount) : '—'}</td>
+          <td class="text-muted text-sm">${r.closeDate||'—'}</td>
+          <td class="text-muted">${r.probability||'—'}%</td>
+          <td style="color:var(--sf-blue)">${r.owner}</td>
+          <td><button class="btn btn-neutral btn-xs" onclick="openRFQRecord('${r.id}')">Open →</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+
+  else if (tab === 'quotes') {
+    el.innerHTML = `
+    <div class="lv-header"><div class="lv-title">📄 Quotes</div></div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Quote ID</th><th>Opportunity</th><th>Seller</th><th>Product</th><th>Landing Cost/MT</th><th>Total</th><th>Status</th><th>Valid Until</th></tr></thead>
+        <tbody>${QUOTE_MOCK.map(q => {
+          const opp = getRFQData().find(r => r.id === q.rfqId);
+          return `<tr>
+          <td class="mono fw-6">${q.id}</td>
+          <td><a class="sf-link" onclick="openRFQRecord('${q.rfqId}')" style="font-weight:600">${opp?.oppName||q.rfqId}</a><br><span class="mono text-xs text-muted">${q.rfqId}</span></td>
+          <td>${q.seller}</td>
+          <td>${q.product}</td>
+          <td class="fw-7">${fmt(q.landingCost)}/MT</td>
+          <td class="fw-7">${fmt(q.grandTotal)}</td>
+          <td><span class="badge ${q.status==='Accepted'?'b-green':'b-gray'}">${q.status}</span></td>
+          <td class="text-muted text-sm">${q.validUntil}</td>
+        </tr>`;}).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+}
+
+function openBuyerAccount(id) {
+  state.selectedAccount = id;
+  state.selectedAccountTab = 'details';
+  state.selectedRFQ = null;
+  if (!state.openTabs.find(t => t.id === 'accounts')) {
+    state.openTabs.push({id:'accounts', label:'🏢 Accounts'});
+  }
+  state.activeTab = 'accounts';
+  buildNav();
+  renderTab('accounts');
+}
+
+function renderBuyerAccountRecord(el, a, activeTab) {
+  const aRFQs = getRFQData().filter(r => r.accountId === a.id);
+  el.innerHTML = breadcrumb([
+    {label:'Accounts', action:"state.selectedAccount=null;renderTab('accounts')"},
+    {label:a.company}
+  ]) + `
+  <div class="rec-hdr" style="border-top:3px solid var(--p1)">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);margin-bottom:2px">Buyer Account · ${a.sfId}</div>
+    <div class="rec-name">${a.company}${a.isLive?'<span class="badge b-live" style="margin-left:10px;font-size:12px">● Live Registration</span>':''}</div>
+    <div class="rec-highlights">
+      <div><div class="rec-hl-lbl">KYC Status</div><div class="rec-hl-val">${a.kycStatus==='Approved'?'<span style="color:var(--green)">✓ Approved</span>':'<span style="color:var(--amber)">Pending</span>'}</div></div>
+      <div><div class="rec-hl-lbl">Credit Limit</div><div class="rec-hl-val">${a.creditLimit ? fmt(a.creditLimit) : '—'}</div></div>
+      <div><div class="rec-hl-lbl">Credit Used</div><div class="rec-hl-val">${a.creditUsed ? fmt(a.creditUsed) : '—'}</div></div>
+      <div><div class="rec-hl-lbl">Payment Terms</div><div class="rec-hl-val">${a.paymentTerms}</div></div>
+      <div><div class="rec-hl-lbl">Annual Spend</div><div class="rec-hl-val">${a.annualSpend ? fmt(a.annualSpend) : '—'}</div></div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn btn-primary btn-sm" onclick="toast('New RFQ for ${a.company}','info')">+ New RFQ</button>
+      <button class="btn btn-neutral btn-sm" onclick="toast('Edit Account','info')">Edit</button>
+    </div>
+  </div>
+  <div class="rec-layout">
+    <div>
+      <div style="background:white;border:1px solid var(--sf-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
+        <div class="rec-tab-bar">
+          ${['details','related'].map(t => `<div class="rec-tab-item ${activeTab===t?'active':''}" onclick="openBuyerAccountTab('${a.id}','${t}')">${t==='details'?'Details':'Related'}</div>`).join('')}
+        </div>
+        <div class="rec-tab-content">
+          ${activeTab === 'details' ? `
+            <div class="fields-section-title">▾ Account Information</div>
+            <div class="fields-grid">
+              ${[['Company',a.company],['GST Number',`<span class="mono">${a.gst}</span>`],['PAN',`<span class="mono">${a.pan}</span>`],['Business Type',a.type],['Territory',a.territory],['Account Owner',`<span style="color:var(--sf-blue)">${a.owner}</span>`],['Phone',a.phone],['Email',`<span style="color:var(--sf-blue)">${a.email}</span>`]].map(([l,v]) => `<div class="f-row"><div class="f-lbl">${l}</div><div class="f-val">${v}</div></div>`).join('')}
+            </div>
+            ${a.creditLimit ? `<div class="fields-section-title" style="margin-top:12px">▾ Credit &amp; Payment</div>
+            <div class="fields-grid">
+              ${[['Credit Limit',fmt(a.creditLimit)],['Credit Used',fmt(a.creditUsed)],['Available',fmt(a.creditLimit-a.creditUsed)],['Payment Terms',a.paymentTerms]].map(([l,v]) => `<div class="f-row"><div class="f-lbl">${l}</div><div class="f-val fw-6">${v}</div></div>`).join('')}
+            </div>` : '<div style="padding:12px;font-size:12.5px;color:var(--amber);background:var(--amber-lt);border-radius:var(--radius);margin-top:8px">⚠ KYC pending — credit terms not set. Switch to Ops/KYC persona to approve.</div>'}` : `
+            ${rsBlock('💼','var(--n1-orange)','Opportunities', aRFQs.length,
+              `<button class="btn btn-neutral btn-xs" onclick="event.stopPropagation();toast('New Opportunity','info')">+ New</button>`,
+              aRFQs.length ? `<div class="t-wrap"><table><thead><tr><th>Opportunity Name</th><th>Stage</th><th>Amount</th><th></th></tr></thead><tbody>${aRFQs.map(r=>`<tr><td><a class="sf-link fw-6" onclick="openRFQRecord('${r.id}')">${r.oppName||r.product+' — '+r.account.split(' ')[0]}</a><br><span class="mono text-xs text-muted">${r.id}</span></td><td><span class="badge ${r.stage>=6?'b-green':r.stage>=3?'b-blue':'b-amber'}">${RFQ_STAGES[r.stage]}</span></td><td>${r.amount?fmt(r.amount):'—'}</td><td><button class="btn btn-neutral btn-xs" onclick="openRFQRecord('${r.id}')">Open →</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="rs-empty">No Opportunities yet.</div>')}
+            ${rsBlock('👤','#7C3AED','Contacts', a.contacts.length, '',
+              `<div class="t-wrap"><table><thead><tr><th>Name</th><th>Title</th><th>Phone</th><th>Email</th></tr></thead><tbody>${a.contacts.map(c=>`<tr><td><a class="sf-link">${c.name}</a>${c.primary?'<span class="badge b-blue" style="margin-left:4px">Primary</span>':''}</td><td class="text-muted">${c.title}</td><td>${c.phone}</td><td style="color:var(--sf-blue)">${c.email}</td></tr>`).join('')}</tbody></table></div>`)}`}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="side-card">
+        <div class="side-title">📊 Account Health</div>
+        <div class="side-row"><span class="text-muted">KYC</span><span class="fw-6">${a.kycStatus}</span></div>
+        <div class="side-row"><span class="text-muted">Total RFQs</span><span class="fw-6">${aRFQs.length}</span></div>
+        <div class="side-row"><span class="text-muted">Annual Spend</span><span class="fw-6">${a.annualSpend ? fmt(a.annualSpend) : '—'}</span></div>
+        ${a.creditLimit ? `<div style="margin-top:10px">
+          <div class="flex jc-sb text-sm mb-8"><span class="text-muted">Credit Utilisation</span><span class="fw-7">${Math.round(a.creditUsed/a.creditLimit*100)}%</span></div>
+          <div class="prog"><div class="prog-fill ${a.creditUsed/a.creditLimit > 0.8 ? 'red' : a.creditUsed/a.creditLimit > 0.5 ? 'amber' : 'green'}" style="width:${Math.round(a.creditUsed/a.creditLimit*100)}%"></div></div>
+        </div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function openBuyerAccountTab(id, tab) {
+  state.selectedAccountTab = tab;
+  renderTab('accounts');
+}
+
+function openRFQRecord(id, tab) {
+  state.selectedRFQ = id;
+  state.selectedRFQTab = tab || 'details';
+  if (!state.openTabs.find(t => t.id === 'rfqs')) state.openTabs.push({id:'rfqs',label:'💼 Opportunities'});
+  state.activeTab = 'rfqs';
+  buildNav();
+  renderTab('rfqs');
+}
+
+function renderRFQRecord(el, r, activeTab) {
+  const rfqQuotes = QUOTE_MOCK.filter(q => q.rfqId === r.id);
+  const oppName = r.oppName || `${r.product} — ${r.account}`;
+  el.innerHTML = breadcrumb([
+    {label:'Opportunities', action:"state.selectedRFQ=null;renderTab('rfqs')"},
+    {label:oppName.length > 50 ? oppName.slice(0,50)+'…' : oppName}
+  ]) + `
+  ${lpath(RFQ_STAGES, r.stage)}
+  <div class="rec-hdr" style="border-top:3px solid var(--n1-orange)">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);margin-bottom:2px">
+      Opportunity · ${r.oppId}${r.isLive?'<span class="badge b-live" style="margin-left:8px">Live</span>':''}
+    </div>
+    <div class="rec-name">${oppName}</div>
+    <div class="rec-highlights">
+      <div><div class="rec-hl-lbl">Account Name</div><div class="rec-hl-val"><a class="sf-link" style="font-size:13px" onclick="openBuyerAccount('${r.accountId}');state.selectedRFQ=null;">${r.account.split(' ').slice(0,3).join(' ')}</a></div></div>
+      <div><div class="rec-hl-lbl">Amount</div><div class="rec-hl-val">${r.amount ? fmt(r.amount) : '—'}</div></div>
+      <div><div class="rec-hl-lbl">Stage</div><div class="rec-hl-val"><span class="badge ${r.stage>=6?'b-green':r.stage>=3?'b-blue':'b-amber'}">${RFQ_STAGES[r.stage]}</span></div></div>
+      <div><div class="rec-hl-lbl">Close Date</div><div class="rec-hl-val">${r.closeDate||'—'}</div></div>
+      <div><div class="rec-hl-lbl">Probability</div><div class="rec-hl-val">${r.probability||'—'}%</div></div>
+      <div><div class="rec-hl-lbl">Opportunity Owner</div><div class="rec-hl-val" style="color:var(--sf-blue)">${r.owner}</div></div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn btn-primary btn-sm" onclick="toast('Quote PDF generated','success')">📄 PDF</button>
+      <button class="btn btn-neutral btn-sm" onclick="toast('Editing Opportunity','info')">Edit</button>
+      <button class="btn btn-neutral btn-sm" onclick="toast('New Quote from Opportunity','info')">+ New Quote</button>
+    </div>
+  </div>
+  <div class="rec-layout">
+    <div>
+      <div style="background:white;border:1px solid var(--sf-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
+        <div class="rec-tab-bar">
+          ${['details','quotes'].map(t => `<div class="rec-tab-item ${activeTab===t?'active':''}" onclick="openRFQTab('${r.id}','${t}')">${t==='details'?'Details':'Quote Comparison'}</div>`).join('')}
+        </div>
+        <div class="rec-tab-content">
+          ${activeTab === 'details' ? `
+            <div class="fields-section-title">▾ Opportunity Information</div>
+            <div class="fields-grid">
+              ${[
+                ['Opportunity Name', oppName],
+                ['Account Name', `<a class="sf-link" onclick="openBuyerAccount('${r.accountId}');state.selectedRFQ=null;">${r.account}</a>`],
+                ['Stage', `<span class="badge ${r.stage>=6?'b-green':r.stage>=3?'b-blue':'b-amber'}">${RFQ_STAGES[r.stage]}</span>`],
+                ['Amount', `<strong>${r.amount ? fmt(r.amount) : '—'}</strong>`],
+                ['Close Date', r.closeDate||'—'],
+                ['Opportunity Owner', `<span style="color:var(--sf-blue)">${r.owner}</span>`],
+                ['Probability', `${r.probability||'—'}%`],
+                ['Lead Source', 'NirmanOne Buyer App'],
+              ].map(([l,v]) => `<div class="f-row"><div class="f-lbl">${l}</div><div class="f-val">${v}</div></div>`).join('')}
+            </div>
+            <div class="fields-section-title" style="margin-top:12px">▾ NirmanOne RFQ Details <span style="font-size:10px;font-weight:400;color:var(--sf-t4);text-transform:none;letter-spacing:0">(Custom Fields)</span></div>
+            <div class="fields-grid">
+              ${[
+                ['RFQ ID', `<span class="mono" style="color:var(--sf-blue)">${r.id}</span>`],
+                ['Product / Material', r.product],
+                ['Quantity', `${r.qty} ${r.unit}`],
+                ['Delivery Pincode', r.pin],
+                ['Date Submitted', r.date],
+                ['Quotes Received', r.quotes],
+                ['Selected Quote', r.selectedQuote ? `<span class="mono">${r.selectedQuote}</span>` : '—'],
+                ['BlackBuck Sync', `<span class="int-pill ${r.blackbuckSync==='synced'?'int-ok':r.blackbuckSync==='pending'?'int-pend':'int-fail'}" style="font-size:11px"><span class="int-dot" style="background:${r.blackbuckSync==='synced'?'var(--green)':r.blackbuckSync==='pending'?'var(--amber-raw)':'var(--red)'}"></span>${r.blackbuckSync}</span>`],
+              ].map(([l,v]) => `<div class="f-row"><div class="f-lbl">${l}</div><div class="f-val">${v}</div></div>`).join('')}
+            </div>` : `
+            <div style="background:linear-gradient(135deg,#EEF7EE,#f8fffb);border:1px solid #B3D9B6;border-radius:var(--radius-md);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+              <span style="font-size:22px">🔓</span>
+              <div><div style="font-weight:700;color:var(--green)">Exact Prices Unlocked for this Opportunity</div><div style="font-size:12px;color:var(--sf-t3);margin-top:2px">Contracted rates from verified sellers. Valid for quote window only.</div></div>
+            </div>
+            ${rfqQuotes.length ? `
+            <div style="background:var(--n1-navy);border-radius:var(--radius-md);padding:8px 14px;margin-bottom:6px;display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr 1fr auto;gap:12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.5)">
+              <div>Seller</div><div>Unit Price</div><div>Freight/MT</div><div>Landing Cost</div><div>Total</div><div>Status</div>
+            </div>
+            ${rfqQuotes.map((q,i) => `
+            <div style="background:white;border:1.5px solid ${q.status==='Accepted'?'var(--green)':i===0?'var(--sf-border-dk)':'var(--sf-border)'};border-radius:var(--radius-md);padding:14px 16px;margin-bottom:8px;display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr 1fr auto;gap:12px;align-items:center;${q.status==='Accepted'?'background:linear-gradient(135deg,#f0fff8,#fff)':''}">
+              <div>
+                <div style="font-weight:700;color:var(--sf-t1)">${q.seller}</div>
+                <div style="font-size:11px;color:var(--sf-t3);margin-top:2px">⭐ Verified seller · GST compliant</div>
+              </div>
+              <div style="font-weight:600">${fmt(q.unitPrice)}<span style="font-size:11px;color:var(--sf-t3)">/MT</span></div>
+              <div style="color:var(--sf-t2)">+${fmt(q.freight)}</div>
+              <div><div style="font-family:var(--font-disp);font-size:20px;font-weight:700;color:var(--green)">${fmt(q.landingCost)}</div>${i===0&&q.status!=='Accepted'?'<div style="font-size:10px;color:var(--green)">🏆 Best Price</div>':''}</div>
+              <div style="font-weight:700">${fmt(q.grandTotal)}<div style="font-size:10.5px;color:var(--sf-t3)">incl. GST</div></div>
+              <span class="badge ${q.status==='Accepted'?'b-green':'b-gray'}">${q.status}</span>
+            </div>`).join('')}` : '<div class="rs-empty">No quotes received yet for this Opportunity.</div>'}`}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="side-card">
+        <div class="side-title">📊 Opportunity Metrics</div>
+        <div class="side-row"><span class="text-muted">Sellers Matched</span><span class="fw-6">${r.quotes || '—'}</span></div>
+        <div class="side-row"><span class="text-muted">Best Landing Cost</span><span class="fw-6">${rfqQuotes.length ? fmt(Math.min(...rfqQuotes.map(q=>q.landingCost))) : '—'}</span></div>
+        <div class="side-row"><span class="text-muted">Probability</span><span class="fw-6">${r.probability||'—'}%</span></div>
+        <div class="side-row"><span class="text-muted">BlackBuck Sync</span><span><span class="int-pill ${r.blackbuckSync==='synced'?'int-ok':r.blackbuckSync==='pending'?'int-pend':'int-fail'}"><span class="int-dot" style="background:${r.blackbuckSync==='synced'?'var(--green)':r.blackbuckSync==='pending'?'var(--amber-raw)':'var(--red)'}"></span>${r.blackbuckSync}</span></span></div>
+      </div>
+      <div class="side-card">
+        <div class="side-title">🕐 Activity Timeline</div>
+        <div class="timeline-item"><div class="tl-icon">📋</div><div><div class="tl-title">RFQ Submitted via Buyer App</div><div class="tl-sub">Opportunity auto-created</div><div class="tl-time">${r.date}</div></div></div>
+        ${r.quotes > 0 ? `<div class="timeline-item"><div class="tl-icon">🤝</div><div><div class="tl-title">${r.quotes} sellers auto-matched</div><div class="tl-sub">Quotes generated by platform</div><div class="tl-time">Same day</div></div></div>` : ''}
+        ${r.selectedQuote ? `<div class="timeline-item"><div class="tl-icon" style="background:var(--green-lt);color:var(--green)">✓</div><div><div class="tl-title">Quote accepted — ${r.selectedQuote}</div><div class="tl-sub">Seller notified · Order created</div></div></div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function openRFQTab(id, tab) {
+  state.selectedRFQTab = tab;
+  renderTab('rfqs');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// P2 — OPS / KYC AGENT
+// ════════════════════════════════════════════════════════════════════
+function renderOpsKYC(tab, el) {
+  const queue = getLiveKYCQueue();
+  const liveEntry = queue.find(k => k.isLive);
+
+  if (tab === 'home') {
+    el.innerHTML = `
+    ${liveEntry ? `<div style="background:linear-gradient(135deg,#064E3B,#065F46);border-radius:var(--radius-md);padding:14px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div><span class="badge b-live">● New from Buyer App</span> <strong style="color:white;margin-left:6px">${liveEntry.company}</strong> <span style="color:rgba(255,255,255,.6);font-size:12px">— just registered. All docs ready for Signzy verification.</span></div>
+      <button class="btn btn-success btn-sm" onclick="openSignzy('${liveEntry.id}')">Run Signzy KYC →</button>
+    </div>` : ''}
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:3px solid var(--p2)"><div class="kpi-lbl">Queue Today</div><div class="kpi-val">${queue.length}</div><div class="kpi-sub">${queue.filter(k=>k.status==='Ready').length} ready to verify</div></div>
+      <div class="kpi"><div class="kpi-lbl">Approved Today</div><div class="kpi-val" style="color:var(--green)">3</div><div class="kpi-sub">Avg 4.2 min turnaround</div></div>
+      <div class="kpi"><div class="kpi-lbl">Incomplete Docs</div><div class="kpi-val" style="color:var(--amber)">${queue.filter(k=>k.status==='Incomplete').length}</div><div class="kpi-sub">Awaiting documents</div></div>
+      <div class="kpi"><div class="kpi-lbl">Signzy API</div><div class="kpi-val"><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>Live</span></div><div class="kpi-sub">99.8% uptime · 3.1s avg</div></div>
+    </div>
+    <div class="two-col">
+      <div class="sf-card">
+        <div class="sf-card-hdr"><div class="sf-card-title">🔍 KYC Queue</div></div>
+        <div class="t-wrap"><table>
+          <thead><tr><th>Company</th><th>GST</th><th>Source</th><th>Submitted</th><th>Docs</th><th>Status</th><th></th></tr></thead>
+          <tbody>${queue.map(k => `<tr>
+            <td><strong>${k.company}</strong>${k.isLive?'<span class="badge b-live" style="margin-left:5px">Live</span>':''}<br><span class="text-muted text-xs">${k.contact} · ${k.mobile}</span></td>
+            <td class="mono">${k.gst}</td>
+            <td><span class="badge b-gray">${k.source}</span></td>
+            <td class="text-muted text-sm">${k.submitted}</td>
+            <td><span title="GST">${k.docs.gst?'✅':'❌'}</span> <span title="Trade">T:${k.docs.trade?'✅':'❌'}</span> <span title="PAN">P:${k.docs.pan?'✅':'❌'}</span> <span title="Bank">B:${k.docs.bank?'✅':'❌'}</span></td>
+            <td><span class="badge ${k.status==='Ready'?'b-green':k.status==='Incomplete'?'b-amber':'b-gray'}">${k.status}</span></td>
+            <td>
+              ${k.status==='Ready' ? `<button class="btn btn-success btn-xs" onclick="openSignzy('${k.id}')">▶ Verify</button>` : ''}
+              ${k.status==='Incomplete' ? `<button class="btn btn-neutral btn-xs" onclick="toast('Reminder sent to ${k.company}','info')">📧 Remind</button>` : ''}
+            </td>
+          </tr>`).join('')}</tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="side-card">
+          <div class="side-title">⚡ Signzy Integration</div>
+          <div class="side-row"><span class="text-muted">Status</span><span><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>Live</span></span></div>
+          <div class="side-row"><span class="text-muted">API Calls Today</span><span class="fw-6">47</span></div>
+          <div class="side-row"><span class="text-muted">Avg Response</span><span class="fw-6">3.1s</span></div>
+          <div class="side-row"><span class="text-muted">Success Rate</span><span class="fw-6" style="color:var(--green)">98.7%</span></div>
+          <div class="side-row"><span class="text-muted">Credential</span><span class="mono text-xs">SIGNZY_PROD_V2</span></div>
+        </div>
+        <div class="side-card">
+          <div class="side-title">📋 Recent Decisions</div>
+          <div class="timeline-item"><div class="tl-icon" style="background:var(--green-lt);color:var(--green)">✓</div><div><div class="tl-title">Kiran Fleet Solutions — Approved</div><div class="tl-time">1 hr ago · Credit ₹25L</div></div></div>
+          <div class="timeline-item"><div class="tl-icon" style="background:var(--green-lt);color:var(--green)">✓</div><div><div class="tl-title">Sharma Construction — Approved</div><div class="tl-time">Yesterday · Credit ₹50L</div></div></div>
+          <div class="timeline-item"><div class="tl-icon" style="background:var(--red-lt);color:var(--red)">✕</div><div><div class="tl-title">Patil Transport — Rejected</div><div class="tl-time">2 days ago · Incomplete PAN</div></div></div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  else if (tab === 'kyc-queue') {
+    el.innerHTML = `
+    <div class="lv-header">
+      <div class="lv-title">🔍 KYC Verification Queue <span style="font-family:var(--font);font-size:13px;color:var(--sf-t3);margin-left:6px">${queue.length} applications</span></div>
+    </div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Company</th><th>GST</th><th>PAN</th><th>Contact</th><th>Source</th><th>Submitted</th><th>Docs Complete</th><th>Status</th><th></th></tr></thead>
+        <tbody>${queue.map(k => {
+          const docsCount = Object.values(k.docs).filter(Boolean).length;
+          return `<tr>
+          <td><strong class="sf-link" onclick="toast('Opening ${k.company} profile','info')">${k.company}</strong>${k.isLive?'<span class="badge b-live" style="margin-left:5px;font-size:10px">● Live</span>':''}<br><span class="text-muted text-xs">${k.contact} · ${k.mobile}</span></td>
+          <td class="mono">${k.gst}</td>
+          <td class="mono">${k.pan||'—'}</td>
+          <td class="text-muted">${k.contact}</td>
+          <td><span class="badge b-blue">${k.source}</span></td>
+          <td class="text-muted text-sm">${k.submitted}</td>
+          <td>
+            <div style="display:flex;gap:3px;align-items:center">
+              <div style="width:60px"><div class="prog"><div class="prog-fill ${docsCount===4?'green':docsCount>=2?'amber':'red'}" style="width:${docsCount*25}%"></div></div></div>
+              <span class="text-xs text-muted">${docsCount}/4</span>
+            </div>
+          </td>
+          <td><span class="badge ${k.status==='Ready'?'b-green':k.status==='Incomplete'?'b-amber':'b-gray'}">${k.status}</span></td>
+          <td style="display:flex;gap:5px">
+            ${k.status==='Ready'?`<button class="btn btn-success btn-sm" onclick="openSignzy('${k.id}')">▶ Run Signzy</button>`:''}
+            ${k.status==='Incomplete'?`<button class="btn btn-neutral btn-xs" onclick="toast('Reminder sent to ${k.company}','info')">📧 Remind</button>`:''}
+          </td>
+        </tr>`;}).join('')}</tbody>
+      </table></div>
+    </div>
+    <div class="access-wall">🔒 KYC Agent can view all accounts but cannot see RFQ pricing, seller data, or opportunity pipeline.</div>`;
+  }
+
+  else if (tab === 'accounts') {
+    const allAccounts = getBuyerAccounts();
+    el.innerHTML = `
+    <div class="lv-header">
+      <div class="lv-title">🏢 All Buyer Accounts</div>
+      <div style="display:flex;gap:8px">
+        <select class="sf-select" style="font-size:12px"><option>All Accounts</option><option>KYC Approved</option><option>KYC Pending</option></select>
+      </div>
+    </div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Company</th><th>SF Account ID</th><th>GST</th><th>Territory</th><th>KYC</th><th>Credit Limit</th><th>Payment Terms</th><th></th></tr></thead>
+        <tbody>${allAccounts.map(a => `<tr>
+          <td><a class="sf-link">${a.company}</a>${a.isLive?'<span class="badge b-live" style="margin-left:4px">Live</span>':''}</td>
+          <td class="mono">${a.sfId}</td>
+          <td class="mono">${a.gst}</td>
+          <td class="text-muted">${a.territory}</td>
+          <td>${a.kycStatus==='Approved'?'<span class="badge b-green">✓ Approved</span>':'<span class="badge b-amber">Pending</span>'}</td>
+          <td>${a.creditLimit?fmt(a.creditLimit):'—'}</td>
+          <td>${a.paymentTerms}</td>
+          <td>${a.kycStatus==='Pending'?`<button class="btn btn-success btn-xs" onclick="toast('Opening KYC for ${a.company}','info')">KYC →</button>`:'<button class="btn btn-neutral btn-xs" onclick="toast(\'Edit Account\',\'info\')">Edit</button>'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIGNZY KYC FLOW
+// ════════════════════════════════════════════════════════════════════
+let signzyState = { step: 1, kycItem: null };
+
+function openSignzy(kycId) {
+  const queue = getLiveKYCQueue();
+  const item = queue.find(k => k.id === kycId);
+  if (!item) return;
+  signzyState = { step: 1, kycItem: item };
+  document.getElementById('sz-company-label').textContent = item.company + ' · ' + item.gst;
+  setSignzyStep(1);
+  document.getElementById('signzy-modal').classList.add('open');
+}
+
+function closeSignzy() {
+  document.getElementById('signzy-modal').classList.remove('open');
+}
+
+function setSignzyStep(step) {
+  signzyState.step = step;
+  ['sz-s1','sz-s2','sz-s3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'sz-step ' + (i + 1 < step ? 'done' : i + 1 === step ? 'active' : 'future');
+  });
+  renderSignzyBody();
+}
+
+function renderSignzyBody() {
+  const item = signzyState.kycItem;
+  const body = document.getElementById('sz-body');
+  const footer = document.getElementById('sz-footer');
+
+  if (signzyState.step === 1) {
+    body.innerHTML = `
+    <div class="sz-company-banner">
+      <div><div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Verifying</div>
+      <div style="font-weight:700;color:white;font-size:15px">${item.company}</div></div>
+      <span class="badge b-blue" style="font-size:11px">Step 1 of 3</span>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="sf-label">GSTIN</label>
+      <input class="sf-input" id="sz-gst-input" value="${item.gst}" style="font-family:'Consolas',monospace;letter-spacing:.05em"/>
+    </div>
+    <div id="sz-step1-result"></div>`;
+    footer.innerHTML = `
+    <div style="font-size:12px;color:var(--sf-t3)">Checks: GST Portal → GSTN DB → MCA21</div>
+    <button class="btn btn-primary" onclick="runGSTVerification()">▶ Run GST Verification</button>`;
+  }
+  else if (signzyState.step === 2) {
+    body.innerHTML = `
+    <div class="sz-company-banner">
+      <div><div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Step 1 Complete ✓ — Now verifying</div>
+      <div style="font-weight:700;color:white;font-size:15px">PAN &amp; Director Match</div></div>
+      <span class="badge b-blue">Step 2 of 3</span>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="sf-label">PAN Number</label>
+      <input class="sf-input" id="sz-pan-input" value="${item.pan||'AABCS1429B'}" style="font-family:'Consolas',monospace;letter-spacing:.05em"/>
+    </div>
+    <div id="sz-step2-result"></div>`;
+    footer.innerHTML = `
+    <div style="font-size:12px;color:var(--sf-t3)">Checks: Income Tax DB → MCA21 Director → GST Cross-match</div>
+    <button class="btn btn-primary" onclick="runPANVerification()">▶ Verify PAN &amp; Directors</button>`;
+  }
+  else if (signzyState.step === 3) {
+    body.innerHTML = `
+    <div class="sz-company-banner">
+      <div><div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Steps 1 &amp; 2 Complete ✓ — Final step</div>
+      <div style="font-weight:700;color:white;font-size:15px">Bank Account Penny Drop</div></div>
+      <span class="badge b-blue">Step 3 of 3</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div><label class="sf-label">Account Number</label><input class="sf-input" id="sz-bank-acct" placeholder="e.g. 1234567890123456" style="font-family:'Consolas',monospace"/></div>
+      <div><label class="sf-label">IFSC Code</label><input class="sf-input" id="sz-bank-ifsc" placeholder="e.g. HDFC0001234" style="font-family:'Consolas',monospace;text-transform:uppercase"/></div>
+    </div>
+    <div id="sz-step3-result"></div>`;
+    footer.innerHTML = `
+    <div style="font-size:12px;color:var(--sf-t3)">₹1 will be credited &amp; verified via RazorpayX / IMPS</div>
+    <button class="btn btn-primary" onclick="runPennyDrop()">▶ Initiate Penny Drop</button>`;
+  }
+  else if (signzyState.step === 4) {
+    body.innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--green-lt);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px">✓</div>
+      <div style="font-family:var(--font-disp);font-size:22px;color:var(--sf-t1);margin-bottom:4px">All Checks Passed</div>
+      <div style="font-size:13px;color:var(--sf-t3);margin-bottom:18px">Signzy verification complete · Reference: <span class="mono">SZ-2025-${Math.floor(Math.random()*90000+10000)}</span></div>
+      <div class="sz-result-card" style="text-align:left">
+        <div class="sz-result-hdr"><span>✅ Verification Summary</span></div>
+        ${[['GST Verification','Passed — Active, Regular taxpayer'],['PAN &amp; Director Match','Passed — 100% match with MCA21'],['Bank Penny Drop','Passed — ₹1 credited &amp; confirmed']].map(([l,v]) => `<div class="sz-result-row"><span class="sz-result-lbl">${l}</span><span class="sz-result-val" style="color:var(--green)">${v}</span></div>`).join('')}
+      </div>
+    </div>
+    <div style="margin-top:4px">
+      <label class="sf-label">Set Credit Limit</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="sf-select" id="sz-credit-limit" style="flex:1">
+          <option value="2500000">₹25 Lakhs</option>
+          <option value="5000000" selected>₹50 Lakhs</option>
+          <option value="7500000">₹75 Lakhs</option>
+          <option value="10000000">₹1 Crore</option>
+        </select>
+        <select class="sf-select" id="sz-payment-terms">
+          <option>Net 30</option>
+          <option>Net 45</option>
+          <option>Net 60</option>
+        </select>
+      </div>
+    </div>`;
+    footer.innerHTML = `
+    <button class="btn btn-neutral" onclick="rejectKYC()">✕ Reject Application</button>
+    <button class="btn btn-success" onclick="approveKYC()">✓ Approve &amp; Activate Account</button>`;
+  }
+}
+
+async function runSignzyCheck(checks, resultId, callback) {
+  const container = document.getElementById(resultId);
+  container.innerHTML = `<div style="border:1px solid var(--sf-border);border-radius:var(--radius-md);overflow:hidden">
+    ${checks.map(c => `<div class="sz-check-item" id="szc-${c.id}">
+      <div class="sz-running-dot" id="szd-${c.id}" style="opacity:0"></div>
+      <div><div style="font-weight:600">${c.label}</div><div style="font-size:11.5px;color:var(--sf-t3)">${c.sub}</div></div>
+    </div>`).join('')}
+  </div>`;
+  document.getElementById('sz-footer').innerHTML = '<div style="font-size:12px;color:var(--sf-t3)"><em>Verification in progress…</em></div>';
+  for (let i = 0; i < checks.length; i++) {
+    const c = checks[i];
+    const row = document.getElementById('szc-' + c.id);
+    const dot = document.getElementById('szd-' + c.id);
+    row.className = 'sz-check-item checking';
+    dot.style.opacity = '1';
+    await delay(900 + Math.random() * 400);
+    row.className = 'sz-check-item done-ok';
+    dot.outerHTML = `<div style="width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700;flex-shrink:0">✓</div>`;
+  }
+  await delay(300);
+  callback();
+}
+
+function runGSTVerification() {
+  const item = signzyState.kycItem;
+  runSignzyCheck([
+    {id:'gst1',label:'GST Portal Validation',sub:'Checking GSTIN format & registration status'},
+    {id:'gst2',label:'Taxpayer Type & Status',sub:'Verifying: Regular, Active, Filing compliant'},
+    {id:'gst3',label:'Business Address Fetch',sub:'Pulling registered address from GSTN database'},
+  ], 'sz-step1-result', () => {
+    document.getElementById('sz-step1-result').innerHTML += `
+    <div class="sz-result-card">
+      <div class="sz-result-hdr"><span>📊 GST Verification Result</span><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>Verified</span></div>
+      ${[['Legal Name',item.company],['GSTIN',item.gst],['Taxpayer Type','Regular'],['Registration Status','Active'],['Last Return Filed','GSTR-3B · Dec 2024'],['Registered Address','Maharashtra · India']].map(([l,v]) => `<div class="sz-result-row"><span class="sz-result-lbl">${l}</span><span class="sz-result-val">${v}</span></div>`).join('')}
+      <div style="padding:6px 14px;font-size:11px;color:var(--sf-t3)">Signzy Ref: <span class="mono">SZ-GST-2025-${Math.floor(Math.random()*90000+10000)}</span></div>
+    </div>`;
+    document.getElementById('sz-footer').innerHTML = `
+    <div style="font-size:12px;color:var(--green);font-weight:600">✓ GST verification passed</div>
+    <button class="btn btn-primary" onclick="setSignzyStep(2)">Continue to PAN Verification →</button>`;
+  });
+}
+
+function runPANVerification() {
+  const item = signzyState.kycItem;
+  runSignzyCheck([
+    {id:'pan1',label:'Income Tax Database Check',sub:'Validating PAN format and active status'},
+    {id:'pan2',label:'Director / Partner Match',sub:'Cross-matching with MCA21 company records'},
+    {id:'pan3',label:'GST → PAN Cross-validation',sub:'Confirming PAN matches GST filing records'},
+  ], 'sz-step2-result', () => {
+    document.getElementById('sz-step2-result').innerHTML += `
+    <div class="sz-result-card">
+      <div class="sz-result-hdr"><span>👤 PAN &amp; Director Result</span><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>100% Match</span></div>
+      ${[['PAN Number',item.pan||'AABCS1429B'],['PAN Holder Name',item.company.replace(' Pvt. Ltd.','').replace(' Ltd.','')+' (Company)'],['Director (MCA21)',item.contact||'Authorized Signatory'],['Match Score','100%'],['Company Type','Private Limited / Proprietorship']].map(([l,v]) => `<div class="sz-result-row"><span class="sz-result-lbl">${l}</span><span class="sz-result-val">${v}</span></div>`).join('')}
+      <div style="padding:6px 14px;font-size:11px;color:var(--sf-t3)">Signzy Ref: <span class="mono">SZ-PAN-2025-${Math.floor(Math.random()*90000+10000)}</span></div>
+    </div>`;
+    document.getElementById('sz-footer').innerHTML = `
+    <div style="font-size:12px;color:var(--green);font-weight:600">✓ PAN &amp; director match passed</div>
+    <button class="btn btn-primary" onclick="setSignzyStep(3)">Continue to Bank Verification →</button>`;
+  });
+}
+
+function runPennyDrop() {
+  const acct = document.getElementById('sz-bank-acct').value.trim() || '123456789012';
+  const ifsc = document.getElementById('sz-bank-ifsc').value.trim().toUpperCase() || 'HDFC0001234';
+  const item = signzyState.kycItem;
+  runSignzyCheck([
+    {id:'bk1',label:'IFSC Code Validation',sub:`Looking up ${ifsc} in RBI master DB`},
+    {id:'bk2',label:'Account Existence Check',sub:'Verifying account is active and operative'},
+    {id:'bk3',label:'Penny Drop — ₹1 Transfer',sub:'Sending ₹1 via IMPS to confirm account holder'},
+  ], 'sz-step3-result', () => {
+    document.getElementById('sz-step3-result').innerHTML += `
+    <div class="sz-result-card">
+      <div class="sz-result-hdr"><span>🏦 Bank Penny Drop Result</span><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>₹1 Confirmed</span></div>
+      ${[['Account Number','XXXX XXXX '+acct.slice(-4)],['IFSC',ifsc],['Bank','HDFC Bank / Axis Bank'],['Account Holder',item.company],['Name Match','✓ Exact Match'],['₹1 Status','Credited &amp; confirmed via IMPS']].map(([l,v]) => `<div class="sz-result-row"><span class="sz-result-lbl">${l}</span><span class="sz-result-val">${v}</span></div>`).join('')}
+      <div style="padding:6px 14px;font-size:11px;color:var(--sf-t3)">Signzy Ref: <span class="mono">SZ-BANK-2025-${Math.floor(Math.random()*90000+10000)}</span></div>
+    </div>`;
+    document.getElementById('sz-footer').innerHTML = `
+    <div style="font-size:12px;color:var(--green);font-weight:600">✓ Bank verification passed</div>
+    <button class="btn btn-primary" onclick="setSignzyStep(4)">Review &amp; Decide →</button>`;
+  });
+}
+
+function approveKYC() {
+  const item = signzyState.kycItem;
+  const limit = parseInt(document.getElementById('sz-credit-limit').value);
+  const terms = document.getElementById('sz-payment-terms').value;
+  closeSignzy();
+  toast(`✓ ${item.company} KYC Approved — Account Activated · Credit ${fmt(limit)} · ${terms}`, 'success');
+  // If live user, update their account in the buyer app indirectly (toast hint)
+  if (item.isLive) {
+    toast('Buyer App account is now active — prices & RFQ submission unlocked for this buyer', 'success');
+  }
+  renderTab(state.activeTab);
+}
+
+function rejectKYC() {
+  const item = signzyState.kycItem;
+  closeSignzy();
+  toast(`✕ ${item.company} KYC Rejected — applicant notified via email`, 'error');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// P3 — SELLER RELATIONSHIP MANAGER
+// ════════════════════════════════════════════════════════════════════
+function renderSellerRM(tab, el) {
+  if (tab === 'home') {
+    const activeSellers = SELLER_ACCOUNTS.filter(s => s.status === 'Active');
+    const totalGMV = SELLER_ACCOUNTS.reduce((s,x) => s + x.monthlyGMV, 0);
+    el.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:3px solid var(--p3)"><div class="kpi-lbl">Active Sellers</div><div class="kpi-val">${activeSellers.length}</div><div class="kpi-sub">${SELLER_ACCOUNTS.filter(s=>s.kycStatus==='Pending').length} pending KYC</div></div>
+      <div class="kpi"><div class="kpi-lbl">Monthly GMV</div><div class="kpi-val">₹${(totalGMV/100000).toFixed(1)}L</div><div class="kpi-sub">Across all sellers</div></div>
+      <div class="kpi"><div class="kpi-lbl">Avg Rating</div><div class="kpi-val" style="color:var(--amber)">4.6 ⭐</div><div class="kpi-sub">Weighted avg</div></div>
+      <div class="kpi"><div class="kpi-lbl">Open Disputes</div><div class="kpi-val" style="color:var(--red)">${DISPUTES_MOCK.filter(d=>d.status==='Open').length}</div><div class="kpi-sub">Require resolution</div></div>
+    </div>
+    <div class="two-col">
+      <div class="sf-card">
+        <div class="sf-card-hdr"><div class="sf-card-title">🏭 Seller Performance</div><button class="btn btn-primary btn-sm" onclick="toast('New Seller Onboarding','info')">+ Onboard Seller</button></div>
+        <div class="t-wrap"><table>
+          <thead><tr><th>Seller</th><th>Category</th><th>Rating</th><th>Monthly GMV</th><th>KYC</th><th>Disputes</th><th></th></tr></thead>
+          <tbody>${SELLER_ACCOUNTS.map(s => `<tr>
+            <td><a class="sf-link" onclick="openSellerRecord('${s.id}')">${s.name}</a><br><span class="text-muted text-xs">${s.city} · ${s.txns}+ txns</span></td>
+            <td>${s.categories.map(c=>`<span class="badge b-gray" style="margin-right:3px">${c}</span>`).join('')}</td>
+            <td>⭐ ${s.rating}</td>
+            <td class="fw-6">${fmt(s.monthlyGMV)}</td>
+            <td>${s.kycStatus==='Approved'?'<span class="badge b-green">✓</span>':'<span class="badge b-amber">Pending</span>'}</td>
+            <td>${s.disputesOpen > 0 ? `<span class="badge b-red">${s.disputesOpen} open</span>` : '<span style="color:var(--sf-t4)">—</span>'}</td>
+            <td><button class="btn btn-neutral btn-xs" onclick="openSellerRecord('${s.id}')">Open →</button></td>
+          </tr>`).join('')}</tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="side-card">
+          <div class="side-title">📦 Catalog Coverage</div>
+          ${[['Steel TMT',3],['Cement',2],['Bitumen',2],['Steel Pipes',2],['Steel Coils',1]].map(([cat,count]) => `
+          <div class="side-row"><span class="text-muted">${cat}</span><span class="fw-6">${count} sellers</span></div>`).join('')}
+        </div>
+        <div class="side-card" style="${DISPUTES_MOCK.filter(d=>d.status==='Open').length > 0 ? 'background:#FFF7EC;border-color:#F5D5A0' : ''}">
+          <div class="side-title" style="${DISPUTES_MOCK.filter(d=>d.status==='Open').length > 0 ? 'color:var(--amber)' : ''}">⚠️ Open Disputes</div>
+          ${DISPUTES_MOCK.filter(d=>d.status==='Open').map(d => `
+          <div class="timeline-item"><div class="tl-icon" style="background:#FFF7EC;color:var(--amber)">!</div><div><div class="tl-title">${d.buyer} vs ${d.seller}</div><div class="tl-sub">${d.issue.substring(0,50)}…</div><div class="tl-time">${d.raised} · ${d.priority} priority</div></div></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  else if (tab === 'sellers') {
+    if (state.selectedSeller) {
+      const s = SELLER_ACCOUNTS.find(x => x.id === state.selectedSeller);
+      if (s) { renderSellerRecord(el, s, state.selectedSellerTab); return; }
+    }
+    el.innerHTML = `
+    <div class="lv-header">
+      <div class="lv-title">🏭 Seller Accounts</div>
+      <button class="btn btn-primary btn-sm" onclick="toast('New Seller Onboarding','info')">+ Onboard</button>
+    </div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Seller</th><th>Type</th><th>Categories</th><th>City</th><th>Rating</th><th>Transactions</th><th>Monthly GMV</th><th>KYC</th><th></th></tr></thead>
+        <tbody>${SELLER_ACCOUNTS.map(s => `<tr>
+          <td><a class="sf-link" onclick="openSellerRecord('${s.id}')">${s.name}</a></td>
+          <td><span class="badge b-gray">${s.type}</span></td>
+          <td>${s.categories.map(c=>`<span class="badge b-blue" style="margin-right:2px">${c}</span>`).join('')}</td>
+          <td class="text-muted">${s.city}</td>
+          <td>⭐ ${s.rating}</td>
+          <td>${s.txns}+</td>
+          <td class="fw-6">${fmt(s.monthlyGMV)}</td>
+          <td>${s.kycStatus==='Approved'?'<span class="badge b-green">✓ Approved</span>':'<span class="badge b-amber">Pending</span>'}</td>
+          <td><button class="btn btn-neutral btn-xs" onclick="openSellerRecord('${s.id}')">Open →</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+
+  else if (tab === 'catalog') {
+    el.innerHTML = `
+    <div class="lv-header">
+      <div class="lv-title">📦 Product Catalog</div>
+      <div style="display:flex;gap:8px">
+        <select class="sf-select"><option>All Categories</option><option>Steel TMT</option><option>Cement</option><option>Bitumen</option><option>Steel Pipes</option></select>
+        <button class="btn btn-neutral btn-sm" onclick="toast('Catalog exported','success')">⬇ Export</button>
+      </div>
+    </div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>SKU</th><th>Product</th><th>Category</th><th>Seller</th><th>List Price</th><th>Stock</th><th>Grade</th><th>Last Updated</th></tr></thead>
+        <tbody>${CATALOG_MOCK.map(c => `<tr>
+          <td class="mono fw-6">${c.sku}</td>
+          <td class="fw-6">${c.product}</td>
+          <td><span class="badge b-blue">${c.category}</span></td>
+          <td><a class="sf-link" onclick="openSellerRecord('${c.sellerId}')">${c.seller}</a></td>
+          <td class="fw-7">${fmt(c.price)}<span class="text-muted text-xs">/${c.unit}</span></td>
+          <td>${c.stock} ${c.unit} ${c.stock < 50 ? '<span class="badge b-amber" style="margin-left:3px">Low</span>' : ''}</td>
+          <td class="text-muted">${c.grade}</td>
+          <td class="text-muted text-sm">${c.lastUpdated}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+
+  else if (tab === 'disputes') {
+    el.innerHTML = `
+    <div class="lv-header"><div class="lv-title">⚠️ Disputes</div></div>
+    <div class="sf-card">
+      <div class="t-wrap"><table>
+        <thead><tr><th>Dispute ID</th><th>RFQ</th><th>Buyer</th><th>Seller</th><th>Issue</th><th>Raised</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+        <tbody>${DISPUTES_MOCK.map(d => `<tr>
+          <td class="mono fw-6">${d.id}</td>
+          <td class="mono"><a class="sf-link">${d.rfqId}</a></td>
+          <td>${d.buyer}</td>
+          <td>${d.seller}</td>
+          <td style="max-width:200px">${d.issue}</td>
+          <td class="text-muted text-sm">${d.raised}</td>
+          <td><span class="badge ${d.priority==='High'?'b-red':d.priority==='Medium'?'b-amber':'b-gray'}">${d.priority}</span></td>
+          <td><span class="badge ${d.status==='Open'?'b-red':'b-green'}">${d.status}</span></td>
+          <td>${d.status==='Open'?`<button class="btn btn-neutral btn-xs" onclick="toast('Dispute ${d.id} — Mediation started','info')">Mediate</button>`:'—'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+}
+
+function openSellerRecord(id) {
+  state.selectedSeller = id;
+  state.selectedSellerTab = 'details';
+  if (!state.openTabs.find(t => t.id === 'sellers')) state.openTabs.push({id:'sellers',label:'🏭 Sellers'});
+  state.activeTab = 'sellers';
+  buildNav();
+  renderTab('sellers');
+}
+
+function renderSellerRecord(el, s, activeTab) {
+  const sCatalog = CATALOG_MOCK.filter(c => c.sellerId === s.id);
+  el.innerHTML = breadcrumb([
+    {label:'Sellers', action:"state.selectedSeller=null;renderTab('sellers')"},
+    {label:s.name}
+  ]) + `
+  <div class="rec-hdr" style="border-top:3px solid var(--p3)">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sf-t3);margin-bottom:2px">Seller Account · ${s.id}</div>
+    <div class="rec-name">${s.name}</div>
+    <div class="rec-highlights">
+      <div><div class="rec-hl-lbl">Rating</div><div class="rec-hl-val">⭐ ${s.rating}</div></div>
+      <div><div class="rec-hl-lbl">Transactions</div><div class="rec-hl-val">${s.txns}+</div></div>
+      <div><div class="rec-hl-lbl">Monthly GMV</div><div class="rec-hl-val">${fmt(s.monthlyGMV)}</div></div>
+      <div><div class="rec-hl-lbl">KYC</div><div class="rec-hl-val">${s.kycStatus==='Approved'?'<span style="color:var(--green)">✓ Approved</span>':'<span style="color:var(--amber)">Pending</span>'}</div></div>
+      <div><div class="rec-hl-lbl">City</div><div class="rec-hl-val">${s.city}</div></div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn btn-neutral btn-sm" onclick="toast('Editing seller record','info')">Edit</button>
+      <button class="btn btn-neutral btn-sm" onclick="toast('Catalog sync triggered','success')">↺ Sync Catalog</button>
+    </div>
+  </div>
+  <div class="rec-layout">
+    <div>
+      <div style="background:white;border:1px solid var(--sf-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
+        <div class="rec-tab-bar">
+          ${['details','catalog'].map(t => `<div class="rec-tab-item ${activeTab===t?'active':''}" onclick="openSellerTab('${s.id}','${t}')">${t==='details'?'Details':'Catalog'}</div>`).join('')}
+        </div>
+        <div class="rec-tab-content">
+          ${activeTab === 'details' ? `
+            <div class="fields-section-title">▾ Seller Information</div>
+            <div class="fields-grid">
+              ${[['Legal Name',s.name],['GST',`<span class="mono">${s.gst}</span>`],['Seller Type',s.type],['Categories',s.categories.join(', ')],['City',s.city],['Godown Pincode',s.godownPin],['Account Manager',`<span style="color:var(--sf-blue)">${s.rm}</span>`],['KYC Status',s.kycStatus]].map(([l,v]) => `<div class="f-row"><div class="f-lbl">${l}</div><div class="f-val">${v}</div></div>`).join('')}
+            </div>` : `
+            <div class="t-wrap"><table>
+              <thead><tr><th>SKU</th><th>Product</th><th>Price</th><th>Stock</th><th>Last Updated</th><th></th></tr></thead>
+              <tbody>${sCatalog.map(c => `<tr>
+                <td class="mono">${c.sku}</td>
+                <td class="fw-6">${c.product}</td>
+                <td class="fw-7">${fmt(c.price)}/${c.unit}</td>
+                <td>${c.stock} ${c.unit} ${c.stock < 50 ? '<span class="badge b-amber">Low</span>' : ''}</td>
+                <td class="text-muted">${c.lastUpdated}</td>
+                <td><button class="btn btn-neutral btn-xs" onclick="toast('Update ${c.product} stock','info')">Update</button></td>
+              </tr>`).join('')}</tbody>
+            </table></div>`}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="side-card">
+        <div class="side-title">📊 Performance</div>
+        <div class="side-row"><span class="text-muted">Rating</span><span class="fw-6">⭐ ${s.rating}</span></div>
+        <div class="side-row"><span class="text-muted">Total Transactions</span><span class="fw-6">${s.txns}+</span></div>
+        <div class="side-row"><span class="text-muted">Monthly GMV</span><span class="fw-6">${fmt(s.monthlyGMV)}</span></div>
+        <div class="side-row"><span class="text-muted">Catalog Items</span><span class="fw-6">${s.catalogItems}</span></div>
+        <div class="side-row"><span class="text-muted">Open Disputes</span><span class="${s.disputesOpen>0?'fw-6':'text-muted'}" style="${s.disputesOpen>0?'color:var(--red)':''}">${s.disputesOpen || '—'}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openSellerTab(id, tab) {
+  state.selectedSellerTab = tab;
+  renderTab('sellers');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// P4 — PLATFORM ADMIN
+// ════════════════════════════════════════════════════════════════════
+function renderAdmin(tab, el) {
+  if (tab === 'home') {
+    el.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:3px solid var(--p4)"><div class="kpi-lbl">Platform Status</div><div class="kpi-val"><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>Healthy</span></div><div class="kpi-sub">All systems operational</div></div>
+      <div class="kpi"><div class="kpi-lbl">Active Buyers</div><div class="kpi-val">${getBuyerAccounts().filter(a=>a.kycStatus==='Approved').length}</div><div class="kpi-sub">${getBuyerAccounts().filter(a=>a.kycStatus==='Pending').length} pending KYC</div></div>
+      <div class="kpi"><div class="kpi-lbl">Active Sellers</div><div class="kpi-val">${SELLER_ACCOUNTS.filter(s=>s.status==='Active').length}</div><div class="kpi-sub">${CATALOG_MOCK.length} catalog items</div></div>
+      <div class="kpi"><div class="kpi-lbl">Total RFQs</div><div class="kpi-val">${getRFQData().length}</div><div class="kpi-sub">${getRFQData().filter(r=>r.stage>=4).length} resulted in orders</div></div>
+    </div>
+    <div class="two-col">
+      <div class="sf-card">
+        <div class="sf-card-hdr"><div class="sf-card-title">🔌 Integration Status</div></div>
+        <div class="t-wrap"><table>
+          <thead><tr><th>Integration</th><th>Type</th><th>Direction</th><th>Last Event</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="fw-6">Signzy KYC</td><td class="text-muted">Named Credential</td><td>NirmanOne → Signzy</td><td>3 min ago</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('Signzy API test passed · 2.9s','success')">Test</button></td></tr>
+            <tr><td class="fw-6">BlackBuck Freight</td><td class="text-muted">REST API</td><td>NirmanOne → BlackBuck</td><td>8 min ago</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('BlackBuck API OK · rate fetch confirmed','success')">Test</button></td></tr>
+            <tr><td class="fw-6">BlackBuck Tracking</td><td class="text-muted">Webhook</td><td>BlackBuck → NirmanOne</td><td style="color:var(--red)">Failed 06:42</td><td><span class="int-pill int-fail"><span class="int-dot" style="background:var(--red)"></span>Down</span></td><td><button class="btn btn-danger btn-xs" onclick="toast('Webhook restart triggered — 30s…','warning')">↺ Restart</button></td></tr>
+            <tr><td class="fw-6">Salesforce ↔ Buyer App</td><td class="text-muted">Connected App</td><td>Buyer App → SF</td><td>Active (real-time)</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('Connected App config','info')">Config</button></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="side-card">
+          <div class="side-title">👥 Persona Activity</div>
+          ${[['Buyer Account Manager','Priya Menon','Active · 4 open RFQs'],['Ops / KYC Agent','Meera Iyer','Active · 3 KYC pending'],['Seller RM','Arjun Khanna','Active · 1 dispute'],['Platform Admin','Suresh K','You']].map(([role,name,status]) => `
+          <div class="side-row" style="flex-direction:column;align-items:flex-start;gap:1px">
+            <div style="font-weight:600;font-size:12.5px">${name}</div>
+            <div style="font-size:11.5px;color:var(--sf-t3)">${role} · ${status}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  else if (tab === 'integrations') {
+    el.innerHTML = `
+    <div class="sf-card">
+      <div class="sf-card-hdr"><div class="sf-card-title">🔌 Integration Health — Signzy &amp; BlackBuck</div></div>
+      <div class="t-wrap"><table>
+        <thead><tr><th>Integration</th><th>Credential</th><th>Direction</th><th>Mechanism</th><th>Last Run</th><th>Calls Today</th><th>Avg Response</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="fw-6">Signzy GST Verify</td><td class="mono text-xs">SIGNZY_PROD_V2</td><td class="text-muted">NirmanOne → Signzy</td><td>REST/OAuth2</td><td>3 min ago</td><td>47</td><td>3.1s</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('Signzy test: GST check passed · 2.9s','success')">Test</button></td></tr>
+          <tr><td class="fw-6">Signzy PAN Verify</td><td class="mono text-xs">SIGNZY_PROD_V2</td><td class="text-muted">NirmanOne → Signzy</td><td>REST/OAuth2</td><td>3 min ago</td><td>41</td><td>2.8s</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('Signzy test: PAN check passed · 2.8s','success')">Test</button></td></tr>
+          <tr><td class="fw-6">Signzy Penny Drop</td><td class="mono text-xs">SIGNZY_PROD_V2</td><td class="text-muted">NirmanOne → Signzy</td><td>REST/IMPS</td><td>1 hr ago</td><td>12</td><td>4.2s</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('Penny drop test passed','success')">Test</button></td></tr>
+          <tr><td class="fw-6">BlackBuck Freight Rate</td><td class="mono text-xs">BB_FTL_PROD</td><td class="text-muted">NirmanOne → BlackBuck</td><td>REST API</td><td>8 min ago</td><td>203</td><td>1.4s</td><td><span class="int-pill int-ok"><span class="int-dot" style="background:var(--green)"></span>OK</span></td><td><button class="btn btn-neutral btn-xs" onclick="toast('BlackBuck rate fetch OK','success')">Test</button></td></tr>
+          <tr><td class="fw-6">BlackBuck Tracking</td><td class="mono text-xs">BB_WEBHOOK_KEY</td><td class="text-muted">BlackBuck → NirmanOne</td><td>Webhook</td><td style="color:var(--red)">Failed 06:42</td><td>0</td><td>Timeout</td><td><span class="int-pill int-fail"><span class="int-dot" style="background:var(--red)"></span>Down</span></td><td><button class="btn btn-danger btn-xs" onclick="toast('Webhook restart triggered','warning')">↺ Restart</button></td></tr>
+        </tbody>
+      </table></div>
+    </div>`;
+  }
+
+  else if (tab === 'permissions') {
+    el.innerHTML = `
+    <div class="sf-card">
+      <div class="sf-card-hdr"><div class="sf-card-title">🔐 Permission Matrix — Object Access by Profile</div></div>
+      <div class="t-wrap">
+        <table class="perm-matrix">
+          <thead><tr><th>Object</th><th>Buyer AM</th><th>Ops / KYC</th><th>Seller RM</th><th>Sys Admin</th></tr></thead>
+          <tbody>${[
+            ['Buyer Accounts',    'R/W (territory)', 'R/W (all)',     '—',              'R/W/D'],
+            ['Opportunities',       'R/W (own)',        'R (no pricing)','—',              'R/W/D'],
+            ['Quotes',            'R/W (own)',        '—',             '—',              'R/W/D'],
+            ['Seller Accounts',   '—',                '—',             'R/W (all)',      'R/W/D'],
+            ['Catalog / Products','R',                '—',             'R/W (all)',      'R/W/D'],
+            ['KYC Records',       '—',                'R/W (all)',     '—',              'R/W/D'],
+            ['Credit Limits',     'R (own accounts)', 'R/W (all)',     '—',              'R/W/D'],
+            ['Disputes',          '—',                '—',             'R/W (all)',      'R/W/D'],
+            ['Integration Logs',  '—',                '—',             '—',              'R/W/D'],
+            ['Setup / Config',    '—',                '—',             '—',              'Full'],
+          ].map(([obj,...cells]) => `<tr><td class="fw-6">${obj}</td>${cells.map(c => `<td class="perm-cell">${c==='—'?'<span class="perm-n">—</span>':c.includes('Full')||c.includes('R/W/D')?`<span class="perm-y">✓</span> <span style="font-size:10px;color:var(--green)">Full</span>`:`<span class="perm-r">${c}</span>`}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:10px 16px;font-size:12px;color:var(--sf-t3);border-top:1px solid var(--sf-border)">
+        <strong>Key:</strong> R = Read · W = Write · D = Delete · (own) = own records only · (territory) = assigned territory · — = No access
+      </div>
+    </div>`;
+  }
+
+  else if (tab === 'logs') {
+    el.innerHTML = `
+    <div class="sf-card">
+      <div class="sf-card-hdr">
+        <div class="sf-card-title">📋 System Audit Log</div>
+        <div style="display:flex;gap:8px">
+          <select class="sf-select" style="font-size:12px"><option>All Events</option><option>KYC</option><option>Integration</option><option>Payment</option></select>
+          <button class="btn btn-neutral btn-sm" onclick="toast('Audit log exported','success')">⬇ Export</button>
+        </div>
+      </div>
+      <div>
+        ${AUDIT_LOG.map(e => `
+        <div style="display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid #F3F2F2;font-size:12px">
+          <span class="mono" style="color:var(--sf-t3);width:130px;flex-shrink:0">${e.time}</span>
+          <span style="padding:1px 6px;border-radius:2px;font-size:10.5px;font-weight:700;flex-shrink:0;align-self:flex-start;background:${e.level==='ERROR'?'#FEE2E2':e.level==='WARN'?'#FEF3C7':'#DBEAFE'};color:${e.level==='ERROR'?'#991B1B':e.level==='WARN'?'#92400E':'#1E40AF'}">${e.level}</span>
+          <span style="color:var(--n1-orange);font-weight:600;width:80px;flex-shrink:0">${e.service}</span>
+          <span style="color:var(--sf-t3);width:90px;flex-shrink:0">${e.user}</span>
+          <span style="color:var(--sf-t2);flex:1">${e.msg}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const icons = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'sf-toast ' + (type === 'info' ? '' : type);
+  el.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(() => el.remove(), 300); }, 5000);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INIT — check for ?persona= deep link, otherwise open selector
+// ════════════════════════════════════════════════════════════════════
+const _urlParams = new URLSearchParams(window.location.search);
+const _deepPersona = _urlParams.get('persona');
+if (_deepPersona && PERSONAS.find(p => p.id === _deepPersona)) {
+  selectPersona(_deepPersona);
+} else {
+  openPersonaModal();
+}
+</script>
+</body>
+</html>

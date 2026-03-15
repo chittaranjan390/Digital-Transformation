@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NirmanOne — Seller Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* NirmanOne base (same as buyer app) */
+  --navy:#06111E;--navy2:#0C1D30;--navy3:#13273D;
+  --blue:#1B4F8A;--blue2:#1A6FC4;--blue-lt:#3B8FE8;
+  --bg:#EEF2F7;--bg2:#E2EAF3;--white:#FFFFFF;
+  --text:#141E2C;--text2:#2E3D4F;--text3:#5C6E84;
+  --border:#CDD6E2;--steel:#8B9BB0;--steel2:#5C6E84;--steel3:#C4CDD8;
+  --success:#0A6E45;--success-bg:#E0F5EC;--success-border:#5DCAA5;
+  --warn:#8A5000;--warn-bg:#FFF4DF;
+  --danger:#A81515;--danger-bg:#FDECEA;
+  --radius:6px;--radius2:10px;--radius3:16px;
+  --shadow:0 2px 12px rgba(6,17,30,0.08);--shadow2:0 4px 28px rgba(6,17,30,0.14);
+  /* Seller accent — amber/orange differentiation from buyer navy */
+  --seller:#B45309;--seller-bg:#FFF7ED;--seller-border:#F59E0B;
+  --seller-lt:#FFFBEB;--seller-dark:#92400E;
+  --seller-nav:#1A1000;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.02em}
+a{color:var(--blue2);text-decoration:none}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;flex-direction:column}
+.page.active{display:flex}
+
+/* ── TOPNAV ── */
+.topnav{background:var(--seller-nav);position:sticky;top:0;z-index:200;border-bottom:2px solid var(--seller-border)}
+.topnav-inner{display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px;max-width:1300px;margin:0 auto;padding:0 24px}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-mark{width:34px;height:34px;background:var(--seller-border);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:20px;height:20px}
+.logo-name{font-size:22px;color:#fff;letter-spacing:.04em}
+.logo-name span{color:var(--seller-border)}
+.logo-tag{font-family:'IBM Plex Sans',sans-serif;font-size:9px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.14em;text-transform:uppercase;margin-top:1px}
+.seller-badge{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.35);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--seller-border);letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-link{font-size:13px;font-weight:500;color:rgba(255,255,255,.6);padding:6px 13px;border-radius:var(--radius);cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:#fff;background:rgba(255,255,255,.09)}
+.nav-link.active{color:var(--seller-border)}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.seller-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:var(--radius);padding:5px 12px 5px 6px;cursor:pointer}
+.seller-avatar{width:26px;height:26px;border-radius:50%;background:var(--seller);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Barlow Condensed',sans-serif}
+.seller-name-nav{font-size:12px;font-weight:500;color:#fff;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-sm-nav{font-size:12px;font-weight:600;padding:6px 16px;border-radius:var(--radius);cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:'IBM Plex Sans',sans-serif;white-space:nowrap}
+.btn-ghost-nav{background:transparent;border-color:rgba(255,255,255,.22);color:#fff}
+.btn-ghost-nav:hover{background:rgba(255,255,255,.1)}
+
+/* ── LAYOUT ── */
+.container{width:100%;max-width:1300px;margin:0 auto;padding:0 24px}
+.page-header{background:var(--seller-nav);padding:22px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.page-title{font-size:28px;color:#fff;margin-bottom:3px}
+.page-sub{font-size:13px;color:rgba(255,255,255,.5)}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius2);box-shadow:var(--shadow)}
+.card-hdr{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.card-body{padding:16px 18px}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi-lbl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:var(--text);line-height:1;margin-bottom:3px}
+.kpi-sub{font-size:11.5px;color:var(--text3)}
+.kpi-delta-up{font-size:11.5px;color:var(--success);font-weight:600}
+.kpi-delta-warn{font-size:11.5px;color:var(--warn);font-weight:600}
+
+/* ── TABLES ── */
+.t-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--bg);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);padding:9px 14px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--bg2);color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFD}
+.sl{color:var(--blue2);cursor:pointer;font-weight:600}
+.sl:hover{text-decoration:underline}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'IBM Plex Sans',sans-serif;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .18s;border-radius:var(--radius)}
+.btn-lg{font-size:15px;padding:13px 28px}
+.btn-md{font-size:13.5px;padding:9px 20px}
+.btn-sm{font-size:12px;padding:6px 14px}
+.btn-xs{font-size:11px;padding:4px 10px}
+.btn-seller{background:var(--seller);color:#fff;border-color:var(--seller)}.btn-seller:hover{background:var(--seller-dark)}
+.btn-primary{background:var(--blue2);color:#fff;border-color:var(--blue2)}.btn-primary:hover{background:var(--blue-lt)}
+.btn-outline{background:transparent;border-color:var(--border);color:var(--text)}.btn-outline:hover{background:var(--bg2)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--blue2)}.btn-ghost:hover{background:rgba(26,111,196,.07)}
+.btn-success{background:var(--success);color:#fff;border-color:var(--success)}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-full{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;letter-spacing:.03em}
+.b-green{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.b-amber{background:var(--warn-bg);color:var(--warn);border:1px solid #E8B84B}
+.b-red{background:var(--danger-bg);color:var(--danger);border:1px solid #F5A3A3}
+.b-blue{background:#E5EFF9;color:var(--blue);border:1px solid #90B8E0}
+.b-gray{background:var(--bg2);color:var(--text3);border:1px solid var(--border)}
+.b-seller{background:var(--seller-bg);color:var(--seller);border:1px solid var(--seller-border)}
+.b-new{background:#FEF9C3;color:#854D0E;border:1px solid #FDE047;animation:newpulse 1.8s infinite}
+@keyframes newpulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ── FORMS ── */
+.form-input,.form-select,.form-textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-size:13px;font-family:'IBM Plex Sans',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border .15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--seller);box-shadow:0 0 0 3px rgba(180,83,9,.09)}
+.form-label{font-size:10.5px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px;display:block}
+.form-hint{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* ── STATUS PILLS ── */
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:100px}
+.pill-new{background:var(--seller-bg);color:var(--seller);border:1px solid var(--seller-border)}
+.pill-quoted{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.pill-accepted{background:#E5EFF9;color:var(--blue);border:1px solid #90B8E0}
+.pill-dispatched{background:#E5EFF9;color:var(--blue);border:1px solid #90B8E0}
+.pill-delivered{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.pill-declined{background:var(--danger-bg);color:var(--danger);border:1px solid #F5A3A3}
+
+/* ── PROGRESS ── */
+.prog{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:3px}
+.prog-seller{background:var(--seller)}
+.prog-green{background:var(--success)}
+.prog-blue{background:var(--blue2)}
+
+/* ── SIDEBAR CARD ── */
+.side-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.side-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px}
+.side-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg2);font-size:12.5px}
+.side-row:last-child{border-bottom:none}
+
+/* ── TIMELINE ── */
+.tl-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.tl-title{font-size:12.5px;font-weight:600;color:var(--text)}
+.tl-sub{font-size:11.5px;color:var(--text3);margin-top:1px}
+.tl-time{font-size:11px;color:var(--steel2);margin-top:2px}
+
+/* ── TWO-COL LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+/* ── TOAST ── */
+#toastWrap{position:fixed;top:74px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:9px;pointer-events:none}
+.toast{background:var(--white);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 16px;min-width:270px;max-width:340px;box-shadow:var(--shadow2);display:flex;align-items:flex-start;gap:10px;animation:toastIn .22s ease;pointer-events:all}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast.removing{animation:toastOut .22s ease forwards}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px)}}
+.toast-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+.toast-title{font-size:12.5px;font-weight:600;color:var(--text)}
+.toast-msg{font-size:11.5px;color:var(--text3)}
+.toast-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 0 0 6px;flex-shrink:0}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(6,17,30,.72);z-index:5000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-box{background:var(--white);border-radius:var(--radius3);box-shadow:var(--shadow2);width:520px;max-width:96vw;overflow:hidden;max-height:92vh;overflow-y:auto}
+.modal-hd{background:var(--seller-nav);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--seller-border)}
+.modal-hd h3{font-size:20px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.modal-close{color:rgba(255,255,255,.6);cursor:pointer;font-size:20px;line-height:1;padding:2px 6px;background:none;border:none}
+.modal-close:hover{color:#fff}
+.modal-body{padding:20px 22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--bg)}
+
+/* ── LOGIN PAGE ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--seller-nav);padding:24px}
+.login-card{background:var(--white);border-radius:var(--radius3);box-shadow:0 32px 80px rgba(0,0,0,.4);width:440px;max-width:100%;overflow:hidden}
+.login-hdr{background:linear-gradient(135deg,#1A1000 0%,#2D1A00 100%);padding:30px 34px;border-bottom:2px solid var(--seller-border)}
+.login-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:4px}
+.login-sub{font-size:12.5px;color:rgba(255,255,255,.45)}
+.login-body{padding:28px 34px}
+.login-footer{padding:16px 34px 24px;background:var(--bg);border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--text3)}
+
+/* ── QUOTE BUILDER ── */
+.qb-preview{background:var(--seller-bg);border:1.5px solid var(--seller-border);border-radius:var(--radius2);padding:16px;margin:14px 0}
+.qb-calc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(180,83,9,.12);font-size:12.5px}
+.qb-calc-row:last-child{border-bottom:none}
+.qb-total{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--success);line-height:1}
+
+/* ── CATALOG ITEM ── */
+.cat-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 18px;display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;margin-bottom:10px;transition:box-shadow .18s}
+.cat-item:hover{box-shadow:var(--shadow)}
+.cat-icon{width:44px;height:44px;border-radius:10px;background:var(--seller-bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+
+/* ── RATING STARS ── */
+.stars{color:#F59E0B;font-size:13px;letter-spacing:1px}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 24px}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:.3}
+.empty-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;color:var(--text2);margin-bottom:7px}
+.empty-sub{font-size:13px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toastWrap"></div>
+
+<!-- ═══════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════ -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-card">
+    <div class="login-hdr">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="logo-mark"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="8" width="7" height="10" rx="1" fill="white" opacity=".9"/><rect x="11" y="4" width="7" height="14" rx="1" fill="white"/><rect x="2" y="2" width="7" height="4" rx="1" fill="white" opacity=".5"/></svg></div>
+        <div>
+          <div class="login-title">NIRMAN<span style="color:var(--seller-border)">ONE</span></div>
+          <div class="login-sub">Seller Portal · Sign In</div>
+        </div>
+      </div>
+    </div>
+    <div class="login-body">
+      <div style="margin-bottom:14px">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="loginEmail" type="email" value="steel@seller.com"/>
+      </div>
+      <div style="margin-bottom:20px">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="loginPass" type="password" value="seller123"/>
+      </div>
+      <button class="btn btn-seller btn-full btn-md" onclick="doLogin()">Sign In to Seller Portal →</button>
+      <div style="margin-top:14px;text-align:right"><a style="font-size:12px;color:rgba(255,255,255,.35);cursor:pointer" onclick="toast('Password reset link sent to your registered email','','info')">Forgot password?</a></div>
+    </div>
+    <div class="login-footer">
+      <a href="nirmanone_v3.html" target="_blank" style="color:var(--seller)">← Back to Buyer App</a>
+      &nbsp;·&nbsp;
+      <a href="nirmanone_sf_console.html?persona=seller-rm" target="_blank" style="color:var(--seller)">SF Console ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN APP (shown after login)
+═══════════════════════════════════════════════ -->
+<div id="mainApp" style="display:none;flex-direction:column;min-height:100vh">
+
+  <!-- TOPNAV -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <div class="logo">
+        <div class="logo-mark"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="8" width="7" height="10" rx="1" fill="white" opacity=".9"/><rect x="11" y="4" width="7" height="14" rx="1" fill="white"/><rect x="2" y="2" width="7" height="4" rx="1" fill="white" opacity=".5"/></svg></div>
+        <div>
+          <div class="logo-name">NIRMAN<span>ONE</span></div>
+          <div class="logo-tag">Seller Portal</div>
+        </div>
+      </div>
+      <div class="seller-badge">Verified Seller</div>
+      <div class="nav-links" id="navLinks">
+        <div class="nav-link active" onclick="showSection('dashboard')">Dashboard</div>
+        <div class="nav-link" onclick="showSection('inbox')">RFQ Inbox <span id="inboxBadge" style="display:none;background:var(--seller-border);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px;margin-left:4px">0</span></div>
+        <div class="nav-link" onclick="showSection('quotes')">My Quotes</div>
+        <div class="nav-link" onclick="showSection('orders')">Orders</div>
+        <div class="nav-link" onclick="showSection('catalog')">Catalog</div>
+        <div class="nav-link" onclick="showSection('performance')">Performance</div>
+      </div>
+      <div class="nav-actions">
+        <a href="nirmanone_v3.html" target="_blank" class="btn-sm-nav btn-ghost-nav" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none">← Buyer App</a>
+        <div class="seller-chip">
+          <div class="seller-avatar" id="sellerAvatar">SM</div>
+          <div class="seller-name-nav" id="sellerNameNav">Steel Mart India</div>
+        </div>
+        <button class="btn-sm-nav btn-ghost-nav" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT AREA -->
+  <main id="mainContent" style="flex:1"></main>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     QUOTE BUILDER MODAL
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="quoteModal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3>Submit Quote</h3>
+      <button class="modal-close" onclick="closeQuoteModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="qbRFQInfo" style="background:var(--bg);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:13px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:4px">
+        <div>
+          <label class="form-label">Your Unit Price (per MT/bag) *</label>
+          <input class="form-input" id="qbPrice" type="number" placeholder="e.g. 68200" oninput="calcQuotePreview()"/>
+          <div class="form-hint" id="qbPriceHint">Enter your ex-warehouse price</div>
+        </div>
+        <div>
+          <label class="form-label">Stock Available</label>
+          <input class="form-input" id="qbStock" type="number" placeholder="MT available" oninput="calcQuotePreview()"/>
+        </div>
+        <div>
+          <label class="form-label">Dispatch In (Days)</label>
+          <select class="form-select" id="qbDispatch">
+            <option value="0">Same Day</option>
+            <option value="1">1 Day</option>
+            <option value="2" selected>2 Days</option>
+            <option value="3">3 Days</option>
+            <option value="5">5 Days</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Payment Terms Accepted</label>
+          <select class="form-select" id="qbTerms">
+            <option>Immediate only</option>
+            <option>Net 7 Days</option>
+            <option selected>Net 30 Days</option>
+            <option>Net 45 Days</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="form-label">Additional Notes</label>
+          <textarea class="form-textarea" id="qbNotes" rows="2" placeholder="Grade certifications, delivery conditions, etc."></textarea>
+        </div>
+      </div>
+      <!-- Live preview -->
+      <div class="qb-preview" id="qbPreview" style="display:none">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--seller);margin-bottom:10px">📊 Live Quote Preview</div>
+        <div class="qb-calc-row"><span style="color:var(--text3)">Your Unit Price</span><span id="qbShowUnit" class="fw-6">—</span></div>
+        <div class="qb-calc-row"><span style="color:var(--text3)">+ Freight (NirmanOne Logistics)</span><span id="qbShowFreight" style="color:var(--text3)">—</span></div>
+        <div class="qb-calc-row"><span style="font-weight:700">Buyer Landing Cost / MT</span><span id="qbShowLanding" style="font-weight:700;color:var(--success);font-size:15px">—</span></div>
+        <div class="qb-calc-row"><span style="color:var(--text3)">× Quantity</span><span id="qbShowQty" style="color:var(--text3)">—</span></div>
+        <div class="qb-calc-row"><span style="color:var(--text3)">+ GST (18%)</span><span id="qbShowGst" style="color:var(--text3)">—</span></div>
+        <div style="padding-top:10px;margin-top:6px;border-top:1.5px solid rgba(180,83,9,.2);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:13px">Total Buyer Price</span>
+          <div class="qb-total" id="qbShowTotal">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-md" onclick="closeQuoteModal()">Cancel</button>
+      <button class="btn btn-seller btn-md" id="qbSubmitBtn" onclick="submitQuote()">Submit Quote →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DISPATCH MODAL -->
+<div class="modal-overlay" id="dispatchModal" style="display:none">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-hd">
+      <h3>Confirm Dispatch</h3>
+      <button class="modal-close" onclick="document.getElementById('dispatchModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="dispatchOrderInfo" style="background:var(--bg);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:13px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label class="form-label">Vehicle Number</label>
+          <input class="form-input" id="dispVehicle" placeholder="e.g. MH-12-AB-1234" style="text-transform:uppercase"/>
+        </div>
+        <div>
+          <label class="form-label">Driver Mobile</label>
+          <input class="form-input" id="dispDriver" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="form-label">BlackBuck Tracking ID</label>
+          <input class="form-input" id="dispTracking" placeholder="Auto-generated on submit" readonly style="background:var(--bg);color:var(--text3)"/>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="form-label">Expected Delivery Date</label>
+          <input class="form-input" id="dispETA" type="date"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-md" onclick="document.getElementById('dispatchModal').style.display='none'">Cancel</button>
+      <button class="btn btn-seller btn-md" onclick="confirmDispatch()">✓ Confirm Dispatch</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// SELLER DATA
+// ═══════════════════════════════════════════════════════════
+const SELLERS = [
+  {
+    id:'S001', name:'Steel Mart India Pvt. Ltd.', email:'steel@seller.com', pass:'seller123',
+    initials:'SM', gst:'27AABCS9999A1Z1', pan:'AABCS9999A', city:'Pune', pin:'411001',
+    type:'Manufacturer', categories:['Steel TMT','Steel Pipes'],
+    rating:4.8, txns:2840, monthlyGMV:4200000, dispatchDays:1,
+    products:{P001:{name:'Fe 500D TMT Bars',price:68200,stock:200,unit:'MT',icon:'⚙️',grade:'IS:1786'},
+              P004:{name:'MS ERW Pipes B Class',price:73800,stock:80,unit:'MT',icon:'🔩',grade:'IS:1239'},
+              P008:{name:'Fe 550D TMT Bars',price:70900,stock:120,unit:'MT',icon:'⚙️',grade:'IS:1786'}},
+    monthlyOrders:[8,11,9,14,12,16], mockPayouts:[
+      {month:'Dec 2024',gmv:3800000,commission:76000,status:'Paid'},
+      {month:'Jan 2025',gmv:4200000,commission:84000,status:'Processing'},
+    ]
+  },
+  {
+    id:'S002', name:'JSR Steel Works', email:'jsr@seller.com', pass:'seller123',
+    initials:'JS', gst:'27AAAJSR1234B2Z2', pan:'AAAJSR1234B', city:'Mumbai', pin:'400001',
+    type:'Manufacturer', categories:['Steel TMT'],
+    rating:4.9, txns:3100, monthlyGMV:3800000, dispatchDays:2,
+    products:{P001:{name:'Fe 500D TMT Bars',price:68500,stock:150,unit:'MT',icon:'⚙️',grade:'IS:1786'},
+              P008:{name:'Fe 550D TMT Bars',price:71200,stock:90,unit:'MT',icon:'⚙️',grade:'IS:1786'},
+              P005:{name:'HR Coil IS:2062 E250',price:62200,stock:60,unit:'MT',icon:'🌀',grade:'IS:2062'}},
+    monthlyOrders:[10,13,11,15,14,18], mockPayouts:[
+      {month:'Dec 2024',gmv:3400000,commission:68000,status:'Paid'},
+      {month:'Jan 2025',gmv:3800000,commission:76000,status:'Processing'},
+    ]
+  },
+  {
+    id:'S004', name:'Cement Corp Maharashtra', email:'cement@seller.com', pass:'seller123',
+    initials:'CC', gst:'27AAACC2345D4Z4', pan:'AAACC2345D', city:'Pune', pin:'411014',
+    type:'Manufacturer', categories:['Cement'],
+    rating:4.6, txns:1640, monthlyGMV:2600000, dispatchDays:0,
+    products:{P002:{name:'OPC 53 Grade Cement',price:418,stock:5000,unit:'bags',icon:'🏗️',grade:'IS:12269'},
+              P006:{name:'PPC Cement Flyash Based',price:388,stock:8000,unit:'bags',icon:'🏗️',grade:'IS:1489'}},
+    monthlyOrders:[22,28,24,31,29,35], mockPayouts:[
+      {month:'Dec 2024',gmv:2300000,commission:46000,status:'Paid'},
+      {month:'Jan 2025',gmv:2600000,commission:52000,status:'Processing'},
+    ]
+  },
+  {
+    id:'S006', name:'Bitumen India Corp', email:'bitumen@seller.com', pass:'seller123',
+    initials:'BI', gst:'27AAABI7890E5Z5', pan:'AAABI7890E', city:'Mumbai', pin:'400088',
+    type:'Distributor', categories:['Bitumen'],
+    rating:4.5, txns:980, monthlyGMV:1800000, dispatchDays:2,
+    products:{P003:{name:'Bitumen VG-30',price:57800,stock:100,unit:'MT',icon:'🛣️',grade:'IS:73'},
+              P007:{name:'Bitumen VG-40',price:60800,stock:80,unit:'MT',icon:'🛣️',grade:'IS:73'}},
+    monthlyOrders:[5,7,6,9,8,11], mockPayouts:[
+      {month:'Dec 2024',gmv:1600000,commission:32000,status:'Paid'},
+      {month:'Jan 2025',gmv:1800000,commission:36000,status:'Processing'},
+    ]
+  },
+];
+
+const PRODUCTS_MAP = {
+  P001:'Fe 500D TMT Bars',P002:'OPC 53 Grade Cement',P003:'Bitumen VG-30',
+  P004:'MS ERW Pipes B Class',P005:'HR Coil IS:2062 E250',P006:'PPC Cement Flyash Based',
+  P007:'Bitumen VG-40',P008:'Fe 550D TMT Bars',P009:'MS Square Hollow Section'
+};
+
+const FREIGHT_MATRIX = {
+  '411':{'400':1800,'421':900,'440':2800,'500':4200,'560':5100,'110':4800},
+  '400':{'411':1800,'421':600,'440':3100,'500':4400,'560':5300,'110':5000},
+  '421':{'411':900,'400':600,'440':3200,'500':4500,'560':5400,'110':5100},
+  '440':{'411':2800,'400':3100,'421':3200,'500':3200,'560':4400,'110':3600},
+  '500':{'411':4200,'400':4400,'421':4500,'440':3200,'560':2200,'110':3000},
+};
+
+function getFreight(originPin, destPin) {
+  const op = String(originPin).slice(0,3);
+  const dp = String(destPin).slice(0,3);
+  if (op === dp) return 600;
+  return (FREIGHT_MATRIX[op] && FREIGHT_MATRIX[op][dp]) || 3500;
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentSeller = null;
+let currentSection = 'dashboard';
+let activeQuoteRFQ = null;    // RFQ being quoted
+let activeDispatchOrder = null;
+
+// localStorage keys
+const KEY_SELLER       = 'n1_seller_user';
+const KEY_BUYER_RFQS   = 'n1_rfqs';          // read — buyer app writes here
+const KEY_SELLER_QUOTES = 'n1_seller_quotes'; // write — seller submits quotes here
+const KEY_SELLER_ORDERS = 'n1_seller_orders'; // seller's order state
+
+function readBuyerRFQs() {
+  try { return JSON.parse(localStorage.getItem(KEY_BUYER_RFQS) || '[]'); } catch(e) { return []; }
+}
+function readSellerQuotes() {
+  try { return JSON.parse(localStorage.getItem(KEY_SELLER_QUOTES) || '[]'); } catch(e) { return []; }
+}
+function writeSellerQuotes(q) {
+  localStorage.setItem(KEY_SELLER_QUOTES, JSON.stringify(q));
+}
+function readSellerOrders() {
+  try { return JSON.parse(localStorage.getItem(KEY_SELLER_ORDERS) || '[]'); } catch(e) { return []; }
+}
+function writeSellerOrders(o) {
+  localStorage.setItem(KEY_SELLER_ORDERS, JSON.stringify(o));
+}
+
+// Mock RFQs that are always present (so demo works even without buyer app open)
+const MOCK_BUYER_RFQS = [
+  {id:'RFQ-2025-0041',product:'Fe 500D TMT Bars',productId:'P001',qty:50,unit:'MT',pin:'411019',date:'10 Jan 2025',buyer:'Sharma Construction Pvt. Ltd.',status:'Quoted',deadline:'25 Jan 2025'},
+  {id:'RFQ-2025-0044',product:'MS ERW Pipes B Class',productId:'P004',qty:30,unit:'MT',pin:'380001',date:'12 Jan 2025',buyer:'Patel Infratech Ltd.',status:'Open',deadline:'28 Jan 2025'},
+  {id:'RFQ-2025-0048',product:'Fe 550D TMT Bars',productId:'P008',qty:80,unit:'MT',pin:'411019',date:'13 Jan 2025',buyer:'Nair Builders',status:'Open',deadline:'20 Jan 2025'},
+  {id:'RFQ-2025-0051',product:'Fe 500D TMT Bars',productId:'P001',qty:25,unit:'MT',pin:'560001',date:'14 Jan 2025',buyer:'Bangalore Infra Works',status:'Open',deadline:'22 Jan 2025'},
+];
+
+const MOCK_SELLER_ORDERS = [
+  {id:'ORD-2025-3801',rfqId:'RFQ-2025-0031',product:'Fe 500D TMT Bars',qty:50,unit:'MT',buyer:'Sharma Construction',amount:3810000,date:'02 Jan 2025',deliveryPin:'411019',status:'delivered',tracking:'BB-2025-44821'},
+  {id:'ORD-2025-3844',rfqId:'RFQ-2025-0038',product:'MS ERW Pipes B Class',qty:20,unit:'MT',buyer:'Patel Infratech',amount:1548000,date:'09 Jan 2025',deliveryPin:'380001',status:'in-transit',tracking:'BB-2025-49103'},
+  {id:'ORD-2025-3901',rfqId:'RFQ-2025-0041',product:'Fe 500D TMT Bars',qty:50,unit:'MT',buyer:'Sharma Construction',amount:4066800,date:'10 Jan 2025',deliveryPin:'411019',status:'accepted',tracking:null},
+];
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
+const delay = ms => new Promise(r => setTimeout(r, ms));
+const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+
+function toast(title, msg, type='success') {
+  const tc = document.getElementById('toastWrap');
+  const icons = {success:'✓',error:'✕',info:'ℹ',warn:'⚠'};
+  const colors = {success:'var(--success)',error:'var(--danger)',info:'var(--blue2)',warn:'var(--seller)'};
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-icon" style="color:${colors[type]||colors.info}">${icons[type]||'ℹ'}</div>
+    <div><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div>
+    <button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 250); }, 3800);
+}
+
+// Get all RFQs this seller is eligible for (matches their product catalog)
+function getMatchedRFQs() {
+  if (!currentSeller) return [];
+  const myProductIds = Object.keys(currentSeller.products);
+  const liveRFQs = readBuyerRFQs().filter(r => r.product && myProductIds.includes(r.productId||
+    Object.keys(currentSeller.products).find(pid => currentSeller.products[pid].name === r.product)));
+  const mockRFQs = MOCK_BUYER_RFQS.filter(r => myProductIds.includes(r.productId));
+  // Merge, deduplicate by id, live first
+  const merged = [...liveRFQs];
+  mockRFQs.forEach(r => { if (!merged.find(x => x.id === r.id)) merged.push(r); });
+  return merged;
+}
+
+function getMyQuotes() {
+  const allQuotes = readSellerQuotes();
+  return allQuotes.filter(q => q.sellerId === currentSeller?.id);
+}
+
+function getMyOrders() {
+  const saved = readSellerOrders().filter(o => o.sellerId === currentSeller?.id);
+  const mockFiltered = MOCK_SELLER_ORDERS.filter(o =>
+    Object.keys(currentSeller?.products||{}).some(pid =>
+      currentSeller.products[pid].name === o.product
+    )
+  );
+  const merged = [...saved];
+  mockFiltered.forEach(o => { if (!merged.find(x => x.id === o.id)) merged.push({...o, sellerId: currentSeller?.id}); });
+  return merged;
+}
+
+// Has this seller already quoted on this RFQ?
+function alreadyQuoted(rfqId) {
+  return getMyQuotes().some(q => q.rfqId === rfqId);
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if (!email || !pass) { toast('Required', 'Enter email and password', 'error'); return; }
+  const seller = SELLERS.find(s => s.email === email && s.pass === pass);
+  if (!seller) { toast('Invalid credentials', 'Check email/password and try again', 'error'); return; }
+  currentSeller = seller;
+  localStorage.setItem(KEY_SELLER, JSON.stringify({id:seller.id, name:seller.name}));
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  document.getElementById('sellerAvatar').textContent = seller.initials;
+  document.getElementById('sellerNameNav').textContent = seller.name;
+  showSection('dashboard');
+  updateInboxBadge();
+  toast('Welcome back!', `Signed in as ${seller.name}`, 'success');
+}
+
+function doLogout() {
+  currentSeller = null;
+  localStorage.removeItem(KEY_SELLER);
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showSection(name) {
+  currentSection = name;
+  document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+  const sections = ['dashboard','inbox','quotes','orders','catalog','performance'];
+  const idx = sections.indexOf(name);
+  const navLinks = document.getElementById('navLinks').querySelectorAll('.nav-link');
+  if (navLinks[idx]) navLinks[idx].classList.add('active');
+  window.scrollTo(0, 0);
+  renderSection(name);
+}
+
+function updateInboxBadge() {
+  const unquoted = getMatchedRFQs().filter(r => !alreadyQuoted(r.id) && r.status !== 'Fulfilled').length;
+  const badge = document.getElementById('inboxBadge');
+  if (badge) {
+    badge.style.display = unquoted > 0 ? 'inline' : 'none';
+    badge.textContent = unquoted;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SECTION RENDERER
+// ═══════════════════════════════════════════════════════════
+function renderSection(name) {
+  const el = document.getElementById('mainContent');
+  if (name === 'dashboard')   renderDashboard(el);
+  else if (name === 'inbox')  renderInbox(el);
+  else if (name === 'quotes') renderQuotes(el);
+  else if (name === 'orders') renderOrders(el);
+  else if (name === 'catalog') renderCatalog(el);
+  else if (name === 'performance') renderPerformance(el);
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDashboard(el) {
+  const s = currentSeller;
+  const allRFQs = getMatchedRFQs();
+  const openRFQs = allRFQs.filter(r => !alreadyQuoted(r.id) && r.status !== 'Fulfilled');
+  const myQuotes = getMyQuotes();
+  const myOrders = getMyOrders();
+  const liveRFQs = readBuyerRFQs().filter(r => Object.keys(s.products).some(pid => s.products[pid].name === r.product));
+
+  el.innerHTML = `
+  <div class="page-header">
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div class="page-title">${s.name}</div>
+          <div class="page-sub">${s.city} · ${s.categories.join(' & ')} · GST ${s.gst}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="badge b-green">✓ KYC Verified</span>
+          <span class="badge b-seller">⭐ ${s.rating} Rating</span>
+          <span style="font-size:12px;color:rgba(255,255,255,.5)">${s.txns.toLocaleString('en-IN')}+ transactions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:22px;padding-bottom:36px">
+    ${liveRFQs.length ? `
+    <div style="background:linear-gradient(135deg,#1A1000,#2D1A00);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius2);padding:13px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:14px">
+      <div><span class="badge b-new">● ${liveRFQs.length} New from Buyer App</span> <span style="color:rgba(255,255,255,.7);font-size:12.5px;margin-left:8px">${liveRFQs.map(r=>r.product).join(', ')} — live RFQs just submitted</span></div>
+      <button class="btn btn-seller btn-sm" style="flex-shrink:0" onclick="showSection('inbox')">View RFQ Inbox →</button>
+    </div>` : ''}
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:3px solid var(--seller)">
+        <div class="kpi-lbl">Open RFQs</div>
+        <div class="kpi-val">${openRFQs.length}</div>
+        <div class="kpi-delta-warn">Awaiting your quote</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Quotes Submitted</div>
+        <div class="kpi-val">${myQuotes.length + 3}</div>
+        <div class="kpi-delta-up">↑ 2 this week</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Active Orders</div>
+        <div class="kpi-val">${myOrders.filter(o=>o.status==='accepted'||o.status==='in-transit').length}</div>
+        <div class="kpi-sub">${myOrders.filter(o=>o.status==='in-transit').length} in transit</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Monthly GMV</div>
+        <div class="kpi-val" style="font-size:26px">${fmt(s.monthlyGMV)}</div>
+        <div class="kpi-delta-up">↑ 12% vs last month</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hdr">
+            <div class="card-title">📋 Pending RFQs — Action Required</div>
+            <button class="btn btn-seller btn-sm" onclick="showSection('inbox')">View All →</button>
+          </div>
+          <div class="t-wrap">
+            <table>
+              <thead><tr><th>RFQ ID</th><th>Product</th><th>Buyer</th><th>Qty</th><th>Delivery Pin</th><th>Deadline</th><th></th></tr></thead>
+              <tbody>
+                ${openRFQs.slice(0,4).map(r => `<tr>
+                  <td><span class="mono sl" onclick="openQuoteModal('${r.id}')">${r.id}</span>${liveRFQs.find(l=>l.id===r.id)?'<span class="badge b-new" style="margin-left:5px">Live</span>':''}</td>
+                  <td style="font-weight:600">${r.product}</td>
+                  <td class="text-muted" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.buyer||'MSME Buyer'}</td>
+                  <td>${r.qty} ${r.unit||'MT'}</td>
+                  <td class="mono">${r.pin||'—'}</td>
+                  <td class="text-muted">${r.deadline||'—'}</td>
+                  <td><button class="btn btn-seller btn-xs" onclick="openQuoteModal('${r.id}')">Quote →</button></td>
+                </tr>`).join('')}
+                ${openRFQs.length === 0 ? '<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3)">No pending RFQs — check back soon</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📦 Recent Orders</div><button class="btn btn-ghost btn-sm" onclick="showSection('orders')">View All →</button></div>
+          <div class="t-wrap">
+            <table>
+              <thead><tr><th>Order ID</th><th>Product</th><th>Qty</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                ${myOrders.slice(0,3).map(o => `<tr>
+                  <td class="mono fw-6">${o.id}</td>
+                  <td>${o.product}</td>
+                  <td>${o.qty} ${o.unit||'MT'}</td>
+                  <td class="fw-6">${fmt(o.amount)}</td>
+                  <td>${statusPill(o.status)}</td>
+                  <td>${o.status==='accepted'?`<button class="btn btn-seller btn-xs" onclick="openDispatchModal('${o.id}')">Dispatch</button>`:o.status==='in-transit'?`<button class="btn btn-outline btn-xs" onclick="toast('Tracking','BB-ID: ${o.tracking||'BB-PENDING'}','info')">Track</button>`:'—'}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="side-card">
+          <div class="side-title">📊 This Month</div>
+          <div class="side-row"><span class="text-muted">GMV</span><span class="fw-6">${fmt(s.monthlyGMV)}</span></div>
+          <div class="side-row"><span class="text-muted">Platform Commission (2%)</span><span class="fw-6" style="color:var(--seller)">${fmt(s.monthlyGMV*0.02)}</span></div>
+          <div class="side-row"><span class="text-muted">Net Payout</span><span class="fw-6" style="color:var(--success)">${fmt(s.monthlyGMV*0.98)}</span></div>
+          <div class="side-row"><span class="text-muted">Orders Fulfilled</span><span class="fw-6">${s.monthlyOrders[5]}</span></div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px"><span class="text-muted">Monthly Target</span><span class="fw-6">${Math.round(s.monthlyGMV/5500000*100)}%</span></div>
+            <div class="prog"><div class="prog-fill prog-seller" style="width:${Math.min(Math.round(s.monthlyGMV/5500000*100),100)}%"></div></div>
+          </div>
+        </div>
+        <div class="side-card">
+          <div class="side-title">⭐ Performance Score</div>
+          <div class="side-row"><span class="text-muted">Overall Rating</span><span class="fw-6"><span class="stars">★★★★${s.rating>=4.8?'★':'☆'}</span> ${s.rating}</span></div>
+          <div class="side-row"><span class="text-muted">On-time Dispatch</span><span class="fw-6" style="color:var(--success)">94%</span></div>
+          <div class="side-row"><span class="text-muted">Quote Response Rate</span><span class="fw-6">88%</span></div>
+          <div class="side-row"><span class="text-muted">Dispute Rate</span><span class="fw-6" style="color:var(--success)">0.3%</span></div>
+        </div>
+        <div class="side-card">
+          <div class="side-title">🕐 Recent Activity</div>
+          <div class="tl-item"><div class="tl-dot">📋</div><div><div class="tl-title">New RFQ matched — ${allRFQs[0]?.product||'TMT Bars'}</div><div class="tl-time">Just now</div></div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--seller-bg);color:var(--seller)">✓</div><div><div class="tl-title">Quote submitted — RFQ-2025-0041</div><div class="tl-time">2 hrs ago</div></div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--success-bg);color:var(--success)">💰</div><div><div class="tl-title">Payment received — ORD-2025-3801</div><div class="tl-sub">${fmt(3800000)}</div><div class="tl-time">Yesterday</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RFQ INBOX
+// ═══════════════════════════════════════════════════════════
+function renderInbox(el) {
+  const rfqs = getMatchedRFQs();
+  const liveRFQs = readBuyerRFQs();
+  el.innerHTML = `
+  <div class="page-header">
+    <div class="container">
+      <div class="page-title">RFQ Inbox</div>
+      <div class="page-sub">Requests matched to your product catalog — respond within the deadline to stay competitive</div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:22px;padding-bottom:36px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <div style="font-size:13px;color:var(--text2)">${rfqs.length} RFQ${rfqs.length!==1?'s':''} matched to your catalog · <strong style="color:var(--seller)">${rfqs.filter(r=>!alreadyQuoted(r.id)).length} pending response</strong></div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <select class="form-select" style="font-size:12px;padding:5px 10px;width:auto"><option>All RFQs</option><option>Pending Quote</option><option>Quoted</option></select>
+      </div>
+    </div>
+    ${rfqs.length === 0 ? `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No RFQs matched yet</div><div class="empty-sub">Matched RFQs will appear here when buyers request your products</div></div>` : ''}
+    ${rfqs.map(r => {
+      const quoted = alreadyQuoted(r.id);
+      const myQ = getMyQuotes().find(q => q.rfqId === r.id);
+      const isLive = !!liveRFQs.find(l => l.id === r.id);
+      const productData = Object.values(currentSeller.products).find(p => p.name === r.product) ||
+                          currentSeller.products[r.productId];
+      const myPrice = productData?.price || 0;
+      const freight = getFreight(currentSeller.pin, r.pin||'411019');
+      const landingPreview = myPrice + freight;
+      return `
+      <div style="background:var(--white);border:1.5px solid ${quoted?'var(--success-border)':isLive?'var(--seller-border)':'var(--border)'};border-radius:var(--radius2);padding:0;margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden">
+        <div style="padding:16px 20px;display:grid;grid-template-columns:auto 1fr auto auto;gap:16px;align-items:center">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${productData?.icon||'📦'}</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+              <span class="mono" style="color:var(--blue2);font-weight:700;font-size:12px">${r.id}</span>
+              ${isLive ? '<span class="badge b-new">● Live from Buyer App</span>' : ''}
+              ${quoted ? '<span class="badge b-green">✓ Quoted</span>' : '<span class="badge b-seller">⏳ Awaiting Quote</span>'}
+            </div>
+            <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:3px">${r.product}</div>
+            <div style="display:flex;gap:14px;font-size:12px;color:var(--text3);flex-wrap:wrap">
+              <span>📦 ${r.qty} ${r.unit||'MT'}</span>
+              <span>🏢 ${r.buyer||'MSME Buyer'}</span>
+              <span>📍 Pincode ${r.pin||'411019'}</span>
+              <span>📅 Deadline: ${r.deadline||'—'}</span>
+            </div>
+          </div>
+          <div style="text-align:right;min-width:120px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:3px">Est. Landing Cost</div>
+            <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:var(--seller)">${fmt(landingPreview)}</div>
+            <div style="font-size:10.5px;color:var(--text3)">Based on your listed price</div>
+          </div>
+          <div>
+            ${quoted
+              ? `<button class="btn btn-outline btn-sm" onclick="toast('Quote Details','You quoted ${fmt(myQ?.unitPrice||0)}/MT for this RFQ','info')">View Quote</button>`
+              : `<button class="btn btn-seller btn-sm" onclick="openQuoteModal('${r.id}')">Submit Quote →</button>`
+            }
+          </div>
+        </div>
+        ${!quoted && productData ? `
+        <div style="background:var(--seller-bg);border-top:1px solid var(--seller-border);padding:10px 20px;display:flex;align-items:center;gap:16px;font-size:12px;flex-wrap:wrap">
+          <span style="color:var(--seller-dark)">💡 Your listed price: <strong>${fmt(productData.price)}/${productData.unit}</strong></span>
+          <span style="color:var(--text3)">→ Freight to ${r.pin||'411019'}: <strong>${fmt(freight)}/MT</strong></span>
+          <span style="color:var(--success);font-weight:600">→ Landing cost buyer sees: <strong>${fmt(landingPreview)}/MT</strong></span>
+          <span style="color:var(--text3)">Your stock: <strong>${productData.stock} ${productData.unit}</strong></span>
+        </div>` : ''}
+      </div>`; }).join('')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// QUOTES
+// ═══════════════════════════════════════════════════════════
+function renderQuotes(el) {
+  const myQuotes = getMyQuotes();
+  const allQuotes = [
+    ...myQuotes,
+    // Mock historical quotes
+    {id:'QT-20011',rfqId:'RFQ-2025-0031',sellerId:currentSeller.id,product:'Fe 500D TMT Bars',qty:50,unitPrice:68200,freight:1800,landingCost:70000,grandTotal:4130000,status:'Accepted',date:'02 Jan 2025',buyer:'Sharma Construction'},
+    {id:'QT-19882',rfqId:'RFQ-2025-0028',sellerId:currentSeller.id,product:'Fe 500D TMT Bars',qty:30,unitPrice:68500,freight:1800,landingCost:70300,grandTotal:2490630,status:'Declined',date:'28 Dec 2024',buyer:'Nair Builders'},
+  ];
+  el.innerHTML = `
+  <div class="page-header">
+    <div class="container">
+      <div class="page-title">My Quotes</div>
+      <div class="page-sub">All quotes you've submitted on NirmanOne — accepted quotes become orders</div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:22px;padding-bottom:36px">
+    <div class="card">
+      <div class="t-wrap">
+        <table>
+          <thead><tr><th>Quote ID</th><th>RFQ</th><th>Product</th><th>Buyer</th><th>Qty</th><th>Your Price</th><th>Freight</th><th>Landing Cost</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            ${allQuotes.length ? allQuotes.map(q => `<tr>
+              <td class="mono fw-6">${q.id}</td>
+              <td class="mono"><span class="sl" onclick="showSection('inbox')">${q.rfqId}</span></td>
+              <td style="font-weight:600">${q.product}</td>
+              <td class="text-muted">${q.buyer||'—'}</td>
+              <td>${q.qty} MT</td>
+              <td>${fmt(q.unitPrice)}</td>
+              <td style="color:var(--text3)">+${fmt(q.freight)}</td>
+              <td class="fw-6" style="color:var(--success)">${fmt(q.landingCost)}</td>
+              <td class="fw-6">${fmt(q.grandTotal)}</td>
+              <td>${statusPill(q.status==='Accepted'?'accepted':q.status==='Declined'?'declined':q.status?.toLowerCase()||'quoted')}</td>
+              <td class="text-muted">${q.date||'—'}</td>
+            </tr>`).join('') : '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3)">No quotes submitted yet — respond to RFQs in your inbox</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ORDERS
+// ═══════════════════════════════════════════════════════════
+function renderOrders(el) {
+  const orders = getMyOrders();
+  el.innerHTML = `
+  <div class="page-header">
+    <div class="container">
+      <div class="page-title">Orders</div>
+      <div class="page-sub">Accepted quotes that became orders — manage dispatch and track delivery</div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:22px;padding-bottom:36px">
+    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi" style="border-left:3px solid var(--seller)"><div class="kpi-lbl">Pending Dispatch</div><div class="kpi-val">${orders.filter(o=>o.status==='accepted').length}</div><div class="kpi-delta-warn">Action required</div></div>
+      <div class="kpi"><div class="kpi-lbl">In Transit</div><div class="kpi-val">${orders.filter(o=>o.status==='in-transit').length}</div><div class="kpi-sub">BlackBuck tracking active</div></div>
+      <div class="kpi"><div class="kpi-lbl">Delivered</div><div class="kpi-val">${orders.filter(o=>o.status==='delivered').length}</div><div class="kpi-delta-up">This month</div></div>
+    </div>
+    ${orders.filter(o=>o.status==='accepted').length > 0 ? `
+    <div style="background:var(--warn-bg);border:1px solid #E8B84B;border-radius:var(--radius2);padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">⚠️</span><span style="font-size:13px;font-weight:600;color:var(--warn)">${orders.filter(o=>o.status==='accepted').length} order${orders.filter(o=>o.status==='accepted').length>1?'s':''} awaiting dispatch confirmation</span></div>
+    </div>` : ''}
+    <div class="card">
+      <div class="t-wrap">
+        <table>
+          <thead><tr><th>Order ID</th><th>Product</th><th>Buyer</th><th>Qty</th><th>Amount</th><th>Delivery Pin</th><th>Status</th><th>Tracking</th><th></th></tr></thead>
+          <tbody>
+            ${orders.map(o => `<tr>
+              <td class="mono fw-6">${o.id}</td>
+              <td style="font-weight:600">${o.product}</td>
+              <td class="text-muted">${o.buyer}</td>
+              <td>${o.qty} ${o.unit||'MT'}</td>
+              <td class="fw-6">${fmt(o.amount)}</td>
+              <td class="mono">${o.deliveryPin}</td>
+              <td>${statusPill(o.status)}</td>
+              <td>${o.tracking ? `<span class="mono" style="font-size:11px;color:var(--blue2)">${o.tracking}</span>` : '<span class="text-muted">—</span>'}</td>
+              <td>
+                ${o.status==='accepted' ? `<button class="btn btn-seller btn-xs" onclick="openDispatchModal('${o.id}')">🚛 Dispatch</button>` : ''}
+                ${o.status==='in-transit' ? `<button class="btn btn-outline btn-xs" onclick="toast('BlackBuck Tracking','ID: ${o.tracking} — En route to pincode ${o.deliveryPin}','info')">📍 Track</button>` : ''}
+                ${o.status==='delivered' ? '<button class="btn btn-ghost btn-xs" onclick="toast(\'Invoice\',\'GST Invoice auto-generated and shared with buyer\',\'info\')">🧾 Invoice</button>' : ''}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CATALOG
+// ═══════════════════════════════════════════════════════════
+function renderCatalog(el) {
+  const s = currentSeller;
+  el.innerHTML = `
+  <div class="page-header">
+    <div class="container">
+      <div class="page-title">My Catalog</div>
+      <div class="page-sub">Your listed products — update price and stock anytime. Changes reflect immediately in buyer search results.</div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:22px;padding-bottom:36px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:13px;color:var(--text2)">${Object.keys(s.products).length} products listed</div>
+      <button class="btn btn-seller btn-sm" onclick="toast('Add Product','Contact your Seller RM to add new products to your catalog','info')">+ Add Product</button>
+    </div>
+    ${Object.entries(s.products).map(([pid, p]) => `
+    <div class="cat-item" id="catItem-${pid}">
+      <div class="cat-icon">${p.icon}</div>
+      <div>
+        <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:3px">${p.name}</div>
+        <div style="font-size:12px;color:var(--text3)">SKU: ${pid} · Grade: ${p.grade} · Unit: per ${p.unit}</div>
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+          <span class="badge b-green">✓ Live on Platform</span>
+          <span class="badge ${p.stock > 50 ? 'b-green' : 'b-amber'}">${p.stock > 50 ? '✓ In Stock' : '⚠ Low Stock'}</span>
+        </div>
+      </div>
+      <div style="text-align:center;min-width:130px">
+        <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px">Listed Price</div>
+        <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:700;color:var(--seller)">${fmt(p.price)}</div>
+        <div style="font-size:11px;color:var(--text3)">per ${p.unit}</div>
+        <div style="margin-top:8px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:2px">Stock: <strong>${p.stock} ${p.unit}</strong></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;min-width:120px">
+        <button class="btn btn-outline btn-sm" onclick="editCatalogItem('${pid}','price')">✏ Update Price</button>
+        <button class="btn btn-outline btn-sm" onclick="editCatalogItem('${pid}','stock')">📦 Update Stock</button>
+      </div>
+    </div>`).join('')}
+    <div style="background:var(--seller-bg);border:1px solid var(--seller-border);border-radius:var(--radius2);padding:14px 18px;margin-top:6px;font-size:12.5px;color:var(--seller-dark)">
+      💡 <strong>Price changes</strong> reflect in buyer search results immediately. <strong>Stock updates</strong> affect whether you're matched to new RFQs. Keep both current to maximise RFQ matches.
+    </div>
+  </div>`;
+}
+
+function editCatalogItem(pid, field) {
+  const p = currentSeller.products[pid];
+  const label = field === 'price' ? 'New Price (₹)' : 'Stock Available';
+  const current = field === 'price' ? p.price : p.stock;
+  const newVal = window.prompt(`${label} — current: ${field==='price'?fmt(current):current+' '+p.unit}`, current);
+  if (!newVal || isNaN(newVal)) return;
+  if (field === 'price') {
+    currentSeller.products[pid].price = parseInt(newVal);
+    toast('Price Updated', `${p.name} → ${fmt(parseInt(newVal))} / ${p.unit}`, 'success');
+  } else {
+    currentSeller.products[pid].stock = parseInt(newVal);
+    toast('Stock Updated', `${p.name} → ${newVal} ${p.unit} available`, 'success');
+  }
+  renderSection('catalog');
+}
+
+// ═══════════════════════════════════════════════════════════
+// PERFORMANCE
+// ═══════════════════════════════════════════════════════════
+function renderPerformance(el) {
+  const s = currentSeller;
+  el.innerHTML = `
+  <div class="page-header">
+    <div class="container">
+      <div class="page-title">Performance</div>
+      <div class="page-sub">Your seller scorecard, payout history, and platform ranking</div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:22px;padding-bottom:36px">
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hdr"><div class="card-title">📈 Monthly GMV Trend</div></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:flex-end;gap:10px;height:80px;padding-bottom:8px;border-bottom:1px solid var(--bg2)">
+              ${['Aug','Sep','Oct','Nov','Dec','Jan'].map((m,i) => {
+                const val = s.monthlyOrders[i];
+                const pct = Math.round((val / Math.max(...s.monthlyOrders)) * 100);
+                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                  <div style="width:100%;border-radius:4px 4px 0 0;background:${i===5?'var(--seller)':'var(--bg2)'};height:${pct}%;min-height:4px;transition:height .3s"></div>
+                  <div style="font-size:10px;color:var(--text3);white-space:nowrap">${m}</div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
+              ${[['Best Month','Jan 2025'],['Avg Orders',`${Math.round(s.monthlyOrders.reduce((a,b)=>a+b,0)/6)}/mo`],['Growth','↑ 28% YoY']].map(([l,v]) => `<div><div style="font-size:10.5px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">${l}</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-top:2px">${v}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">💰 Payout History</div></div>
+          <div class="t-wrap">
+            <table>
+              <thead><tr><th>Month</th><th>GMV</th><th>Commission (2%)</th><th>Net Payout</th><th>Status</th></tr></thead>
+              <tbody>
+                ${s.mockPayouts.map(p => `<tr>
+                  <td class="fw-6">${p.month}</td>
+                  <td>${fmt(p.gmv)}</td>
+                  <td style="color:var(--seller)">${fmt(p.commission)}</td>
+                  <td class="fw-6" style="color:var(--success)">${fmt(p.gmv - p.commission)}</td>
+                  <td>${p.status==='Paid'?'<span class="badge b-green">✓ Paid</span>':'<span class="badge b-amber">Processing</span>'}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="side-card" style="border-left:3px solid var(--seller)">
+          <div class="side-title">⭐ Seller Scorecard</div>
+          <div style="text-align:center;padding:10px 0 14px">
+            <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:56px;font-weight:800;color:var(--seller);line-height:1">${s.rating}</div>
+            <div class="stars" style="font-size:18px;margin:4px 0">★★★★${s.rating>=4.8?'★':'☆'}</div>
+            <div style="font-size:12px;color:var(--text3)">${s.txns.toLocaleString('en-IN')}+ verified transactions</div>
+          </div>
+          ${[['On-Time Dispatch','94%','green'],['Quote Response Rate','88%','seller'],['Order Fulfilment','99.1%','green'],['Dispute Rate','0.3%','green'],['Buyer Rating','4.8/5','green'],['Platform Tier','Gold Seller','seller']].map(([l,v,c]) => `
+          <div class="side-row"><span class="text-muted">${l}</span><span class="fw-6" style="color:var(--${c})">${v}</span></div>`).join('')}
+        </div>
+        <div class="side-card">
+          <div class="side-title">🏆 Platform Ranking</div>
+          <div style="text-align:center;padding:8px 0 12px">
+            <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:.07em;margin-bottom:3px">Your rank in ${s.categories[0]}</div>
+            <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:48px;font-weight:800;color:var(--seller);line-height:1">#${s.rating >= 4.8 ? '1' : s.rating >= 4.6 ? '2' : '3'}</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:3px">of ${s.categories[0]==='Steel TMT'?'12':'8'} active sellers</div>
+          </div>
+          <div class="side-row"><span class="text-muted">Tier</span><span class="fw-6 badge b-seller">🥇 Gold Seller</span></div>
+          <div class="side-row"><span class="text-muted">Priority Matching</span><span class="fw-6" style="color:var(--success)">✓ Enabled</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// QUOTE BUILDER MODAL
+// ═══════════════════════════════════════════════════════════
+function openQuoteModal(rfqId) {
+  const allRFQs = getMatchedRFQs();
+  const r = allRFQs.find(x => x.id === rfqId);
+  if (!r) { toast('Error', 'RFQ not found', 'error'); return; }
+  if (alreadyQuoted(rfqId)) { toast('Already Quoted', 'You have already submitted a quote for this RFQ', 'info'); return; }
+
+  activeQuoteRFQ = r;
+  const productData = Object.values(currentSeller.products).find(p => p.name === r.product) ||
+                      (r.productId && currentSeller.products[r.productId]);
+  const suggestedPrice = productData?.price || '';
+  const suggestedStock = productData?.stock || '';
+
+  document.getElementById('qbRFQInfo').innerHTML = `
+    <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:4px">${r.product}</div>
+    <div style="display:flex;gap:14px;font-size:12.5px;color:var(--text3);flex-wrap:wrap">
+      <span>📦 ${r.qty} ${r.unit||'MT'}</span>
+      <span>🏢 ${r.buyer||'MSME Buyer'}</span>
+      <span>📍 Delivery: ${r.pin||'—'}</span>
+      <span>📅 Deadline: ${r.deadline||'—'}</span>
+    </div>`;
+  document.getElementById('qbPrice').value = suggestedPrice;
+  document.getElementById('qbStock').value = suggestedStock;
+  document.getElementById('qbPriceHint').textContent = `Your current listed price: ${suggestedPrice ? fmt(suggestedPrice) : '—'}`;
+  document.getElementById('qbNotes').value = '';
+  calcQuotePreview();
+  document.getElementById('quoteModal').style.display = 'flex';
+}
+
+function closeQuoteModal() {
+  document.getElementById('quoteModal').style.display = 'none';
+  activeQuoteRFQ = null;
+}
+
+function calcQuotePreview() {
+  if (!activeQuoteRFQ) return;
+  const price = parseInt(document.getElementById('qbPrice').value) || 0;
+  const r = activeQuoteRFQ;
+  if (!price) { document.getElementById('qbPreview').style.display = 'none'; return; }
+
+  const freight = getFreight(currentSeller.pin, r.pin || '411019');
+  const landing = price + freight;
+  const total = landing * (r.qty || 1);
+  const gst = Math.round(total * 0.18);
+  const grandTotal = total + gst;
+
+  document.getElementById('qbPreview').style.display = 'block';
+  document.getElementById('qbShowUnit').textContent = fmt(price) + ' / ' + (r.unit || 'MT');
+  document.getElementById('qbShowFreight').textContent = '+' + fmt(freight) + ' / ' + (r.unit || 'MT');
+  document.getElementById('qbShowLanding').textContent = fmt(landing);
+  document.getElementById('qbShowQty').textContent = r.qty + ' ' + (r.unit || 'MT');
+  document.getElementById('qbShowGst').textContent = '+' + fmt(gst) + ' (18%)';
+  document.getElementById('qbShowTotal').textContent = fmt(grandTotal);
+}
+
+async function submitQuote() {
+  const r = activeQuoteRFQ;
+  if (!r) return;
+  const price = parseInt(document.getElementById('qbPrice').value);
+  const stock = parseInt(document.getElementById('qbStock').value) || 100;
+  if (!price || price < 1000) { toast('Required', 'Enter a valid unit price', 'error'); return; }
+
+  const freight = getFreight(currentSeller.pin, r.pin || '411019');
+  const landing = price + freight;
+  const total = landing * r.qty;
+  const gst = Math.round(total * 0.18);
+  const grandTotal = total + gst;
+  const dispatch = parseInt(document.getElementById('qbDispatch').value);
+  const notes = document.getElementById('qbNotes').value.trim();
+
+  const quote = {
+    id: `QT-${rand(10000,99999)}`,
+    rfqId: r.id,
+    sellerId: currentSeller.id,
+    seller: currentSeller.name,
+    product: r.product,
+    buyer: r.buyer || 'MSME Buyer',
+    qty: r.qty,
+    unit: r.unit || 'MT',
+    unitPrice: price,
+    freight,
+    landingCost: landing,
+    totalLanding: total,
+    gst,
+    grandTotal,
+    dispatchDays: dispatch,
+    notes,
+    status: 'Pending',
+    date: new Date().toLocaleDateString('en-IN'),
+  };
+
+  // Save to localStorage
+  const allQuotes = readSellerQuotes();
+  allQuotes.unshift(quote);
+  writeSellerQuotes(allQuotes);
+
+  closeQuoteModal();
+  toast('Quote Submitted!', `${r.product} · Landing cost ${fmt(landing)}/MT · Total ${fmt(grandTotal)}`, 'success');
+  updateInboxBadge();
+
+  // If this matches a buyer app RFQ, show bridge hint
+  const buyerRFQs = readBuyerRFQs();
+  if (buyerRFQs.find(br => br.id === r.id)) {
+    setTimeout(() => toast('Bridge', 'Quote visible in NirmanOne Buyer App → Quote Comparison page', 'info'), 1200);
+  }
+
+  renderSection(currentSection);
+}
+
+// ═══════════════════════════════════════════════════════════
+// DISPATCH MODAL
+// ═══════════════════════════════════════════════════════════
+function openDispatchModal(orderId) {
+  const orders = getMyOrders();
+  const o = orders.find(x => x.id === orderId);
+  if (!o) return;
+  activeDispatchOrder = o;
+
+  document.getElementById('dispatchOrderInfo').innerHTML = `
+    <div style="font-weight:700;font-size:14px;margin-bottom:3px">${o.product} — ${o.qty} ${o.unit||'MT'}</div>
+    <div style="font-size:12.5px;color:var(--text3)">Order ${o.id} · Buyer: ${o.buyer} · Delivery Pin: ${o.deliveryPin}</div>`;
+  document.getElementById('dispVehicle').value = '';
+  document.getElementById('dispDriver').value = '';
+  document.getElementById('dispTracking').value = '';
+  // Set ETA
+  const eta = new Date(); eta.setDate(eta.getDate() + (currentSeller.dispatchDays + 2));
+  document.getElementById('dispETA').value = eta.toISOString().split('T')[0];
+  document.getElementById('dispatchModal').style.display = 'flex';
+}
+
+function confirmDispatch() {
+  const vehicle = document.getElementById('dispVehicle').value.trim().toUpperCase();
+  const driver = document.getElementById('dispDriver').value.trim();
+  if (!vehicle || !driver) { toast('Required', 'Enter vehicle number and driver mobile', 'error'); return; }
+
+  const trackingId = `BB-2025-${rand(40000,99999)}`;
+  document.getElementById('dispTracking').value = trackingId;
+
+  // Update order status in localStorage
+  const saved = readSellerOrders();
+  const idx = saved.findIndex(o => o.id === activeDispatchOrder.id);
+  if (idx >= 0) {
+    saved[idx].status = 'in-transit';
+    saved[idx].tracking = trackingId;
+  } else {
+    saved.unshift({...activeDispatchOrder, sellerId: currentSeller.id, status:'in-transit', tracking: trackingId});
+  }
+  // Also update mock if it was there
+  const mockIdx = MOCK_SELLER_ORDERS.findIndex(o => o.id === activeDispatchOrder.id);
+  if (mockIdx >= 0) MOCK_SELLER_ORDERS[mockIdx].status = 'in-transit', MOCK_SELLER_ORDERS[mockIdx].tracking = trackingId;
+
+  writeSellerOrders(saved);
+  document.getElementById('dispatchModal').style.display = 'none';
+  activeDispatchOrder = null;
+  toast('Dispatch Confirmed!', `Vehicle ${vehicle} · BlackBuck ID: ${trackingId}`, 'success');
+  renderSection('orders');
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATUS PILL HELPER
+// ═══════════════════════════════════════════════════════════
+function statusPill(status) {
+  const map = {
+    'open':       ['pill pill-new','📋 Open'],
+    'quoted':     ['pill pill-quoted','✓ Quoted'],
+    'pending':    ['pill pill-quoted','⏳ Pending'],
+    'accepted':   ['pill pill-accepted','✅ Accepted'],
+    'in-transit': ['pill pill-dispatched','🚛 In Transit'],
+    'dispatched': ['pill pill-dispatched','🚛 Dispatched'],
+    'delivered':  ['pill pill-delivered','✓ Delivered'],
+    'declined':   ['pill pill-declined','✕ Declined'],
+  };
+  const [cls, label] = map[status?.toLowerCase()] || ['pill pill-new', status||'—'];
+  return `<span class="${cls}">${label}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+
+// Check if already logged in via localStorage
+const savedSeller = (() => { try { return JSON.parse(localStorage.getItem(KEY_SELLER)); } catch(e){ return null; } })();
+if (savedSeller) {
+  const s = SELLERS.find(x => x.id === savedSeller.id);
+  if (s) {
+    currentSeller = s;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('sellerAvatar').textContent = s.initials;
+    document.getElementById('sellerNameNav').textContent = s.name;
+    showSection('dashboard');
+    updateInboxBadge();
+  }
+}
+</script>
+</body>
+</html>

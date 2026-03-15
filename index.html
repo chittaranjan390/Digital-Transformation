@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chittaranjan Sahu — Functional Consultant & Strategy Leader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080A0E;--bg2:#0F1118;--bg3:#161B26;--border:rgba(200,185,140,0.12);--border-strong:rgba(200,185,140,0.25);--cream:#EDE8DC;--cream-muted:rgba(237,232,220,0.55);--gold:#C8A96E;--gold-light:#DFC08A;--steel:#5B9EC9;--font-display:'Cormorant Garamond',Georgia,serif;--font-ui:'Syne',sans-serif;--font-mono:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--cream);font-family:var(--font-ui);font-size:16px;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:20px 60px;background:rgba(8,10,14,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:padding 0.3s}
+.nav-logo{font-family:var(--font-display);font-size:1.15rem;font-weight:600;letter-spacing:0.04em;color:var(--cream);text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-muted);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{color:var(--gold)!important;border:1px solid var(--gold);padding:8px 18px;border-radius:2px;transition:background 0.2s,color 0.2s!important}
+.nav-cta:hover{background:var(--gold)!important;color:var(--bg)!important}
+
+/* HERO */
+#hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:140px 60px 80px;position:relative;overflow:hidden;gap:60px}
+.hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(200,169,110,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%)}
+.hero-glow{position:absolute;top:-200px;right:-100px;width:700px;height:700px;background:radial-gradient(circle,rgba(91,158,201,0.08) 0%,transparent 70%);pointer-events:none}
+.hero-glow-2{position:absolute;bottom:-100px;left:100px;width:500px;height:500px;background:radial-gradient(circle,rgba(200,169,110,0.06) 0%,transparent 70%);pointer-events:none}
+.hero-left{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:28px}
+.hero-tag::before{content:'';display:block;width:32px;height:1px;background:var(--gold)}
+h1.hero-name{font-family:var(--font-display);font-size:clamp(3.2rem,5vw,5.5rem);font-weight:300;line-height:1.05;color:var(--cream);margin-bottom:10px}
+h1.hero-name em{font-style:italic;color:var(--gold-light)}
+.hero-title{font-family:var(--font-mono);font-size:0.78rem;letter-spacing:0.1em;color:var(--steel);margin-bottom:32px;text-transform:uppercase}
+.hero-desc{font-size:1.05rem;color:var(--cream-muted);max-width:480px;line-height:1.75;margin-bottom:44px}
+.hero-desc strong{color:var(--cream);font-weight:600}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap}
+.btn-primary{font-family:var(--font-ui);font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--bg);background:var(--gold);padding:14px 32px;border-radius:2px;text-decoration:none;border:1px solid var(--gold);transition:background 0.2s;cursor:pointer;display:inline-block}
+.btn-primary:hover{background:var(--gold-light)}
+.btn-secondary{font-family:var(--font-ui);font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--cream);background:transparent;padding:14px 32px;border-radius:2px;text-decoration:none;border:1px solid var(--border-strong);transition:border-color 0.2s}
+.btn-secondary:hover{border-color:var(--cream)}
+
+/* STAT CARDS — fixed alignment */
+.hero-right{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;align-items:stretch}
+.stat-card{background:var(--bg2);border:1px solid var(--border);padding:28px 36px;position:relative;overflow:hidden;transition:border-color 0.3s}
+.stat-card:hover{border-color:var(--border-strong)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold)}
+.stat-number{font-family:var(--font-display);font-size:3rem;font-weight:600;color:var(--cream);line-height:1;margin-bottom:4px}
+.stat-number span{color:var(--gold)}
+.stat-label{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream-muted)}
+.stat-sub{font-family:var(--font-mono);font-size:0.65rem;color:var(--steel);margin-top:6px;letter-spacing:0.05em}
+
+/* SECTIONS */
+section{padding:120px 60px;position:relative}
+.section-label{display:inline-flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:24px}
+.section-label::before{content:'';display:block;width:40px;height:1px;background:var(--gold)}
+h2.section-title{font-family:var(--font-display);font-size:clamp(2.4rem,4vw,3.8rem);font-weight:300;line-height:1.1;color:var(--cream);margin-bottom:20px}
+h2.section-title em{font-style:italic;color:var(--gold-light)}
+.section-subtitle{font-size:1rem;color:var(--cream-muted);max-width:580px;line-height:1.75}
+
+/* PILLARS */
+#pillars{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:64px}
+.pillar{background:var(--bg2);padding:52px 44px;position:relative;overflow:hidden;transition:background 0.3s}
+.pillar:hover{background:var(--bg3)}
+.pillar-icon{width:48px;height:48px;margin-bottom:28px}
+.pillar-icon svg{width:100%;height:100%}
+.pillar-number{position:absolute;top:44px;right:44px;font-family:var(--font-display);font-size:4rem;font-weight:700;color:rgba(200,169,110,0.07);line-height:1;user-select:none}
+.pillar h3{font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:var(--cream);margin-bottom:16px}
+.pillar p{font-size:0.92rem;color:var(--cream-muted);line-height:1.75;margin-bottom:24px}
+.pillar-tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.08em;padding:4px 10px;border:1px solid var(--border-strong);color:var(--cream-muted);border-radius:2px;text-transform:uppercase}
+.tag.gold{border-color:rgba(200,169,110,0.35);color:var(--gold)}
+.tag.steel{border-color:rgba(91,158,201,0.35);color:var(--steel)}
+
+/* PROJECTS */
+#projects{background:var(--bg)}
+.projects-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:72px}
+.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+.project-card{background:var(--bg2);border:1px solid var(--border);padding:44px;position:relative;overflow:hidden;transition:border-color 0.3s,transform 0.3s;cursor:pointer;text-decoration:none;display:block;color:inherit}
+.project-card:hover{border-color:var(--border-strong);transform:translateY(-4px)}
+.project-card.featured{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.project-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--steel));opacity:0;transition:opacity 0.3s}
+.project-card:hover::after{opacity:1}
+
+/* View project arrow overlay */
+.project-cta{position:absolute;bottom:44px;right:44px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);opacity:0;transform:translateX(-8px);transition:opacity 0.25s,transform 0.25s;display:flex;align-items:center;gap:6px}
+.project-cta::after{content:'→';font-size:0.9rem}
+.project-card:hover .project-cta{opacity:1;transform:translateX(0)}
+
+.project-meta{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.project-number{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;color:var(--gold);border:1px solid rgba(200,169,110,0.3);padding:4px 10px;border-radius:2px}
+.project-type{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--steel)}
+.project-card h3{font-family:var(--font-display);font-size:1.9rem;font-weight:600;color:var(--cream);margin-bottom:8px;line-height:1.15}
+.project-company{font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.project-desc{font-size:0.93rem;color:var(--cream-muted);line-height:1.78;margin-bottom:32px}
+.project-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:32px}
+.project-metric{background:var(--bg);padding:20px 16px;text-align:center}
+.metric-val{font-family:var(--font-display);font-size:1.8rem;font-weight:600;color:var(--cream);line-height:1;margin-bottom:4px}
+.metric-val span{color:var(--gold)}
+.metric-label{font-size:0.62rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--cream-muted)}
+.project-deliverables h4{font-size:0.68rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-muted);margin-bottom:14px}
+.deliverable-list{list-style:none}
+.deliverable-list li{font-size:0.88rem;color:var(--cream-muted);padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;line-height:1.5}
+.deliverable-list li::before{content:'→';color:var(--gold);flex-shrink:0;font-size:0.78rem;margin-top:2px}
+.project-tech{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+
+/* EXPERIENCE */
+#experience{background:var(--bg2);border-top:1px solid var(--border)}
+.timeline{position:relative;margin-top:72px;padding-left:40px}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--border)}
+.timeline-item{position:relative;margin-bottom:64px;opacity:0;transform:translateX(-20px);transition:opacity 0.6s ease,transform 0.6s ease}
+.timeline-item.visible{opacity:1;transform:translateX(0)}
+.timeline-dot{position:absolute;left:-46px;top:8px;width:12px;height:12px;background:var(--gold);border:3px solid var(--bg2);box-shadow:0 0 0 1px var(--gold);transition:transform 0.2s}
+.timeline-item:hover .timeline-dot{transform:scale(1.3)}
+.timeline-period{font-family:var(--font-mono);font-size:0.67rem;letter-spacing:0.1em;color:var(--steel);margin-bottom:10px;text-transform:uppercase}
+.timeline-role{font-family:var(--font-display);font-size:1.5rem;font-weight:600;color:var(--cream);margin-bottom:4px}
+.timeline-company{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.timeline-points{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:820px}
+.timeline-points li{font-size:0.88rem;color:var(--cream-muted);padding:12px 16px;background:var(--bg);border-left:2px solid var(--border);line-height:1.55;transition:border-color 0.2s}
+.timeline-points li:hover{border-left-color:var(--gold)}
+
+/* EDUCATION */
+#education{background:var(--bg);border-top:1px solid var(--border)}
+.edu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
+.edu-card{background:var(--bg2);border:1px solid var(--border);padding:36px;position:relative;overflow:hidden;transition:border-color 0.3s}
+.edu-card:hover{border-color:var(--border-strong)}
+.edu-year{font-family:var(--font-mono);font-size:0.67rem;letter-spacing:0.1em;color:var(--steel);margin-bottom:12px}
+.edu-institute{font-family:var(--font-display);font-size:1.7rem;font-weight:600;color:var(--cream);margin-bottom:6px;line-height:1.1}
+.edu-course{font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.edu-score{font-family:var(--font-display);font-size:2.8rem;font-weight:600;color:var(--cream);line-height:1}
+.edu-score span{color:var(--gold);font-size:1.2rem;vertical-align:super}
+.edu-score-label{font-size:0.67rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream-muted);margin-top:4px}
+.certs-grid{display:flex;flex-wrap:wrap;gap:12px;margin-top:48px}
+.cert-badge{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);padding:14px 20px;transition:border-color 0.2s,background 0.2s;cursor:default}
+.cert-badge:hover{border-color:var(--gold);background:rgba(200,169,110,0.04)}
+.cert-dot{width:8px;height:8px;background:var(--gold);flex-shrink:0}
+.cert-name{font-size:0.8rem;font-weight:600;letter-spacing:0.04em;color:var(--cream)}
+.cert-issuer{font-family:var(--font-mono);font-size:0.62rem;color:var(--steel);margin-top:2px;letter-spacing:0.06em}
+
+/* ACHIEVEMENTS */
+#achievements{background:var(--bg3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:64px 60px}
+.achievements-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.achievement-item{background:var(--bg3);padding:36px 28px;text-align:center;transition:background 0.2s}
+.achievement-item:hover{background:var(--bg2)}
+.achievement-rank{font-family:var(--font-display);font-size:2.2rem;font-weight:600;color:var(--gold);line-height:1;margin-bottom:8px}
+.achievement-name{font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--cream);margin-bottom:4px}
+.achievement-detail{font-family:var(--font-mono);font-size:0.65rem;color:var(--cream-muted);letter-spacing:0.06em}
+
+/* CONTACT */
+#contact{background:var(--bg);padding:120px 60px;text-align:center;position:relative;overflow:hidden}
+#contact::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(200,169,110,0.06) 0%,transparent 70%);pointer-events:none}
+.contact-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+#contact h2{font-family:var(--font-display);font-size:clamp(2.8rem,5vw,5rem);font-weight:300;color:var(--cream);margin-bottom:24px;line-height:1.05}
+#contact h2 em{font-style:italic;color:var(--gold-light)}
+.contact-sub{font-size:1rem;color:var(--cream-muted);line-height:1.7;margin-bottom:48px}
+.contact-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:44px}
+.contact-link{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;color:var(--cream-muted);text-decoration:none;border:1px solid var(--border);padding:12px 20px;transition:color 0.2s,border-color 0.2s}
+.contact-link:hover{color:var(--gold);border-color:var(--gold)}
+.contact-link svg{width:14px;height:14px;flex-shrink:0}
+.cta-email-btn{font-family:var(--font-ui);font-size:0.8rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--bg);background:var(--gold);padding:16px 44px;border-radius:2px;text-decoration:none;border:none;display:inline-block;transition:background 0.2s;cursor:pointer}
+.cta-email-btn:hover{background:var(--gold-light)}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 60px;display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-family:var(--font-mono);font-size:0.67rem;color:var(--cream-muted);letter-spacing:0.06em}
+.footer-tagline{font-family:var(--font-display);font-size:0.85rem;font-style:italic;color:var(--cream-muted)}
+
+/* ANIMATION */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up:nth-child(2){transition-delay:0.1s}
+.fade-up:nth-child(3){transition-delay:0.2s}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  nav{padding:18px 32px}
+  #hero{grid-template-columns:1fr;padding:130px 32px 80px;gap:48px}
+  section{padding:80px 32px}
+  #achievements{padding:64px 32px}
+  .pillars-grid{grid-template-columns:1fr}
+  .projects-grid{grid-template-columns:1fr}
+  .project-card.featured{grid-template-columns:1fr}
+  .edu-grid{grid-template-columns:1fr}
+  .achievements-inner{grid-template-columns:1fr 1fr}
+  .timeline-points{grid-template-columns:1fr}
+  .nav-links{display:none}
+  footer{flex-direction:column;gap:8px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="#hero" class="nav-logo">Chittaranjan <span>Sahu</span></a>
+  <ul class="nav-links">
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact" class="nav-cta">Let's Connect</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-left">
+    <div class="hero-tag">Functional Consultant · Strategy Leader</div>
+    <h1 class="hero-name">Chittaranjan<br/><em>Sahu</em></h1>
+    <div class="hero-title">IIT Hyderabad · IIM Raipur · Lead Functional Consultant</div>
+    <p class="hero-desc">I solve <strong>ambiguous, high-stakes problems</strong> at the intersection of technology and business strategy — from architecting Salesforce solutions that move revenue to building operational systems that scale across 700+ stakeholders.</p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn-primary">View My Work</a>
+      <a href="#contact" class="btn-secondary">Get In Touch</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="stat-card">
+      <div class="stat-number">5<span>+</span></div>
+      <div class="stat-label">Years Delivering Impact</div>
+      <div class="stat-sub">TCS → IIM Raipur → Mindsprint</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">$300<span>K</span></div>
+      <div class="stat-label">Revenue Generated</div>
+      <div class="stat-sub">Single vendor mgmt. delivery at TCS</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">700<span>+</span></div>
+      <div class="stat-label">Stakeholders Managed</div>
+      <div class="stat-sub">Students placed across 90+ companies · IIM Raipur</div>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section id="pillars">
+  <div class="section-label">What I Bring</div>
+  <h2 class="section-title">Three ways I create<br/><em>outsized value</em></h2>
+  <p class="section-subtitle">Whether it's a Salesforce rollout, a strategic recommendation, or an ambiguous initiative that needs an owner — I've done all three, end-to-end.</p>
+  <div class="pillars-grid">
+    <div class="pillar fade-up">
+      <div class="pillar-number">01</div>
+      <div class="pillar-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="28" width="10" height="16" fill="none" stroke="#C8A96E" stroke-width="1.5"/>
+          <rect x="19" y="18" width="10" height="26" fill="none" stroke="#C8A96E" stroke-width="1.5"/>
+          <rect x="34" y="8" width="10" height="36" fill="none" stroke="#C8A96E" stroke-width="1.5"/>
+          <path d="M9 26L24 16L39 6" stroke="#5B9EC9" stroke-width="1.5" stroke-dasharray="3 2"/>
+        </svg>
+      </div>
+      <h3>Functional Consulting</h3>
+      <p>Led end-to-end Salesforce implementations — from requirements gathering and solution design to go-live. Built B2B marketplace workflows, seller portals, and quote automation that directly impacted revenue cycles.</p>
+      <div class="pillar-tags">
+        <span class="tag gold">Salesforce Sales Cloud</span>
+        <span class="tag gold">Experience Cloud</span>
+        <span class="tag">Solution Design</span>
+        <span class="tag">RFP / SOW</span>
+        <span class="tag steel">Data Cloud</span>
+      </div>
+    </div>
+    <div class="pillar fade-up">
+      <div class="pillar-number">02</div>
+      <div class="pillar-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="18" stroke="#C8A96E" stroke-width="1.5"/>
+          <path d="M24 8V24L32 32" stroke="#5B9EC9" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="3" fill="#C8A96E"/>
+        </svg>
+      </div>
+      <h3>Strategic Operations</h3>
+      <p>Managed KPI tracking, executive reporting, GTM planning, and business unit governance as a Lead Functional Consultant. Coordinated end-to-end recruitment for 700+ students across 90+ companies as Placement Coordinator.</p>
+      <div class="pillar-tags">
+        <span class="tag gold">GTM Planning</span>
+        <span class="tag">Executive Reporting</span>
+        <span class="tag">Process Design</span>
+        <span class="tag steel">KPI Governance</span>
+        <span class="tag">Stakeholder Mgmt</span>
+      </div>
+    </div>
+    <div class="pillar fade-up">
+      <div class="pillar-number">03</div>
+      <div class="pillar-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="6" width="15" height="15" rx="1" stroke="#C8A96E" stroke-width="1.5"/>
+          <rect x="27" y="6" width="15" height="15" rx="1" stroke="#5B9EC9" stroke-width="1.5"/>
+          <rect x="6" y="27" width="15" height="15" rx="1" stroke="#5B9EC9" stroke-width="1.5"/>
+          <rect x="27" y="27" width="15" height="15" rx="1" stroke="#C8A96E" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <h3>Technology Leadership</h3>
+      <p>Designed and shipped production solutions across Salesforce, Microsoft Power Platform, and Azure SQL. Led a team of four at TCS, delivered 50% efficiency gains, and built automation tools used by 3,600+ projects.</p>
+      <div class="pillar-tags">
+        <span class="tag gold">Microsoft Power Platform</span>
+        <span class="tag">Azure SQL</span>
+        <span class="tag steel">Agentforce</span>
+        <span class="tag">Python Automation</span>
+        <span class="tag">API Integrations</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="projects-header">
+    <div>
+      <div class="section-label">Selected Work</div>
+      <h2 class="section-title">Projects that<br/><em>moved the needle</em></h2>
+    </div>
+  </div>
+  <div class="projects-grid">
+
+    <!-- NIRMANONE -->
+    <a href="projects/nirmanone/index.html" class="project-card featured fade-up">
+      <div>
+        <div class="project-meta">
+          <span class="project-number">01</span>
+          <span class="project-type">Salesforce Implementation · B2B Marketplace</span>
+        </div>
+        <h3>NirmanOne</h3>
+        <div class="project-company">Mindsprint Technology (Olam Information Services) · 2025</div>
+        <p class="project-desc">Architected a full-stack B2B digital marketplace for Steel, Cement & Industrial Materials — covering the complete opportunity-to-quote lifecycle with real-time external pricing APIs, role-based access control, and a seller onboarding portal built on Salesforce Experience Cloud.</p>
+        <div class="project-metrics">
+          <div class="project-metric"><div class="metric-val">2<span>×</span></div><div class="metric-label">Deal Velocity</div></div>
+          <div class="project-metric"><div class="metric-val">100<span>%</span></div><div class="metric-label">API-Driven Pricing</div></div>
+          <div class="project-metric"><div class="metric-val">0<span>→1</span></div><div class="metric-label">Portal Built</div></div>
+        </div>
+        <div class="project-tech">
+          <span class="tag gold">Salesforce Sales Cloud</span>
+          <span class="tag gold">Experience Cloud</span>
+          <span class="tag steel">External API Integration</span>
+          <span class="tag">Role-Based Access</span>
+          <span class="tag">Opportunity-to-Quote</span>
+        </div>
+      </div>
+      <div class="project-deliverables">
+        <h4>Key Deliverables</h4>
+        <ul class="deliverable-list">
+          <li>Sales Cloud implementation: Accounts, Opportunities & Quotes for a B2B industrial marketplace</li>
+          <li>Real-time pricing engine via external API calls, replacing manual price list management</li>
+          <li>Experience Cloud Seller Portal for external seller onboarding, product catalog & inventory</li>
+          <li>Serviceable pin code management with role-based UI and API access control</li>
+          <li>End-to-end opportunity-to-quote lifecycle automation</li>
+          <li>Pre-sales consulting: RFP/RFQ responses, solution design and SOW structuring</li>
+        </ul>
+        <div style="margin-top:28px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:8px">View Case Study <span style="font-size:1rem">→</span></div>
+      </div>
+    </a>
+
+    <!-- VELTRAC -->
+    <a href="projects/veltrac/index.html" class="project-card fade-up">
+      <div class="project-meta">
+        <span class="project-number">02</span>
+        <span class="project-type">CRM Strategy · B2B Platform</span>
+      </div>
+      <h3>Veltrac India</h3>
+      <div class="project-company">Rubber King Tyre Private Limited · 2024</div>
+      <p class="project-desc">Designed a comprehensive B2B platform strategy for a leading tyre manufacturer — streamlining dealer management, admin operations, and Salesforce CRM workflows with measurable impact on lead conversion and customer acquisition.</p>
+      <div class="project-metrics">
+        <div class="project-metric"><div class="metric-val">50<span>%</span></div><div class="metric-label">Conversion Boost</div></div>
+        <div class="project-metric"><div class="metric-val">15<span>%</span></div><div class="metric-label">Lead Tracking Gain</div></div>
+        <div class="project-metric"><div class="metric-val">4<span>×</span></div><div class="metric-label">Portals Designed</div></div>
+      </div>
+      <div class="project-tech">
+        <span class="tag gold">Salesforce CRM</span>
+        <span class="tag">B2B Dealer Portal</span>
+        <span class="tag steel">Competitive Analysis</span>
+        <span class="tag">Admin Console</span>
+      </div>
+      <div class="project-cta">View Case Study</div>
+    </a>
+
+    <!-- BASINSYNC -->
+    <a href="projects/basinsync/index.html" class="project-card fade-up">
+      <div class="project-meta">
+        <span class="project-number">03</span>
+        <span class="project-type">Process Automation · Enterprise Platform</span>
+      </div>
+      <h3>BasinSync</h3>
+      <div class="project-company">Tata Consultancy Services · Australian Utilities Client · 2020–2023</div>
+      <p class="project-desc">Led the design and delivery of an enterprise platform for an Australian utilities client — automating project approvals, vendor data management, and operational monitoring across a portfolio of 3,600+ projects.</p>
+      <div class="project-metrics">
+        <div class="project-metric"><div class="metric-val">50<span>%</span></div><div class="metric-label">Manual Time Saved</div></div>
+        <div class="project-metric"><div class="metric-val">$300<span>K</span></div><div class="metric-label">Revenue for TCS</div></div>
+        <div class="project-metric"><div class="metric-val">200<span>+</span></div><div class="metric-label">Vendors Managed</div></div>
+      </div>
+      <div class="project-tech">
+        <span class="tag gold">Microsoft Power Platform</span>
+        <span class="tag steel">Azure SQL</span>
+        <span class="tag">Power BI Dashboard</span>
+        <span class="tag">Vendor Portal</span>
+      </div>
+      <div class="project-cta">View Case Study</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section id="achievements">
+  <div class="section-label" style="margin-bottom:40px">Academic Excellence</div>
+  <div class="achievements-inner">
+    <div class="achievement-item"><div class="achievement-rank">Top 3%</div><div class="achievement-name">CAT 2022</div><div class="achievement-detail">Common Admission Test · IIMs</div></div>
+    <div class="achievement-item"><div class="achievement-rank">Top 2%</div><div class="achievement-name">GATE 2018</div><div class="achievement-detail">Graduate Aptitude Test in Engineering</div></div>
+    <div class="achievement-item"><div class="achievement-rank">Top 2%</div><div class="achievement-name">JEE MAIN</div><div class="achievement-detail">Joint Entrance Examination</div></div>
+    <div class="achievement-item"><div class="achievement-rank">Top 1%</div><div class="achievement-name">ICAR AIEEA</div><div class="achievement-detail">National Entrance Examination · 2014</div></div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">Career</div>
+  <h2 class="section-title">A track record of<br/><em>shipping things that matter</em></h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-period">Apr 2025 – Present · 09 Months</div>
+      <div class="timeline-role">Lead Functional Consultant</div>
+      <div class="timeline-company">Mindsprint Technology (Olam Information Services)</div>
+      <ul class="timeline-points">
+        <li>Drove growth initiatives, GTM planning, and quarterly business planning across hiring strategy, funding, and capability development</li>
+        <li>Owned KPI tracking and executive reporting across certifications, CSAT, SLAs, and pipeline health for practice governance</li>
+        <li>Led end-to-end pre-sales engagements: RFP/RFQ, solution definition, scope & risk assessment, SOW support</li>
+        <li>Delivered Salesforce Sales Cloud implementation with real-time external API pricing for a B2B industrial marketplace</li>
+        <li>Designed Experience Cloud Seller Portal with role-based access, product catalog, pin code management and inventory</li>
+        <li>Enabled sales execution via pitch decks, solution demos, and reusable accelerators</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-period">July 2023 – March 2025</div>
+      <div class="timeline-role">Placement Coordinator</div>
+      <div class="timeline-company">IIM Raipur · Career Development & Placement Office</div>
+      <ul class="timeline-points">
+        <li>Coordinated end-to-end recruitment for 700+ students — scheduling, candidate prep, and final selection management</li>
+        <li>Built campus-corporate relations, facilitating recruitment with 90+ leading companies across sectors</li>
+        <li>Automated recruitment workflow using Python and Google Scripts — streamlining company allocation and resume archiving</li>
+        <li>Organized three major summits: Leadership, HR, and Shaktirath — elevating IIM Raipur's brand across industries</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-period">Apr 2024 – May 2024 · 02 Months</div>
+      <div class="timeline-role">Strategy Intern</div>
+      <div class="timeline-company">Rubber King Tyre Private Limited</div>
+      <ul class="timeline-points">
+        <li>Improved lead management processes — 15% gain in lead tracking efficiency through streamlined follow-up workflows</li>
+        <li>Streamlined Salesforce CRM workflows, reducing business lead processing time and enhancing operational efficiency</li>
+        <li>Conducted competitive analysis of lead response times, delivering insights that boosted conversion rates by 50%</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-period">Oct 2020 – June 2023 · 32 Months</div>
+      <div class="timeline-role">Technology Consultant</div>
+      <div class="timeline-company">Tata Consultancy Services</div>
+      <ul class="timeline-points">
+        <li>Managed Financial Administration, Project Management, and Internal Communication apps — 99% uptime</li>
+        <li>Designed automated project approval process on Microsoft Power Platform — 50% reduction across 3,600 projects</li>
+        <li>Led a team of 4 to deliver vendor data management app for 200+ vendors, generating $300K revenue for TCS</li>
+        <li>Received 'Beyond Excellence Award' and A-band performance rating for 3 consecutive years — top 10% at TCS</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-label">Education</div>
+  <h2 class="section-title">Built on <em>exceptional</em><br/>foundations</h2>
+  <div class="edu-grid">
+    <div class="edu-card fade-up"><div class="edu-year">2023 – 2025</div><div class="edu-institute">IIM Raipur</div><div class="edu-course">Master of Business Administration</div><div class="edu-score">80.24<span>%</span></div><div class="edu-score-label">Percentage</div></div>
+    <div class="edu-card fade-up"><div class="edu-year">2018 – 2020</div><div class="edu-institute">IIT Hyderabad</div><div class="edu-course">M.Tech — Engineering</div><div class="edu-score">92.90<span>%</span></div><div class="edu-score-label">Percentage</div></div>
+    <div class="edu-card fade-up"><div class="edu-year">2014 – 2018</div><div class="edu-institute">NIT Rourkela</div><div class="edu-course">B.Tech — Engineering</div><div class="edu-score">78.20<span>%</span></div><div class="edu-score-label">Percentage</div></div>
+  </div>
+  <div style="margin-top:80px">
+    <div class="section-label">Certifications</div>
+    <div class="certs-grid">
+      <div class="cert-badge"><div class="cert-dot"></div><div><div class="cert-name">Salesforce Data Cloud Consultant</div><div class="cert-issuer">Salesforce</div></div></div>
+      <div class="cert-badge"><div class="cert-dot"></div><div><div class="cert-name">Salesforce Administrator</div><div class="cert-issuer">Salesforce</div></div></div>
+      <div class="cert-badge"><div class="cert-dot"></div><div><div class="cert-name">Salesforce Agentforce Specialist</div><div class="cert-issuer">Salesforce</div></div></div>
+      <div class="cert-badge"><div class="cert-dot"></div><div><div class="cert-name">Google Data Analytics</div><div class="cert-issuer">Google</div></div></div>
+      <div class="cert-badge"><div class="cert-dot"></div><div><div class="cert-name">Google Project Management</div><div class="cert-issuer">Google</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="section-label" style="justify-content:center;margin-bottom:32px">Open to Opportunities</div>
+    <h2>Let's build<br/>something <em>significant</em></h2>
+    <p class="contact-sub">I'm actively exploring roles in Functional Consulting, Management Consulting, and Strategy — particularly with firms that value people who can both think and ship.</p>
+    <div class="contact-links">
+      <a href="mailto:chittaranjanssahu39000@gmail.com" class="contact-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        chittaranjanssahu39000@gmail.com
+      </a>
+      <a href="tel:+919348926601" class="contact-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+        +91 93489 26601
+      </a>
+      <a href="https://www.linkedin.com/in/chittaranjan-sahu-7a7289129/" target="_blank" class="contact-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn Profile
+      </a>
+    </div>
+    <a href="mailto:chittaranjanssahu39000@gmail.com?subject=Re%3A%20Chittaranjan%20Sahu%20%E2%80%94%20Functional%20Consultant%20%7C%20IIT%20Hyderabad%20%C2%B7%20IIM%20Raipur&body=Hi%20Chittaranjan%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20wanted%20to%20connect." class="cta-email-btn">
+      Send Me a Message
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2025 Chittaranjan Sahu · All rights reserved</div>
+  <div class="footer-tagline">"IIT trained. IIM sharpened. Ambiguity-proof."</div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.1});
+document.querySelectorAll('.fade-up, .timeline-item').forEach(el => observer.observe(el));
+document.querySelectorAll('.timeline-item').forEach((item,i) => item.style.transitionDelay = `${i*0.1}s`);
+
+window.addEventListener('load', () => {
+  const heroLeft = document.querySelector('.hero-left');
+  const heroRight = document.querySelector('.hero-right');
+  [heroLeft, heroRight].forEach((el, i) => {
+    if(!el) return;
+    el.style.cssText = `opacity:0;transform:translateY(24px);transition:opacity 0.9s ease ${i*0.25}s,transform 0.9s ease ${i*0.25}s`;
+    requestAnimationFrame(() => setTimeout(() => { el.style.opacity='1'; el.style.transform='translateY(0)'; }, 50));
+  });
+  document.querySelectorAll('.stat-card').forEach((card, i) => {
+    card.style.cssText = `opacity:0;transform:translateX(20px);transition:opacity 0.7s ease ${0.4+i*0.15}s,transform 0.7s ease ${0.4+i*0.15}s`;
+    requestAnimationFrame(() => setTimeout(() => { card.style.opacity='1'; card.style.transform='translateX(0)'; }, 50));
+  });
+});
+
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('main-nav');
+  nav.style.padding = window.scrollY > 60 ? '14px 60px' : '20px 60px';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GFIC — NPD Platform · Chittaranjan Sahu</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --nav-bg: #7C1461;
+  --nav-dark: #5E0E4A;
+  --nav-text: #ffffff;
+  --accent: #7C1461;
+  --accent-light: #B05090;
+  --accent-hover: #5E0E4A;
+  --stage-active: #7C1461;
+  --stage-done: #52B788;
+  --border: #E2E5E9;
+  --text-primary: #1A1A1A;
+  --text-secondary: #5C6B7A;
+  --text-link: #7C1461;
+  --bg-main: #F3F4F6;
+  --card-bg: #ffffff;
+  --required: #DC2626;
+  --success-bg: #F0FDF4;
+  --font: 'DM Sans', sans-serif;
+  --obj-nav-width: 220px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg-main); color: var(--text-primary); font-size: 13px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ===== TOP NAV ===== */
+.top-nav {
+  background: var(--nav-bg);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 0;
+  flex-shrink: 0;
+  z-index: 300;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  position: relative;
+}
+.nav-menu-icon { color:rgba(255,255,255,0.8);font-size:16px;cursor:pointer;padding:0 10px;flex-shrink:0; }
+.app-logo { display:flex;align-items:center;gap:7px;color:white;font-weight:700;font-size:13.5px;padding:0 12px;white-space:nowrap;flex-shrink:0; }
+.app-logo svg { width:19px;height:19px; }
+/* Object dropdown trigger */
+.obj-dropdown-wrap { position:relative;flex-shrink:0; }
+.obj-dropdown-btn {
+  display:flex;align-items:center;gap:6px;
+  color:rgba(255,255,255,0.9);
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:4px;
+  padding:5px 10px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:var(--font);
+  white-space:nowrap;
+  transition:background 0.12s;
+}
+.obj-dropdown-btn:hover { background:rgba(255,255,255,0.2); }
+.obj-dropdown-btn .caret { font-size:10px;opacity:0.7; }
+.obj-dropdown-menu {
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  background:white;
+  border-radius:5px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.18);
+  min-width:200px;
+  z-index:500;
+  overflow:hidden;
+  display:none;
+  border:1px solid var(--border);
+}
+.obj-dropdown-menu.open { display:block; }
+.obj-dd-item {
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  cursor:pointer;
+  font-size:13px;
+  color:var(--text-primary);
+  transition:background 0.1s;
+}
+.obj-dd-item:hover { background:#F8F2F7; }
+.obj-dd-item.active { background:#F5EBF4;color:var(--accent);font-weight:700; }
+.obj-dd-icon { width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;flex-shrink:0; }
+.obj-dd-divider { height:1px;background:var(--border);margin:4px 0; }
+.obj-dd-edit { font-size:11.5px;color:var(--text-secondary);padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:6px; }
+.obj-dd-edit:hover { background:#F8F2F7; }
+/* Search in nav */
+.nav-search { flex:1;margin:0 14px; }
+.nav-search input { width:100%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 14px;color:white;font-size:12.5px;font-family:var(--font); }
+.nav-search input::placeholder { color:rgba(255,255,255,0.5); }
+.top-nav-right { display:flex;align-items:center;gap:10px;flex-shrink:0; }
+.nav-icon-btn { color:rgba(255,255,255,0.75);cursor:pointer;font-size:14px;background:none;border:none;padding:3px; }
+.nav-avatar { width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:10px;border:1px solid rgba(255,255,255,0.3); }
+
+/* ===== OPEN TABS BAR (below top nav) ===== */
+.open-tabs-bar {
+  background: #EDEDED;
+  display:flex;
+  align-items:flex-end;
+  padding:0 10px;
+  gap:2px;
+  flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  min-height:30px;
+}
+.open-tab {
+  display:flex;align-items:center;gap:5px;
+  padding:5px 12px;
+  font-size:11.5px;
+  cursor:pointer;
+  color:var(--text-secondary);
+  background:#DCDCDC;
+  border-radius:4px 4px 0 0;
+  border:1px solid #C8C8C8;
+  border-bottom:none;
+  white-space:nowrap;
+  transition:all 0.12s;
+}
+.open-tab:hover { background:#E8E8E8; }
+.open-tab.active { background:white;color:var(--text-primary);font-weight:600;border-color:var(--border); }
+.tab-close { margin-left:5px;font-size:13px;line-height:1;color:#999;border-radius:2px;padding:0 2px;transition:all 0.1s; }
+.tab-close:hover { background:#ddd;color:#333; }
+
+/* ===== APP BODY ===== */
+.app-body { display:flex;flex:1;overflow:hidden;flex-direction:column; }
+
+/* ===== MAIN AREA ===== */
+.main-area { flex:1;display:flex;flex-direction:column;overflow:hidden; }
+
+/* ===== SCREENS ===== */
+.screen { display:none;flex:1;flex-direction:column;overflow:hidden; }
+.screen.visible { display:flex; }
+
+/* ===== RECORD HEADER ===== */
+.rec-header { background:white;border-bottom:1px solid var(--border);padding:10px 18px 0;flex-shrink:0; }
+.rec-type-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:4px; }
+.rec-type-label { font-size:11px;color:var(--text-secondary);font-weight:500;display:flex;align-items:center;gap:5px; }
+.rec-name { font-size:17px;font-weight:700;margin-bottom:6px; }
+.rec-meta { display:flex;gap:20px;flex-wrap:wrap;padding-bottom:8px; }
+.rec-meta-item { display:flex;flex-direction:column;gap:1px; }
+.rec-meta-label { font-size:10px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:0.3px; }
+.rec-meta-val { font-size:12.5px;color:var(--text-primary); }
+.rec-meta-val a { color:var(--text-link);text-decoration:none; }
+.rec-actions { display:flex;gap:6px;align-items:center;flex-shrink:0; }
+
+/* ===== STAGE PATH ===== */
+.stage-path { display:flex;background:white;overflow:hidden;border-top:1px solid var(--border);flex-shrink:0; }
+.stage-item { flex:1;padding:8px 6px 8px 24px;font-size:11.5px;font-weight:500;color:var(--text-secondary);background:#EBEBEB;position:relative;cursor:pointer;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%,12px 50%);text-align:center; }
+.stage-item:first-child { clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%);padding-left:14px; }
+.stage-item.s-active { background:var(--stage-active);color:white;font-weight:700; }
+.stage-item.s-done { background:var(--stage-done);color:white; }
+.stage-mark-btn { background:var(--accent);color:white;border:none;padding:6px 12px;margin:5px 8px;border-radius:4px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0; }
+
+/* ===== TABS ===== */
+.tab-row { display:flex;border-bottom:2px solid var(--border);padding:0 18px;background:white;flex-shrink:0; }
+.tab-btn { padding:9px 14px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.12s; }
+.tab-btn:hover { color:var(--text-primary); }
+.tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+
+/* ===== SCROLL CONTENT ===== */
+.scroll-content { flex:1;overflow-y:auto; }
+
+/* ===== LAYOUT ===== */
+.content-with-sidebar { display:flex;flex:1;overflow:hidden; }
+.content-col { flex:1;overflow-y:auto; }
+.right-sidebar { width:310px;border-left:1px solid var(--border);background:white;overflow-y:auto;flex-shrink:0; }
+
+/* ===== SECTION CARDS ===== */
+.sec-card { background:white;margin:10px 14px;border-radius:5px;border:1px solid var(--border);overflow:hidden; }
+.sec-card-hd { display:flex;align-items:center;gap:7px;padding:8px 14px;border-bottom:1px solid var(--border);cursor:pointer;background:white; }
+.sec-card-title { font-size:12.5px;font-weight:700; }
+.field-grid { display:grid;grid-template-columns:1fr 1fr; }
+.f-row { padding:7px 14px;border-bottom:1px solid #F3F4F6;display:flex;flex-direction:column;gap:2px; }
+.f-row:last-child { border-bottom:none; }
+.f-lbl { font-size:11px;color:var(--text-secondary);font-weight:500; }
+.f-val { font-size:12.5px;color:var(--text-primary); }
+.f-val a { color:var(--text-link);text-decoration:none; }
+.f-empty { color:#aaa;font-style:italic; }
+
+/* ===== RELATED LISTS ===== */
+.rel-card { background:white;margin:10px 14px;border-radius:5px;border:1px solid var(--border);overflow:hidden; }
+.rel-hd { display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid var(--border); }
+.rel-icon { width:18px;height:18px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;flex-shrink:0; }
+.rel-title { font-size:12.5px;font-weight:700;flex:1; }
+.rel-actions { display:flex;gap:5px;margin-left:auto; }
+.dtable { width:100%;border-collapse:collapse; }
+.dtable th { background:#F8F9FA;padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border);white-space:nowrap; }
+.dtable td { padding:7px 10px;border-bottom:1px solid #F5F6F8;font-size:12px; }
+.dtable tr:last-child td { border-bottom:none; }
+.dtable a { color:var(--text-link);text-decoration:none; }
+.dtable tr:hover td { background:#FAFBFC; }
+.view-all-row { padding:7px 10px;text-align:center; }
+.view-all-row a { color:var(--text-link);font-size:11.5px; }
+
+/* ===== BUTTONS ===== */
+.btn-p { background:var(--accent);color:white;border:none;padding:6px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background 0.12s; }
+.btn-p:hover { background:var(--accent-hover); }
+.btn-s { background:white;color:var(--text-primary);border:1px solid var(--border);padding:6px 12px;border-radius:4px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all 0.12s; }
+.btn-s:hover { background:var(--bg-main); }
+.btn-approve { background:#15803D;color:white;border:none;padding:6px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all 0.2s;display:flex;align-items:center;gap:6px;opacity:0.4;pointer-events:none; }
+.btn-approve.ready { opacity:1;pointer-events:auto;animation:pulse-green 1.5s infinite; }
+@keyframes pulse-green { 0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,0.4)} 50%{box-shadow:0 0 0 6px rgba(21,128,61,0)} }
+
+/* ===== BADGES ===== */
+.badge { display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600; }
+.b-green { background:#DCFCE7;color:#15803D; }
+.b-blue { background:#DBEAFE;color:#1D4ED8; }
+.b-orange { background:#FED7AA;color:#C2410C; }
+.b-grey { background:#F3F4F6;color:#6B7280; }
+.b-purple { background:#EDE9FE;color:#6D28D9; }
+.b-red { background:#FEE2E2;color:#DC2626; }
+.b-pink { background:#FCE7F3;color:#9D174D; }
+
+/* ===== NPD SUBBAR ===== */
+.npd-subbar { background:#F8F9FA;padding:7px 18px;display:flex;gap:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0; }
+.nsb-item { display:flex;flex-direction:column;gap:1px; }
+.nsb-lbl { font-size:9.5px;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.4px; }
+.nsb-val { font-size:12px;color:var(--text-primary);font-weight:500; }
+
+/* ===== TASK DASHBOARD ===== */
+.task-stage-block { margin:10px 14px;border:1px solid var(--border);border-radius:5px;overflow:hidden; }
+.task-stage-hd { display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:white;border-bottom:1px solid var(--border);cursor:pointer; }
+.task-stage-title { font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px; }
+.stage-progress-pill { display:flex;align-items:center;gap:8px; }
+.stage-pct { font-size:11.5px;font-weight:700; }
+.stage-mini-bar { width:80px;height:7px;background:#E5E7EB;border-radius:4px;overflow:hidden; }
+.stage-mini-fill { height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s; }
+.stage-mini-fill.complete { background:#15803D; }
+.task-row { display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid #F3F4F6;background:white;transition:background 0.1s; }
+.task-row:last-child { border-bottom:none; }
+.task-row:hover { background:#FAFBFC; }
+.task-cb { width:15px;height:15px;border:1.5px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0;margin-top:1px;accent-color:var(--accent); }
+.task-name { flex:1;font-size:12px;line-height:1.4; }
+.task-name.done { text-decoration:line-through;color:var(--text-secondary); }
+.task-team-badge { font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0; }
+.task-assignee { font-size:11px;color:var(--text-secondary);min-width:100px;flex-shrink:0; }
+.task-due { font-size:11px;min-width:85px;text-align:right;flex-shrink:0; }
+.task-due.ov { color:var(--required);font-weight:600; }
+.task-due.ok { color:#15803D; }
+.task-complete-icon { color:#15803D;font-size:14px;flex-shrink:0; }
+
+/* ===== RIGHT SIDEBAR ===== */
+.rsb-tabs { display:flex;border-bottom:1px solid var(--border); }
+.rsb-tab { flex:1;text-align:center;padding:9px 6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;transition:all 0.12s; }
+.rsb-tab.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.rsb-body { padding:10px; }
+.tr-section { border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px; }
+.tr-sec-hd { background:#F8F9FA;padding:7px 10px;font-size:11.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border); }
+.tr-sec-body { padding:8px 10px; }
+.tr-link { color:var(--text-link);font-size:12px;font-weight:600;margin-bottom:6px; }
+.donut-wrap { display:flex;gap:12px;align-items:center;margin:8px 0; }
+.donut-svg { flex-shrink:0; }
+.donut-stats-col { flex:1; }
+.donut-stat { display:flex;align-items:center;gap:6px;font-size:11.5px;margin-bottom:4px; }
+.dsq { width:9px;height:9px;border-radius:2px;flex-shrink:0; }
+.sp-item { margin-bottom:7px; }
+.sp-labels { display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:3px; }
+.sp-lbl { color:var(--text-secondary); }
+.sp-pct { font-weight:700; }
+.sp-bar { height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden; }
+.sp-fill { height:100%;border-radius:3px;transition:width 0.4s; }
+.todo-item { display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:1px solid #F5F5F5; }
+.todo-item:last-child { border-bottom:none; }
+.todo-cb { width:13px;height:13px;border:1.5px solid #ccc;border-radius:2px;cursor:pointer;flex-shrink:0;margin-top:2px;accent-color:var(--accent); }
+.todo-text { font-size:11px;flex:1;line-height:1.4; }
+.npd-owner-badge { background:#2B2B2B;color:white;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px;white-space:nowrap;display:inline-block;margin-top:2px; }
+.todo-due { font-size:10px;color:var(--required);font-weight:600;white-space:nowrap;flex-shrink:0; }
+
+/* ===== ACTIVITY SIDEBAR ===== */
+.act-item { display:flex;gap:8px;padding:9px 0;border-bottom:1px solid #F3F4F6; }
+.act-icon { width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+.act-text { font-size:11.5px;color:var(--text-primary);line-height:1.5; }
+.act-meta { font-size:10.5px;color:var(--text-secondary);margin-top:1px; }
+.act-date-grp { font-size:11.5px;font-weight:700;color:var(--text-secondary);padding:8px 0 5px;border-bottom:1px solid var(--border);margin-bottom:3px;display:flex;justify-content:space-between; }
+
+/* ===== WIZARD MODAL ===== */
+.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3000;display:flex;align-items:center;justify-content:center; }
+.modal-overlay.hidden { display:none; }
+.modal-box { background:white;border-radius:6px;width:920px;max-width:95vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.35); }
+.modal-hd { background:var(--nav-bg);color:white;padding:12px 18px;display:flex;justify-content:space-between;align-items:center; }
+.modal-title { font-size:15px;font-weight:700; }
+.modal-close { background:none;border:none;color:white;font-size:20px;cursor:pointer;line-height:1; }
+.modal-body { display:flex;flex:1;overflow:hidden; }
+.wiz-steps { width:175px;background:#F8F9FA;padding:16px;border-right:1px solid var(--border);flex-shrink:0; }
+.wiz-step { display:flex;align-items:flex-start;gap:8px;margin-bottom:18px; }
+.wiz-circle { width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;flex-shrink:0; }
+.wiz-circle.done { background:var(--accent);color:white; }
+.wiz-circle.current { background:var(--accent);color:white;border:2px solid var(--accent-light); }
+.wiz-circle.pending { background:white;color:var(--text-secondary);border:2px solid var(--border); }
+.wiz-lbl { font-size:12px;font-weight:500;color:var(--text-secondary);line-height:1.3; }
+.wiz-lbl.current { color:var(--accent);font-weight:700; }
+.wiz-connector { width:2px;height:14px;background:var(--border);margin:2px 0 2px 9px; }
+.wiz-content { flex:1;overflow-y:auto;padding:18px; }
+.wiz-footer { padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:white; }
+.form-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.form-field { display:flex;flex-direction:column;gap:4px; }
+.form-field.full { grid-column:1/-1; }
+.form-lbl { font-size:11.5px;font-weight:600;color:#374151; }
+.req { color:var(--required); }
+.form-input { border:1px solid var(--border);border-radius:4px;padding:7px 9px;font-size:12.5px;font-family:var(--font);color:var(--text-primary); }
+.form-input:focus { outline:none;border-color:var(--accent); }
+.form-sel { border:1px solid var(--border);border-radius:4px;padding:7px 9px;font-size:12.5px;font-family:var(--font);background:white; }
+.form-ta { border:1px solid var(--border);border-radius:4px;padding:7px 9px;font-size:12.5px;font-family:var(--font);resize:vertical;min-height:65px; }
+.info-banner { background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:8px 12px;font-size:11.5px;color:#1D4ED8;margin-bottom:10px;display:flex;gap:6px; }
+.pgrid { width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:4px;overflow:hidden;font-size:12px; }
+.pgrid th { background:#F8F9FA;padding:7px 9px;text-align:left;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);font-size:11px;white-space:nowrap; }
+.pgrid td { padding:6px 9px;border-bottom:1px solid #F3F4F6; }
+.pgrid tr:last-child td { border-bottom:none; }
+.inline-input { border:1px solid var(--border);border-radius:3px;padding:4px 6px;font-size:11.5px;font-family:var(--font);width:100%; }
+.inline-sel { border:1px solid var(--border);border-radius:3px;padding:4px 6px;font-size:11.5px;font-family:var(--font);background:white;width:100%; }
+
+/* ===== INITIATE NPD ===== */
+.init-table-wrap { overflow-x:auto;border:1px solid var(--border);border-radius:5px;margin-bottom:14px; }
+.init-table { border-collapse:collapse;min-width:1300px;font-size:12px; }
+.init-table th { background:#F8F9FA;padding:8px 9px;text-align:left;font-size:11px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border);white-space:nowrap; }
+.init-table td { padding:7px 9px;border-bottom:1px solid #F3F4F6;vertical-align:middle; }
+.init-table tr:last-child td { border-bottom:none; }
+
+/* ===== APPROVAL POPUP ===== */
+.approval-popup { background:white;border-radius:6px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden; }
+.approval-popup-hd { background:var(--nav-bg);color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center; }
+.approval-popup-body { padding:20px; }
+.approval-stage-badge { display:inline-flex;align-items:center;gap:6px;background:#DCFCE7;color:#15803D;border:1px solid #86EFAC;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;margin-bottom:14px; }
+.approver-option { display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:5px;cursor:pointer;margin-bottom:7px;transition:all 0.12s; }
+.approver-option:hover { border-color:var(--accent);background:#FDF2FB; }
+.approver-option.selected { border-color:var(--accent);background:#FDF2FB; }
+.approver-avatar { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0; }
+.approver-name { font-size:13px;font-weight:600; }
+.approver-role { font-size:11px;color:var(--text-secondary); }
+.approval-success { text-align:center;padding:24px 16px; }
+.approval-success-icon { font-size:40px;margin-bottom:10px; }
+
+/* ===== UPLOAD MODAL ===== */
+.upload-box { background:white;border-radius:6px;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden; }
+.upload-zone { border:2px dashed var(--border);border-radius:5px;padding:28px;text-align:center;margin:14px;cursor:pointer; }
+.upload-zone:hover { border-color:var(--accent);background:#FDF2FB; }
+
+/* ===== SUCCESS BANNER ===== */
+.success-banner { background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;padding:18px;text-align:center;margin-top:14px; }
+
+
+/* ===== APP LAUNCHER ===== */
+.app-launcher-overlay {
+  position:fixed;inset:0;z-index:1000;display:none;
+}
+.app-launcher-overlay.open { display:block; }
+.app-launcher-panel {
+  position:fixed;top:42px;left:0;
+  width:340px;
+  background:white;
+  border-radius:0 0 6px 0;
+  box-shadow:4px 4px 20px rgba(0,0,0,0.18);
+  border:1px solid var(--border);
+  border-top:none;
+  z-index:1001;
+  overflow:hidden;
+  animation:slideDown 0.15s ease;
+}
+@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.al-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;font-weight:700;
+}
+.al-close { background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-secondary);line-height:1;padding:2px 6px; }
+.al-close:hover { background:#F3F4F6;border-radius:3px; }
+.al-search { padding:10px 14px;border-bottom:1px solid var(--border); }
+.al-search input {
+  width:100%;border:1px solid var(--border);border-radius:20px;
+  padding:7px 14px;font-size:12.5px;font-family:var(--font);
+  background:#F8F9FA;
+}
+.al-search input:focus { outline:none;border-color:var(--accent);background:white; }
+.al-section-title { font-size:11px;font-weight:700;color:var(--text-secondary);padding:10px 14px 6px;letter-spacing:0.3px;text-transform:uppercase; }
+.al-apps-grid { padding:6px 10px 14px; }
+.al-app-item {
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:5px;cursor:pointer;
+  transition:background 0.1s;
+}
+.al-app-item:hover { background:#F3F4F6; }
+.al-app-icon {
+  width:32px;height:32px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+.al-app-name { font-size:13px;font-weight:500;color:var(--text-primary); }
+.al-view-all { padding:8px 14px 12px;text-align:center; }
+.al-view-all a { color:var(--text-link);font-size:12.5px;text-decoration:none;font-weight:600; }
+
+/* ===== SETTINGS DROPDOWN ===== */
+.settings-dropdown {
+  position:fixed;top:42px;right:90px;
+  width:240px;background:white;
+  border-radius:5px;border:1px solid var(--border);
+  box-shadow:0 4px 16px rgba(0,0,0,0.14);
+  z-index:1001;display:none;
+  animation:slideDown 0.12s ease;
+  overflow:hidden;
+}
+.settings-dropdown.open { display:block; }
+.sd-section { padding:8px 0; }
+.sd-title { font-size:10px;font-weight:700;color:var(--text-secondary);padding:6px 14px 4px;letter-spacing:0.4px;text-transform:uppercase; }
+.sd-item { display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);transition:background 0.1s; }
+.sd-item:hover { background:#F8F2F7;color:var(--accent); }
+.sd-divider { height:1px;background:var(--border);margin:4px 0; }
+
+/* ===== PROFILE DROPDOWN ===== */
+.profile-dropdown {
+  position:fixed;top:42px;right:10px;
+  width:260px;background:white;
+  border-radius:5px;border:1px solid var(--border);
+  box-shadow:0 4px 16px rgba(0,0,0,0.14);
+  z-index:1001;display:none;
+  animation:slideDown 0.12s ease;
+  overflow:hidden;
+}
+.profile-dropdown.open { display:block; }
+.pd-header { background:var(--nav-bg);padding:16px;display:flex;align-items:center;gap:12px; }
+.pd-avatar-lg { width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:white;flex-shrink:0; }
+.pd-name { color:white;font-size:14px;font-weight:700; }
+.pd-role { color:rgba(255,255,255,0.75);font-size:11.5px;margin-top:2px; }
+.pd-body { padding:8px 0; }
+.pd-item { display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);transition:background 0.1s; }
+.pd-item:hover { background:#F8F2F7;color:var(--accent); }
+.pd-divider { height:1px;background:var(--border);margin:4px 0; }
+
+/* Waffle icon */
+.waffle-btn { background:none;border:none;cursor:pointer;padding:4px 8px;display:flex;align-items:center;justify-content:center; }
+.waffle-grid { display:grid;grid-template-columns:repeat(3,5px);gap:2px; }
+.waffle-dot { width:5px;height:5px;background:rgba(255,255,255,0.85);border-radius:1px; }
+
+/* ===== MISC ===== */
+.pg-row { display:flex;align-items:center;justify-content:space-between;padding:7px 0;font-size:11.5px;color:var(--text-secondary); }
+.pg-btns { display:flex;gap:3px; }
+.pg-btn { border:1px solid var(--border);background:white;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:11px; }
+.pg-btn.disabled { opacity:0.35;cursor:default; }
+.add-row-btn { background:none;border:1px dashed var(--accent);color:var(--accent);padding:4px 10px;border-radius:4px;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:3px; }
+</style>
+</head>
+<body>
+
+<!-- BACK TO PORTFOLIO -->
+<div style="background:#0D0D0D;border-bottom:1px solid #1E1E1E;padding:10px 20px;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;z-index:9999;position:relative;">
+  <a href="../../index.html" style="display:flex;align-items:center;gap:8px;color:#C8A96E;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;opacity:0.85;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">
+    ← Back to Portfolio
+  </a>
+  <span style="color:#2A2A2A;font-size:14px">|</span>
+  <span style="color:#555;font-size:11px;letter-spacing:0.05em;">GFIC — NPD Platform · Live Prototype</span>
+</div>
+
+<!-- ===== TOP NAV ===== -->
+<div class="top-nav">
+  <button class="waffle-btn" onclick="toggleAppLauncher()" title="App Launcher">
+    <div class="waffle-grid">
+      <div class="waffle-dot"></div><div class="waffle-dot"></div><div class="waffle-dot"></div>
+      <div class="waffle-dot"></div><div class="waffle-dot"></div><div class="waffle-dot"></div>
+      <div class="waffle-dot"></div><div class="waffle-dot"></div><div class="waffle-dot"></div>
+    </div>
+  </button>
+  <div class="app-logo">
+    <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="22" rx="4" fill="rgba(255,255,255,0.2)"/><path d="M11 3L19 7V15L11 19L3 15V7Z" fill="white" opacity="0.85"/><circle cx="11" cy="11" r="3" fill="rgba(255,255,255,0.4)"/></svg>
+    GFIC Console
+  </div>
+  <!-- Object Dropdown (matches Salesforce nav pattern) -->
+  <div class="obj-dropdown-wrap">
+    <button class="obj-dropdown-btn" id="obj-dd-btn" onclick="toggleObjDropdown()">
+      <span id="obj-dd-label">Accounts</span>
+      <span class="caret">▾</span>
+    </button>
+    <div class="obj-dropdown-menu" id="obj-dropdown-menu">
+      <div class="obj-dd-item" onclick="navToScreen('account','Accounts')">
+        <div class="obj-dd-icon" style="background:#7C1461">🏢</div> Accounts
+      </div>
+      <div class="obj-dd-item" onclick="navToScreen('opportunity','Opportunities')">
+        <div class="obj-dd-icon" style="background:#B45309">📋</div> Opportunities
+      </div>
+      <div class="obj-dd-item" onclick="navToScreen('project','Projects')">
+        <div class="obj-dd-icon" style="background:#1A3C2E">📁</div> Projects
+      </div>
+      <div class="obj-dd-item" onclick="navToScreen('npd','NPD Records')">
+        <div class="obj-dd-icon" style="background:#0F766E">🧪</div> NPD Records
+      </div>
+      <div class="obj-dd-divider"></div>
+      <div class="obj-dd-item" onclick="navToScreen('initiate','Initiate NPD')">
+        <div class="obj-dd-icon" style="background:#DC2626">⚡</div> Initiate NPD
+      </div>
+      <div class="obj-dd-divider"></div>
+      <div class="obj-dd-edit">✏️ Edit</div>
+    </div>
+  </div>
+  <div class="nav-search">
+    <input type="text" placeholder="🔍  Search GFIC Console...">
+  </div>
+  <div class="top-nav-right">
+    <button class="nav-icon-btn" title="Favorites">⭐</button>
+    <button class="nav-icon-btn" title="New">➕</button>
+    <button class="nav-icon-btn" title="Help">❓</button>
+    <button class="nav-icon-btn" title="Setup" onclick="toggleSettings(event)">⚙</button>
+    <button class="nav-icon-btn" title="Notifications" style="position:relative">🔔<span style="position:absolute;top:-2px;right:-4px;background:#DC2626;color:white;border-radius:50%;width:14px;height:14px;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700">1</span></button>
+    <div class="nav-avatar" onclick="toggleProfile(event)" style="cursor:pointer" title="Profile">CS</div>
+  </div>
+</div>
+
+<!-- ===== OPEN RECORD TABS (below top nav) ===== -->
+<div class="open-tabs-bar" id="open-tabs-bar">
+  <div class="open-tab active" data-screen="account">🏢 GlobalFood Inc.</div>
+</div>
+
+<div class="app-body">
+<div class="main-area">
+
+<!-- ================================================================ -->
+<!-- SCREEN: ACCOUNT -->
+<!-- ================================================================ -->
+<div id="screen-account" class="screen visible">
+  <div class="rec-header">
+    <div class="rec-type-row">
+      <div class="rec-type-label">🏢 Account</div>
+      <div class="rec-actions">
+        <button class="btn-s">New Contact</button>
+        <button class="btn-p" onclick="openWizard()">New Opportunity</button>
+        <button class="btn-s">Quick Quote</button>
+      </div>
+    </div>
+    <div class="rec-name">GlobalFood Inc.</div>
+    <div class="rec-meta">
+      <div class="rec-meta-item"><div class="rec-meta-label">ERP Account ID</div><div class="rec-meta-val">0001093267</div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Commercialized</div><div class="rec-meta-val">✅</div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Parent Account</div><div class="rec-meta-val"><a href="#">THE GLOBALFOOD COMPANY</a></div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Account Owner</div><div class="rec-meta-val"><a href="#">Tyler Simpson</a></div></div>
+    </div>
+    <div class="tab-row">
+      <div class="tab-btn active" onclick="switchTab(this,'acc-details','acc-related','acc-plan')">Details</div>
+      <div class="tab-btn" onclick="switchTab(this,'acc-related','acc-details','acc-plan')">Related</div>
+      <div class="tab-btn" onclick="switchTab(this,'acc-plan','acc-details','acc-related')">Account Plan</div>
+    </div>
+  </div>
+  <div class="content-with-sidebar">
+    <div class="content-col">
+      <div id="acc-details">
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Account Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Account Name</div><div class="f-val">GlobalFood Inc.</div></div>
+            <div class="f-row"><div class="f-lbl">Account Owner</div><div class="f-val"><a href="#">Tyler Simpson</a></div></div>
+            <div class="f-row"><div class="f-lbl">Account Type</div><div class="f-val">Global</div></div>
+            <div class="f-row"><div class="f-lbl">Parent Account</div><div class="f-val"><a href="#">THE GLOBALFOOD COMPANY</a></div></div>
+            <div class="f-row"><div class="f-lbl">Customer Group</div><div class="f-val">GLOBALFOOD</div></div>
+            <div class="f-row"><div class="f-lbl">Customer Priority Level</div><div class="f-val"><span class="f-empty">—</span></div></div>
+            <div class="f-row"><div class="f-lbl">Channel</div><div class="f-val">PL / Retailer</div></div>
+            <div class="f-row"><div class="f-lbl">Phone</div><div class="f-val">+1 212 555 0198</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Address Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Billing Address</div><div class="f-val">123 Food Corp Drive, Chicago, IL 60601, USA</div></div>
+            <div class="f-row"><div class="f-lbl">Regions</div><div class="f-val">NORTH AMERICA</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">System Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">ERP Account ID</div><div class="f-val">0001093267</div></div>
+            <div class="f-row"><div class="f-lbl">Commercialized</div><div class="f-val">✅</div></div>
+            <div class="f-row"><div class="f-lbl">Created By</div><div class="f-val">Salesforce Team, 12/8/2020</div></div>
+            <div class="f-row"><div class="f-lbl">Last Modified By</div><div class="f-val">Chittaranjan Sahu, 10/4/2026</div></div>
+          </div>
+        </div>
+      </div>
+      <div id="acc-related" style="display:none">
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#7C1461">📋</div><div class="rel-title">Quotes <span style="font-weight:400;color:var(--text-secondary)">(5+)</span></div><div class="rel-actions"><button class="btn-s" style="font-size:11px;padding:4px 8px">⚙</button><button class="btn-s" style="font-size:11px;padding:4px 8px">↺</button></div></div>
+          <table class="dtable"><thead><tr><th>#</th><th>Quote Name</th><th>Status</th><th>Product Platform</th><th>Responsible Sales Person</th></tr></thead><tbody>
+            <tr><td>1</td><td><a href="#">251015-GLOBALFOOD-F&B-Solutions-V1</a></td><td><span class="badge b-green">Quote Close</span></td><td>Food and Beverage Solutions</td><td><a href="#">Ashley Ho</a></td></tr>
+            <tr><td>2</td><td><a href="#">091025-GLOBALFOOD-F&B-Solutions-V1</a></td><td><span class="badge b-green">Quote Close</span></td><td>Food and Beverage Solutions</td><td><a href="#">Rutger Schutte</a></td></tr>
+          </tbody></table>
+          <div class="view-all-row"><a href="#">View All</a></div>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#0369A1">📦</div><div class="rel-title">Approved SKUs <span style="font-weight:400;color:var(--text-secondary)">(7)</span></div><div class="rel-actions"><button class="btn-s" style="font-size:11px;padding:4px 8px">⚙</button></div></div>
+          <table class="dtable"><thead><tr><th>#</th><th>Asset Name</th><th>Status</th><th>Internal Code</th><th>Customer External Code</th></tr></thead><tbody>
+            <tr><td>1</td><td><a href="#">GF-Cocoa Low Fat Powder Premium</a></td><td><span class="badge b-blue">Purchased</span></td><td>✅</td><td>AE0002</td></tr>
+            <tr><td>2</td><td><a href="#">GF-Instant Coffee Powder Dark Roast</a></td><td><span class="badge b-grey">—</span></td><td>456</td><td>123</td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#B45309">🏷</div><div class="rel-title">Commercial Opportunities <span style="font-weight:400;color:var(--text-secondary)">(10+)</span></div></div>
+          <table class="dtable"><thead><tr><th>#</th><th>Opportunity Name</th><th>Type</th><th>Close Date</th><th>Stage</th><th>Owner</th></tr></thead><tbody>
+            <tr><td>1</td><td><a href="#" onclick="switchScreen('opportunity');return false">OPP-2024-0126-GLOBALFOOD-Cocoa-Solutions</a></td><td>Commercial Opportunity</td><td>30/6/2026</td><td><span class="badge b-orange">Briefing</span></td><td><a href="#">Shayna Wagner</a></td></tr>
+            <tr><td>2</td><td><a href="#">OPP-2024-0125-GLOBALFOOD-Coffee</a></td><td>Commercial Opportunity</td><td>31/5/2026</td><td><span class="badge b-green">Closed Won</span></td><td><a href="#">Ashley Chen</a></td></tr>
+          </tbody></table>
+          <div class="view-all-row"><a href="#">View All</a></div>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#6D28D9">👥</div><div class="rel-title">Contacts <span style="font-weight:400;color:var(--text-secondary)">(5+)</span></div><div class="rel-actions"><button class="btn-s" style="font-size:11px;padding:4px 8px">Add Relationship</button></div></div>
+          <table class="dtable"><thead><tr><th>#</th><th>Contact Name</th><th>Job Function</th><th>Roles</th><th>Email</th></tr></thead><tbody>
+            <tr><td>1</td><td><a href="#">James Carter</a></td><td>Procurement</td><td>Decision Maker</td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5d37733e3c2f29382f1d3a31323f3c313b323239733e3230">[email&#160;protected]</a></td></tr>
+            <tr><td>2</td><td><a href="#">Maria Schmidt</a></td><td>R&amp;D</td><td>Technical Contact</td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b3de9dc0d0dbdedad7c7f3d4dfdcd1d2dfd5dcdcd79dd0dcde">[email&#160;protected]</a></td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#0F766E">💰</div><div class="rel-title">Sales Agreements <span style="font-weight:400;color:var(--text-secondary)">(10+)</span></div></div>
+          <table class="dtable"><thead><tr><th>#</th><th>Name</th><th>ERP Status</th><th>Start Date</th><th>End Date</th><th>Total Amount</th><th>Business Unit</th></tr></thead><tbody>
+            <tr><td>1</td><td><a href="#">SA0004262-24519078.0.F</a></td><td><span class="badge b-green">Active</span></td><td>1/10/2024</td><td>31/3/2025</td><td>USD 1,761,459,000.00</td><td>Cocoa</td></tr>
+            <tr><td>2</td><td><a href="#">SA0004263-24519100.0.F</a></td><td><span class="badge b-green">Active</span></td><td>1/10/2024</td><td>31/3/2025</td><td>USD 13,395,375,000.00</td><td>Coffee</td></tr>
+          </tbody></table>
+          <div class="view-all-row"><a href="#">View All</a></div>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#0369A1">🏦</div><div class="rel-title">Account Legal Entity <span style="font-weight:400;color:var(--text-secondary)">(8)</span></div></div>
+          <table class="dtable"><thead><tr><th>#</th><th>Account Legal Entity Number</th><th>Sales Org</th><th>Division</th><th>Distribution Channel</th></tr></thead><tbody>
+            <tr><td>1</td><td><a href="#">ALE-36017</a></td><td>CI16-O.C.P.SitedeSanPedro</td><td>Cocoa</td><td>Export</td></tr>
+            <tr><td>2</td><td><a href="#">ALE-82196</a></td><td>SG41-OIL Processing-Cocoa</td><td>Cocoa</td><td>Export</td></tr>
+            <tr><td>3</td><td><a href="#">ALE-115689</a></td><td>SG11-Sales Org – Coffee</td><td>Coffee</td><td>Export</td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#B45309">💳</div><div class="rel-title">Account Payment Terms <span style="font-weight:400;color:var(--text-secondary)">(6+)</span></div><div class="rel-actions"><button class="btn-s" style="font-size:11px;padding:4px 8px">New</button></div></div>
+          <table class="dtable"><thead><tr><th>Account Payment Term Number</th><th>Payment Term Master Name</th></tr></thead><tbody>
+            <tr><td><a href="#">APT-13799</a></td><td>Z001 – Pay immediately w/o deductions</td></tr>
+            <tr><td><a href="#">APT-24014</a></td><td>Z120 – Sales Term 120 Days from Date of Invoice</td></tr>
+            <tr><td><a href="#">APT-24015</a></td><td>ZD60 – 60 Days from Date of Invoice</td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#374151">📍</div><div class="rel-title">Ship To Address <span style="font-weight:400;color:var(--text-secondary)">(2)</span></div><div class="rel-actions"><button class="btn-s" style="font-size:11px;padding:4px 8px">New</button></div></div>
+          <table class="dtable"><thead><tr><th>Ship to Address Number</th><th>Ship To SAP Id</th></tr></thead><tbody>
+            <tr><td><a href="#">STA-47919</a></td><td>0001119176</td></tr>
+            <tr><td><a href="#">STA-48061</a></td><td></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div id="acc-plan" style="display:none"><div style="padding:30px;text-align:center;color:var(--text-secondary)">Account Plan not configured.</div></div>
+    </div>
+    <div class="right-sidebar">
+      <div style="padding:8px 10px;border-bottom:1px solid var(--border)"><label style="font-size:10.5px;color:var(--text-secondary);font-weight:600">ADD TAG</label><input type="text" placeholder="Search or create tag..." style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:3px;padding:5px 7px;font-size:11.5px;font-family:var(--font)"></div>
+      <div class="rsb-tabs"><div class="rsb-tab active">Activity</div><div class="rsb-tab">Chatter</div><div class="rsb-tab">Notes</div></div>
+      <div class="rsb-body">
+        <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap"><button class="btn-s" style="font-size:11px;padding:4px 8px">Log a Call</button><button class="btn-s" style="font-size:11px;padding:4px 8px">New Task</button><button class="btn-s" style="font-size:11px;padding:4px 8px">New Event</button><button class="btn-s" style="font-size:11px;padding:4px 8px">Email</button></div>
+        <div class="act-date-grp"><span>Upcoming &amp; Overdue</span><span style="font-size:10.5px">View All</span></div>
+        <div class="act-item"><div class="act-icon" style="background:#DCFCE7">✅</div><div><div class="act-text">Follow Up With GlobalFood Inc. for Project 071025-HERSHEY Food and Beverage Solutions Bake…</div><div class="act-meta">Ashley Ho has an upcoming task · <strong>13 Oct 2025</strong></div></div></div>
+        <div class="act-item"><div class="act-icon" style="background:#DBEAFE">📋</div><div><div class="act-text">Follow up with Remo on shipment plan</div><div class="act-meta">Jonathan Tharnstrom · <strong>9 Jan 2025</strong></div></div></div>
+        <div class="act-date-grp" style="margin-top:10px"><span>August • 2025</span><span style="font-size:10.5px">Last Year</span></div>
+        <div class="act-item"><div class="act-icon" style="background:#DBEAFE">📧</div><div><div class="act-text">Pardot Email: Join us: GFIC Cocoa Academy Sept 9 &amp; 10, 2025</div><div class="act-meta">B2BMA Integration · 19 Aug 2025</div></div></div>
+        <div class="act-item"><div class="act-icon" style="background:#DBEAFE">📧</div><div><div class="act-text">Pardot Email: You're invited: EUDR Compliance Webinar</div><div class="act-meta">B2BMA Integration · 12 Aug 2025</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN: OPPORTUNITY -->
+<!-- ================================================================ -->
+<div id="screen-opportunity" class="screen">
+  <div class="rec-header">
+    <div class="rec-type-row">
+      <div class="rec-type-label">📋 Opportunity</div>
+      <div class="rec-actions">
+        <button class="btn-s">+ Follow</button>
+        <button class="btn-s">Commercialize Account</button>
+        <button class="btn-p">Create Quote</button>
+        <button class="btn-s">Modify Opportunity</button>
+      </div>
+    </div>
+    <div class="rec-name">OPP-2024-0126-GLOBALFOOD-CPC</div>
+    <div class="rec-meta">
+      <div class="rec-meta-item"><div class="rec-meta-label">Account Name</div><div class="rec-meta-val"><a href="#" onclick="switchScreen('account');return false">GlobalFood Inc.</a></div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Close Date</div><div class="rec-meta-val">30/6/2026</div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Record Type</div><div class="rec-meta-val">Private Label</div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Opportunity Owner</div><div class="rec-meta-val"><a href="#">Chittaranjan Sahu</a></div></div>
+    </div>
+    <div class="stage-path">
+      <div class="stage-item s-active">Briefing</div>
+      <div class="stage-item">Development</div>
+      <div class="stage-item">Offering</div>
+      <div class="stage-item">Closed</div>
+      <button class="stage-mark-btn">✓ Mark Stage as Complete</button>
+    </div>
+    <div class="tab-row">
+      <div class="tab-btn active" onclick="switchTab(this,'opp-details','opp-related','opp-npdtasks')">Details</div>
+      <div class="tab-btn" onclick="switchTab(this,'opp-related','opp-details','opp-npdtasks')">Related</div>
+      <div class="tab-btn" onclick="switchTab(this,'opp-npdtasks','opp-details','opp-related')">NPD Tasks</div>
+    </div>
+  </div>
+  <div class="content-with-sidebar">
+    <div class="content-col">
+      <div id="opp-details">
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Opportunity Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Opportunity Name</div><div class="f-val">OPP-2024-0126-GLOBALFOOD-CPC</div></div>
+            <div class="f-row"><div class="f-lbl">Customer's Business Type</div><div class="f-val">New Business</div></div>
+            <div class="f-row"><div class="f-lbl">Private Label Business</div><div class="f-val">CPC</div></div>
+            <div class="f-row"><div class="f-lbl">Product Platform (2.0)</div><div class="f-val">Food and Beverage Solutions</div></div>
+            <div class="f-row"><div class="f-lbl">Customer Contact</div><div class="f-val"><a href="#">James Carter</a></div></div>
+            <div class="f-row"><div class="f-lbl">Primary Business Driver</div><div class="f-val">Regulatory/Compliance</div></div>
+            <div class="f-row"><div class="f-lbl">Sales Channel</div><div class="f-val">Private Label – Retail</div></div>
+            <div class="f-row"><div class="f-lbl">Close Date</div><div class="f-val">30/6/2026</div></div>
+            <div class="f-row"><div class="f-lbl">Payment Terms</div><div class="f-val">0002 – 14 days 2%, 30 net</div></div>
+            <div class="f-row"><div class="f-lbl">Region of Project</div><div class="f-val">NORTH AMERICA</div></div>
+            <div class="f-row"><div class="f-lbl">Opportunity Currency</div><div class="f-val">USD – U.S. Dollar</div></div>
+            <div class="f-row"><div class="f-lbl">Unit of Measure (UoM)</div><div class="f-val">KG – Kilogram</div></div>
+            <div class="f-row"><div class="f-lbl">BID/Tender/RFP</div><div class="f-val">Yes</div></div>
+            <div class="f-row"><div class="f-lbl">RFP Platform</div><div class="f-val">Ariba</div></div>
+            <div class="f-row"><div class="f-lbl">Stage</div><div class="f-val">Briefing</div></div>
+            <div class="f-row"><div class="f-lbl">Account Name</div><div class="f-val"><a href="#" onclick="switchScreen('account');return false">GlobalFood Inc.</a></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="opp-related" style="display:none">
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#B45309">📦</div><div class="rel-title">Products <span style="font-weight:400;color:var(--text-secondary)">(2)</span></div></div>
+          <table class="dtable"><thead><tr><th>Product</th><th>Line Description</th><th>Raw Material Code</th><th>Packaging Code</th></tr></thead><tbody>
+            <tr><td><a href="#">GF-CPC Product A</a></td><td>Instant Coffee Powder – Dark Roast</td><td>RM-CF-4001</td><td>PK-221</td></tr>
+            <tr><td><a href="#">GF-CPC Product B</a></td><td>Chocolate Chips – Semi Sweet</td><td>RM-CC-4002</td><td>PK-1021</td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#0369A1">👥</div><div class="rel-title">Opportunity Team <span style="font-weight:400;color:var(--text-secondary)">(6+)</span></div></div>
+          <table class="dtable"><thead><tr><th>Team Member</th><th>Member Role</th></tr></thead><tbody>
+            <tr><td><a href="#">Erica Morales</a></td><td>Commercialization</td></tr>
+            <tr><td><a href="#">Shayna Wagner</a></td><td>Commercialization</td></tr>
+            <tr><td><a href="#">Ashley Ho</a></td><td>Sales Manager</td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#1A3C2E">📁</div><div class="rel-title">Projects <span style="font-weight:400;color:var(--text-secondary)">(2)</span></div><div class="rel-actions"><button class="btn-p" onclick="switchScreen('initiate')" style="font-size:11px;padding:4px 10px">Initiate NPD</button></div></div>
+          <table class="dtable"><thead><tr><th>Project Name</th><th>Project Description</th><th>Project Type</th><th>Project Sub Type</th></tr></thead><tbody>
+            <tr><td><a href="#" onclick="switchScreen('project');return false">OPP-2024-0126-GLOBALFOOD-Instant Coffee Powder</a></td><td>Instant Coffee Powder – Dark Roast</td><td>Customer Project</td><td>Develop</td></tr>
+            <tr><td><a href="#" onclick="switchScreen('project');return false">OPP-2024-0126-GLOBALFOOD-Chocolate Chips</a></td><td>Chocolate Chips – Semi Sweet</td><td>Customer Project</td><td>Develop</td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#52B788">📈</div><div class="rel-title">Stage History <span style="font-weight:400;color:var(--text-secondary)">(2)</span></div></div>
+          <table class="dtable"><thead><tr><th>Stage</th><th>Amount</th><th>Probability</th><th>Close Date</th><th>Last Modified By</th><th>Last Modified</th></tr></thead><tbody>
+            <tr><td>Briefing</td><td>USD 5.50</td><td>10%</td><td>30/6/2026</td><td>Chittaranjan Sahu</td><td>10/4/2026, 5:34 pm</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div id="opp-npdtasks" style="display:none">
+        <div style="padding:12px 14px">
+          <table class="dtable" style="border:1px solid var(--border);border-radius:5px;overflow:hidden">
+            <thead><tr><th>Task Name</th><th>NPD Project</th><th>Assignee</th><th>Team</th><th>Due Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Create NPD</td><td><a href="#">NPD-00821</a></td><td>Maria Zarate</td><td><span class="badge b-green">Innovation</span></td><td class="task-due ov">3/9/2025</td><td><span class="badge b-orange">Holding</span></td></tr>
+              <tr><td>Cross-Functional Feasibility Assessment</td><td><a href="#">NPD-00821</a></td><td>Erica Morales</td><td><span class="badge b-blue">Quality &amp; FS</span></td><td class="task-due ov">9/9/2025</td><td><span class="badge b-orange">Holding</span></td></tr>
+              <tr><td>Develop ingredient / Formula Process</td><td><a href="#">NPD-00821</a></td><td>Erica Morales</td><td><span class="badge b-green">Innovation</span></td><td class="task-due ov">30/9/2025</td><td><span class="badge b-orange">Holding</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="right-sidebar">
+      <div class="rsb-tabs"><div class="rsb-tab active">Activity</div><div class="rsb-tab">Chatter</div></div>
+      <div class="rsb-body"><div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:20px">No activities to show.</div><div style="text-align:center"><button class="btn-p" style="font-size:11.5px">Show All Activities</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN: PROJECT -->
+<!-- ================================================================ -->
+<div id="screen-project" class="screen">
+  <div class="rec-header">
+    <div class="rec-type-row">
+      <div class="rec-type-label">📁 Project</div>
+      <div class="rec-actions"><button class="btn-s">Edit</button><button class="btn-p" onclick="switchScreen('initiate')">Initiate NPD</button></div>
+    </div>
+    <div class="rec-name">OPP-2024-0126-GLOBALFOOD – Instant Coffee Powder – Dark Roast-CPC</div>
+    <div class="rec-meta">
+      <div class="rec-meta-item"><div class="rec-meta-label">Project Type</div><div class="rec-meta-val">Customer Project</div></div>
+      <div class="rec-meta-item"><div class="rec-meta-label">Project Status</div><div class="rec-meta-val">Ideation</div></div>
+    </div>
+    <div class="stage-path">
+      <div class="stage-item s-active">Ideation</div>
+      <div class="stage-item">Feasibility</div>
+      <div class="stage-item">Development</div>
+      <div class="stage-item">Commercialization</div>
+      <div class="stage-item">Launch</div>
+      <div class="stage-item">Post Launch</div>
+      <div class="stage-item">Closed</div>
+      <button class="stage-mark-btn">✓ Mark Project Status as Complete</button>
+    </div>
+    <div class="tab-row">
+      <div class="tab-btn active" onclick="switchTab(this,'proj-details','proj-related')">Details</div>
+      <div class="tab-btn" onclick="switchTab(this,'proj-related','proj-details')">Related</div>
+    </div>
+  </div>
+  <div class="content-with-sidebar">
+    <div class="content-col">
+      <div id="proj-details">
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Project Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Opportunity</div><div class="f-val"><a href="#" onclick="switchScreen('opportunity');return false">OPP-2024-0126-GLOBALFOOD-CPC</a></div></div>
+            <div class="f-row"><div class="f-lbl">Owner</div><div class="f-val"><a href="#">Chittaranjan Sahu</a></div></div>
+            <div class="f-row"><div class="f-lbl">Project Type</div><div class="f-val">Customer Project</div></div>
+            <div class="f-row"><div class="f-lbl">Project Sub Type</div><div class="f-val">Develop</div></div>
+            <div class="f-row"><div class="f-lbl">Project Description</div><div class="f-val">Instant Coffee Powder – Dark Roast</div></div>
+            <div class="f-row"><div class="f-lbl">Currency</div><div class="f-val">USD – U.S. Dollar</div></div>
+            <div class="f-row"><div class="f-lbl">Potential Volume</div><div class="f-val">60,000.00</div></div>
+            <div class="f-row"><div class="f-lbl">Private Label Business</div><div class="f-val">CPC</div></div>
+            <div class="f-row"><div class="f-lbl">TaskRay Template</div><div class="f-val">Flow 2 – Only Commercialize</div></div>
+            <div class="f-row"><div class="f-lbl">Target Launch Date</div><div class="f-val">20/6/2026</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">NPD Details</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Incremental Revenue</div><div class="f-val">✅</div></div>
+            <div class="f-row"><div class="f-lbl">Innovation Team</div><div class="f-val">IEC</div></div>
+            <div class="f-row"><div class="f-lbl">Projected Revenue</div><div class="f-val">USD 204,000.00</div></div>
+            <div class="f-row"><div class="f-lbl">Target Retail Margin</div><div class="f-val">30.00%</div></div>
+            <div class="f-row"><div class="f-lbl">Target Retail Price</div><div class="f-val">USD 5.99</div></div>
+            <div class="f-row"><div class="f-lbl">Seasonality</div><div class="f-val">Everyday Item</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Shipment Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Shipping Country</div><div class="f-val">USA</div></div>
+            <div class="f-row"><div class="f-lbl">Shipping City</div><div class="f-val">Chicago</div></div>
+            <div class="f-row"><div class="f-lbl">Sample Location</div><div class="f-val">NORTH AMERICA</div></div>
+            <div class="f-row"><div class="f-lbl">Shipping Street</div><div class="f-val">123 Food Corp Drive</div></div>
+          </div>
+        </div>
+      </div>
+      <div id="proj-related" style="display:none">
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#0F766E">🧪</div><div class="rel-title">NPDs <span style="font-weight:400;color:var(--text-secondary)">(1)</span></div><div class="rel-actions"><button class="btn-s" style="font-size:11px;padding:4px 8px">New</button></div></div>
+          <table class="dtable"><thead><tr><th>☐</th><th>Project Name</th></tr></thead><tbody>
+            <tr><td>☐</td><td><a href="#" onclick="switchScreen('npd');return false">OPP-2024-0126-GLOBALFOOD-Instant Coffee Powder – Dark Roast-CPC</a></td></tr>
+          </tbody></table>
+        </div>
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#52B788">📅</div><div class="rel-title">Project History <span style="font-weight:400;color:var(--text-secondary)">(1)</span></div></div>
+          <table class="dtable"><thead><tr><th>Date</th><th>Field</th><th>User</th></tr></thead><tbody>
+            <tr><td>10/4/2026, 1:53 pm</td><td>Created.</td><td><a href="#">Chittaranjan Sahu</a></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="right-sidebar">
+      <div class="rsb-tabs"><div class="rsb-tab active">Activity</div><div class="rsb-tab">Chatter</div></div>
+      <div class="rsb-body"><div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:20px">No activities.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN: NPD -->
+<!-- ================================================================ -->
+<div id="screen-npd" class="screen">
+  <div class="rec-header">
+    <div class="rec-type-row">
+      <div class="rec-type-label">🧪 NPD</div>
+      <div class="rec-actions">
+        <button class="btn-approve" id="submit-approval-btn" onclick="openApprovalModal()">✅ Submit for Approval</button>
+        <button class="btn-s">TaskRay Template Change</button>
+        <button class="btn-s">Close NPD ▾</button>
+      </div>
+    </div>
+    <div class="rec-name">NPD-00821 – Turkey Gravy Mix 0.87oz</div>
+    <div class="npd-subbar">
+      <div class="nsb-item"><div class="nsb-lbl">Record Type</div><div class="nsb-val">Customer</div></div>
+      <div class="nsb-item"><div class="nsb-lbl">TaskRay Template</div><div class="nsb-val">Flow 1 – Full NPD (NORTH AMERICA / Spice)</div></div>
+      <div class="nsb-item"><div class="nsb-lbl">Label</div><div class="nsb-val">Private Label</div></div>
+      <div class="nsb-item"><div class="nsb-lbl">Innovation Team</div><div class="nsb-val">Private Label</div></div>
+      <div class="nsb-item"><div class="nsb-lbl">Target Launch Date</div><div class="nsb-val">1/10/2026</div></div>
+      <div class="nsb-item"><div class="nsb-lbl">Owner</div><div class="nsb-val"><a href="#" style="color:var(--text-link)">Maria Zarate</a></div></div>
+    </div>
+    <div class="stage-path" id="npd-stage-path">
+      <div class="stage-item s-active" id="npd-stage-0">Ideation</div>
+      <div class="stage-item" id="npd-stage-1">Feasibility</div>
+      <div class="stage-item" id="npd-stage-2">Development</div>
+      <div class="stage-item" id="npd-stage-3">Commercialization</div>
+      <div class="stage-item" id="npd-stage-4">Launch</div>
+      <div class="stage-item" id="npd-stage-5">Post Launch</div>
+      <div class="stage-item" id="npd-stage-6">Closed</div>
+    </div>
+    <div class="tab-row">
+      <div class="tab-btn active" onclick="switchNPDTab(this,'npd-details-pane','npd-taskdash-pane','npd-related-pane','npd-materials-pane','npd-history-pane')">Details</div>
+      <div class="tab-btn" onclick="switchNPDTab(this,'npd-taskdash-pane','npd-details-pane','npd-related-pane','npd-materials-pane','npd-history-pane')">Task Dashboard</div>
+      <div class="tab-btn" onclick="switchNPDTab(this,'npd-related-pane','npd-details-pane','npd-taskdash-pane','npd-materials-pane','npd-history-pane')">Related</div>
+      <div class="tab-btn" onclick="switchNPDTab(this,'npd-materials-pane','npd-details-pane','npd-taskdash-pane','npd-related-pane','npd-history-pane')">Materials</div>
+      <div class="tab-btn" onclick="switchNPDTab(this,'npd-history-pane','npd-details-pane','npd-taskdash-pane','npd-related-pane','npd-materials-pane')">History</div>
+    </div>
+  </div>
+  <div class="content-with-sidebar">
+    <div class="content-col">
+      <!-- DETAILS PANE -->
+      <div id="npd-details-pane">
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Opportunity Overview</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">NPD Project ID</div><div class="f-val">NPD-00821</div></div>
+            <div class="f-row"><div class="f-lbl">Record Type</div><div class="f-val">Customer</div></div>
+            <div class="f-row"><div class="f-lbl">Project Name</div><div class="f-val">250815-ALDI INC-Turkey Gravy Mix 0.87oz</div></div>
+            <div class="f-row"><div class="f-lbl">Owner</div><div class="f-val"><a href="#">Maria Zarate</a></div></div>
+            <div class="f-row"><div class="f-lbl">Opportunity</div><div class="f-val"><a href="#" onclick="switchScreen('opportunity');return false">250815-ALDI INC-Olde Thompson-Gravy Mix</a></div></div>
+            <div class="f-row"><div class="f-lbl">Customer</div><div class="f-val"><a href="#" onclick="switchScreen('account');return false">GlobalFood Inc.</a></div></div>
+            <div class="f-row"><div class="f-lbl">Unit of Measurement</div><div class="f-val">OZ – Ounces</div></div>
+            <div class="f-row"><div class="f-lbl">Projected Revenue</div><div class="f-val">USD 272,160.00</div></div>
+            <div class="f-row"><div class="f-lbl">Sales Channel</div><div class="f-val">Private Label – Retail</div></div>
+            <div class="f-row"><div class="f-lbl">Seasonality</div><div class="f-val"><span class="badge b-orange">Limited Time Offering</span></div></div>
+            <div class="f-row"><div class="f-lbl">Region</div><div class="f-val">NORTH AMERICA</div></div>
+            <div class="f-row"><div class="f-lbl">Potential Volume</div><div class="f-val">1,344,000.00</div></div>
+            <div class="f-row"><div class="f-lbl">Label</div><div class="f-val">Private Label</div></div>
+            <div class="f-row"><div class="f-lbl">Private Label Business Unit</div><div class="f-val">CPC</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Timeline</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Project Start Date</div><div class="f-val">3/9/2025</div></div>
+            <div class="f-row"><div class="f-lbl">Target Launch Date</div><div class="f-val">1/10/2026</div></div>
+            <div class="f-row"><div class="f-lbl">Project Created Date</div><div class="f-val">3/9/2025</div></div>
+            <div class="f-row"><div class="f-lbl">Innovation Team</div><div class="f-val">Private Label</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Stage Gate Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Status</div><div class="f-val">Ideation</div></div>
+            <div class="f-row"><div class="f-lbl">Project Manager</div><div class="f-val"><a href="#">John Carney</a></div></div>
+            <div class="f-row"><div class="f-lbl">Approval Status</div><div class="f-val"><span class="f-empty">—</span></div></div>
+            <div class="f-row"><div class="f-lbl">Is Capex Needed</div><div class="f-val"><span class="f-empty">—</span></div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Pricing Input</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Target Retail Price</div><div class="f-val">USD 0.45</div></div>
+            <div class="f-row"><div class="f-lbl">Sales Price Per Unit</div><div class="f-val">USD 0.20</div></div>
+            <div class="f-row"><div class="f-lbl">Target Retail Margin</div><div class="f-val">0.55%</div></div>
+            <div class="f-row"><div class="f-lbl">Annual Volume (Cases)</div><div class="f-val">14,000</div></div>
+            <div class="f-row"><div class="f-lbl">Target GFIC Margin</div><div class="f-val">0.15%</div></div>
+            <div class="f-row"><div class="f-lbl">Annual Volume (Units)</div><div class="f-val">1,344,000</div></div>
+            <div class="f-row"><div class="f-lbl">Payment Terms</div><div class="f-val"><span class="f-empty">—</span></div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Product Details</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Item Description</div><div class="f-val">Turkey Gravy Mix 0.87oz – winter seasonal program for ALDI</div></div>
+            <div class="f-row"><div class="f-lbl">Target Net Weight</div><div class="f-val">0.87</div></div>
+            <div class="f-row"><div class="f-lbl">Case Pack</div><div class="f-val">96</div></div>
+            <div class="f-row"><div class="f-lbl">Graphics Change Cutover</div><div class="f-val">Not Applicable</div></div>
+            <div class="f-row"><div class="f-lbl">Planned Certification</div><div class="f-val">No MSG</div></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Opportunity Product Information</span></div>
+          <div class="field-grid">
+            <div class="f-row"><div class="f-lbl">Size of Prize</div><div class="f-val">45,000.00</div></div>
+            <div class="f-row"><div class="f-lbl">Minimum Order Quantity</div><div class="f-val">5,000</div></div>
+            <div class="f-row"><div class="f-lbl">Internal Code</div><div class="f-val">GF-PL-30021</div></div>
+            <div class="f-row"><div class="f-lbl">Customer External Code</div><div class="f-val">GF-TGM-001</div></div>
+            <div class="f-row"><div class="f-lbl">Plant</div><div class="f-val"><a href="#">1888 – ECDC Warehouse</a></div></div>
+          </div>
+        </div>
+      </div>
+      <!-- TASK DASHBOARD PANE -->
+      <div id="npd-taskdash-pane" style="display:none">
+        <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:13px;font-weight:700">Task Dashboard — Flow 1: Full NPD (NA / Spice)</div>
+            <div id="task-summary-line" style="font-size:12px;color:var(--text-secondary);margin-top:2px">23 tasks total · 0 complete · 22 overdue</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">Current Stage: <strong id="current-stage-label">Ideation</strong></div>
+        </div>
+        <div id="task-dashboard-content"></div>
+      </div>
+      <!-- RELATED -->
+      <div id="npd-related-pane" style="display:none">
+        <div class="rel-card">
+          <div class="rel-hd"><div class="rel-icon" style="background:#DC2626">📋</div><div class="rel-title">Approval History <span style="font-weight:400;color:var(--text-secondary)">(0)</span></div></div>
+          <div style="padding:12px;font-size:12px;color:var(--text-secondary)">No approval history.</div>
+        </div>
+      </div>
+      <div id="npd-materials-pane" style="display:none"><div style="padding:24px;text-align:center;color:var(--text-secondary)">No materials added yet.</div></div>
+      <div id="npd-history-pane" style="display:none">
+        <div class="sec-card">
+          <div class="sec-card-hd"><span>▼</span><span class="sec-card-title">Field History</span></div>
+          <table class="dtable"><thead><tr><th>Date</th><th>Field</th><th>User</th></tr></thead><tbody>
+            <tr><td>3/9/2025, 9:00 am</td><td>Created</td><td><a href="#">Maria Zarate</a></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="right-sidebar">
+      <div class="rsb-tabs">
+        <div class="rsb-tab" onclick="switchRsbTab(this,'rsb-activity','rsb-chatter','rsb-taskdetails')">Activity</div>
+        <div class="rsb-tab" onclick="switchRsbTab(this,'rsb-chatter','rsb-activity','rsb-taskdetails')">Chatter</div>
+        <div class="rsb-tab active" onclick="switchRsbTab(this,'rsb-taskdetails','rsb-activity','rsb-chatter')">Task Details</div>
+      </div>
+      <div id="rsb-activity" class="rsb-body" style="display:none"><div style="font-size:12px;color:var(--text-secondary);padding:16px;text-align:center">No activities.</div></div>
+      <div id="rsb-chatter" class="rsb-body" style="display:none"><div style="font-size:12px;color:var(--text-secondary);padding:16px;text-align:center">No chatter posts.</div></div>
+      <div id="rsb-taskdetails" class="rsb-body">
+        <!-- Snapshot -->
+        <div class="tr-section">
+          <div class="tr-sec-hd">TaskRay Snapshot (1) <span style="color:var(--accent)">✎</span></div>
+          <div class="tr-sec-body">
+            <div class="tr-link">Turkey Gravy Mix 0.87oz</div>
+            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:5px">Task Groups</div>
+            <select style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px;font-size:11.5px;font-family:var(--font)"><option>Show All</option></select>
+          </div>
+        </div>
+        <!-- Task Overview -->
+        <div class="tr-section">
+          <div class="tr-sec-hd"><span>TASK OVERVIEW</span><span style="font-size:11px;color:var(--text-secondary)">INFO</span></div>
+          <div class="tr-sec-body">
+            <div class="donut-wrap">
+              <svg class="donut-svg" width="58" height="58" viewBox="0 0 58 58">
+                <circle cx="29" cy="29" r="22" fill="none" stroke="#E5E7EB" stroke-width="10"/>
+                <circle id="donut-arc" cx="29" cy="29" r="22" fill="none" stroke="#7C1461" stroke-width="10" stroke-dasharray="0 138.23" stroke-linecap="round" transform="rotate(-90 29 29)" style="transition:stroke-dasharray 0.4s"/>
+              </svg>
+              <div class="donut-stats-col">
+                <div class="donut-stat"><div class="dsq" style="background:#E5E7EB"></div><span id="rsb-holding-count" style="font-size:12px;font-weight:700">23 Holding</span></div>
+                <div class="donut-stat"><div class="dsq" style="background:#DC2626"></div><span id="rsb-overdue-count" style="color:#DC2626;font-weight:600;font-size:12px">22 overdue</span></div>
+                <div style="margin-top:5px"><span id="rsb-pct-badge" class="badge b-grey">0% complete</span></div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-secondary)">
+              <span>⏱ Estimated Time: — hrs</span><span>⏱ Actual Time: — hrs</span>
+            </div>
+          </div>
+        </div>
+        <!-- Stage Status -->
+        <div class="tr-section">
+          <div class="tr-sec-hd">TaskRay Status (1) <span style="color:var(--accent)">✎</span></div>
+          <div class="tr-sec-body">
+            <div class="tr-link" style="margin-bottom:8px">Turkey Gravy Mix 0.87oz</div>
+            <div id="stage-progress-bars"></div>
+          </div>
+        </div>
+        <!-- To Do -->
+        <div class="tr-section">
+          <div class="tr-sec-hd">TaskRay To Do (1) <span style="color:var(--accent)">✎</span></div>
+          <div class="tr-sec-body" style="padding:6px 8px">
+            <div class="tr-link" style="margin-bottom:6px">Turkey Gravy Mix 0.87oz</div>
+            <div style="font-size:10.5px;font-weight:700;color:var(--text-secondary);padding:4px 0 6px;border-bottom:1px solid var(--border)">HOLDING &nbsp;<span id="rsb-todo-count">23</span></div>
+            <div id="rsb-todo-list" style="max-height:260px;overflow-y:auto;margin-top:4px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN: INITIATE NPD -->
+<!-- ================================================================ -->
+<div id="screen-initiate" class="screen">
+  <div class="rec-header">
+    <div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:3px">Opportunity › OPP-2024-0126-GLOBALFOOD-CPC</div>
+    <div class="rec-name">Initiate New Product Development Request</div>
+  </div>
+  <div class="scroll-content" style="padding:14px">
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:9px 12px;font-size:12px;color:#1D4ED8;margin-bottom:12px">
+      ℹ️ Please ensure all required project data is completed to initiate the NPD process. Save your input, select the NPD requests to start, then click "Initiate NPD".
+    </div>
+    <div class="init-table-wrap">
+      <table class="init-table">
+        <thead><tr>
+          <th>Actions</th><th>Project Description</th><th>* Taskray Template</th><th>Project Status</th><th>isBundle</th><th>Project Name</th><th>* Team Member</th><th>* Target Launch Date</th><th>* Target Retail Price</th><th>* Target Retail Margin</th><th>* Target GFIC Margin</th><th>Sales Price Per Unit</th><th>* Incremental Volume</th><th>* Sales Channel</th><th>* Seasonality</th><th>Annual Volume (Cases)</th><th>* Country Project Developed</th><th>* Innovation Team</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><input class="inline-input" value="Instant Coffee Powder – Dark Roast" style="min-width:155px"></td>
+            <td><select class="inline-sel" style="min-width:175px"><option value="flow2" selected>Flow 2 – Only Commercialize (APAC/Coffee)</option><option value="flow1">Flow 1 – Full NPD (EMEA/Cocoa)</option><option value="flow3">Flow 3 – Sustainability (NA/Spice)</option></select></td>
+            <td><select class="inline-sel" style="min-width:95px"><option>Ideation</option></select></td>
+            <td style="text-align:center"><input type="checkbox"></td>
+            <td><input class="inline-input" value="OPP-2024-0126-GLOBALFOOD-Instant Cof..." style="min-width:200px" readonly></td>
+            <td><input class="inline-input" value="Chittaranjan Sahu" style="min-width:130px"></td>
+            <td><input class="inline-input" type="date" value="2026-06-20" style="min-width:125px"></td>
+            <td><input class="inline-input" value="5.99" style="min-width:75px"></td>
+            <td><input class="inline-input" value="30" style="min-width:75px"></td>
+            <td><input class="inline-input" value="18" style="min-width:75px"></td>
+            <td><input class="inline-input" value="3.40" style="min-width:75px"></td>
+            <td><input class="inline-input" value="60000" style="min-width:80px"></td>
+            <td><select class="inline-sel" style="min-width:135px"><option>Private Label – Retail</option></select></td>
+            <td><select class="inline-sel" style="min-width:120px"><option>Everyday Item</option><option>Limited Time Offering</option></select></td>
+            <td><input class="inline-input" value="5000" style="min-width:75px"></td>
+            <td><select class="inline-sel" style="min-width:110px"><option>USA</option><option>Germany</option></select></td>
+            <td><select class="inline-sel" style="min-width:95px"><option>IEC</option><option>Private Label</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><input class="inline-input" value="Chocolate Chips – Semi Sweet" style="min-width:155px"></td>
+            <td><select class="inline-sel" style="min-width:175px"><option value="flow3" selected>Flow 3 – Sustainability (NA/Spice)</option><option value="flow1">Flow 1 – Full NPD (EMEA/Cocoa)</option><option value="flow2">Flow 2 – Only Commercialize (APAC/Coffee)</option></select></td>
+            <td><select class="inline-sel" style="min-width:95px"><option>Ideation</option></select></td>
+            <td style="text-align:center"><input type="checkbox"></td>
+            <td><input class="inline-input" value="OPP-2024-0126-GLOBALFOOD-Chocolate C..." style="min-width:200px" readonly></td>
+            <td><input class="inline-input" value="Chittaranjan Sahu" style="min-width:130px"></td>
+            <td><input class="inline-input" type="date" value="2027-08-15" style="min-width:125px"></td>
+            <td><input class="inline-input" value="3.49" style="min-width:75px"></td>
+            <td><input class="inline-input" value="25" style="min-width:75px"></td>
+            <td><input class="inline-input" value="15" style="min-width:75px"></td>
+            <td><input class="inline-input" value="2.10" style="min-width:75px"></td>
+            <td><input class="inline-input" value="0" style="min-width:80px"></td>
+            <td><select class="inline-sel" style="min-width:135px"><option>Private Label – Retail</option></select></td>
+            <td><select class="inline-sel" style="min-width:120px"><option>Limited Time Offering</option><option>Everyday Item</option></select></td>
+            <td><input class="inline-input" value="2000" style="min-width:75px"></td>
+            <td><select class="inline-sel" style="min-width:110px"><option>USA</option></select></td>
+            <td><select class="inline-sel" style="min-width:95px"><option>IEC</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+      <div style="display:flex;gap:8px"><button class="btn-p">Save</button><button class="btn-s">Cancel</button></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:12px;color:var(--text-secondary)">Page 1 of 1 &nbsp;·&nbsp; Total Records: 2</div>
+        <button class="btn-s">Previous</button>
+        <button class="btn-p" onclick="document.getElementById('initiate-success').style.display='block';this.disabled=true">Initiate NPD</button>
+      </div>
+    </div>
+    <div id="initiate-success" style="display:none" class="success-banner">
+      <div style="font-size:28px;margin-bottom:6px">🎉</div>
+      <div style="font-size:14px;font-weight:700;color:#15803D">Your request to initiate NPD has been submitted successfully.</div>
+      <div style="font-size:12.5px;color:#166534;margin-top:4px">Kindly note that this request will be processed in the background and it may take up to 5 minutes to complete.</div>
+      <button class="btn-s" style="margin-top:10px" onclick="switchScreen('opportunity')">Exit</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-area -->
+</div><!-- end app-body -->
+
+<!-- ================================================================ -->
+<!-- WIZARD MODAL -->
+<!-- ================================================================ -->
+<div id="wizard-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">New Opportunity — GlobalFood Inc.</div><button class="modal-close" onclick="closeWizard()">×</button></div>
+    <div class="modal-body">
+      <div class="wiz-steps">
+        <div class="wiz-step"><div><div class="wiz-circle current" id="wc1">1</div><div class="wiz-connector"></div></div><div class="wiz-lbl current" id="wl1">Opportunity Details</div></div>
+        <div class="wiz-step"><div><div class="wiz-circle pending" id="wc2">2</div><div class="wiz-connector"></div></div><div class="wiz-lbl" id="wl2">Product Specification</div></div>
+        <div class="wiz-step"><div><div class="wiz-circle pending" id="wc3">3</div></div><div class="wiz-lbl" id="wl3">Product Project Data</div></div>
+      </div>
+      <div class="wiz-content">
+        <div id="ws1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:14px">Opportunity Details</div>
+          <div class="form-grid">
+            <div class="form-field" style="position:relative">
+              <label class="form-lbl">Customer Contact <span class="req">*</span></label>
+              <div style="position:relative">
+                <input class="form-input" id="contact-lookup-input" placeholder="Search contacts..." autocomplete="off" oninput="filterContacts(this.value)" onfocus="showContactDropdown()" style="padding-right:28px">
+                <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:12px;pointer-events:none">🔍</span>
+              </div>
+              <div id="contact-lookup-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--border);border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.12);z-index:500;max-height:180px;overflow-y:auto;margin-top:2px">
+                <div style="padding:5px 10px;font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;border-bottom:1px solid var(--border);background:#F8F9FA">Recent &amp; Matching Contacts</div>
+                <div id="contact-lookup-list"></div>
+              </div>
+            </div>
+            <div class="form-field"><label class="form-lbl">Close Date <span class="req">*</span></label><input class="form-input" type="date" value="2026-06-30"></div>
+            <div class="form-field"><label class="form-lbl">Customer Business Type <span class="req">*</span></label><select class="form-sel"><option>New Business</option><option>Existing Business</option></select></div>
+            <div class="form-field"><label class="form-lbl">Private Label Business <span class="req">*</span></label><select class="form-sel"><option>CPC</option><option>Olde Thompson</option><option>Club Coffee</option></select></div>
+            <div class="form-field"><label class="form-lbl">Primary Business Driver <span class="req">*</span></label><select class="form-sel"><option>Growth</option><option>Regulatory/Compliance</option><option>Innovation</option></select></div>
+            <div class="form-field"><label class="form-lbl">Sales Channel <span class="req">*</span></label><select class="form-sel"><option>Private Label – Retail</option><option>Food Service</option></select></div>
+            <div class="form-field"><label class="form-lbl">Region of Project <span class="req">*</span></label><select class="form-sel"><option>NORTH AMERICA</option><option>EMEA</option><option>APAC</option><option>MENATI</option></select></div>
+            <div class="form-field"><label class="form-lbl">Payment Terms</label><select class="form-sel"><option>0002 – 14 days 2%, 30 net</option><option>0004 – as of end of month</option></select></div>
+            <div class="form-field"><label class="form-lbl">Opportunity Currency <span class="req">*</span></label><select class="form-sel"><option>U.S. Dollar</option><option>Euro</option></select></div>
+            <div class="form-field"><label class="form-lbl">Estimated Revenue</label><input class="form-input" placeholder="e.g. 45000"></div>
+            <div class="form-field"><label class="form-lbl">Unit of Measure</label><select class="form-sel"><option>KG – Kilogram</option><option>MT – Metric Ton</option><option>OZ – Ounces</option></select></div>
+            <div class="form-field"><label class="form-lbl">Is this a Bid/Tender/RFP? <span class="req">*</span></label><select class="form-sel"><option>Yes</option><option>No</option></select></div>
+            <div class="form-field full"><label class="form-lbl">Strategic Importance</label><textarea class="form-ta" placeholder="Describe strategic importance..."></textarea></div>
+            <div class="form-field full"><label class="form-lbl">Description of Opportunity <span class="req">*</span></label><textarea class="form-ta" placeholder="Describe the opportunity..."></textarea></div>
+          </div>
+        </div>
+        <div id="ws2" style="display:none">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">Product Specification</div>
+          <div class="info-banner">ℹ️ Select existing products from the catalog below, or import new products via the Excel template to trigger NPD.</div>
+
+          <!-- EXISTING PRODUCT CATALOG -->
+          <div style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="background:#7C1461;color:white;border-radius:3px;padding:2px 7px;font-size:11px">Existing SKUs</span>
+                <span style="font-size:12.5px;font-weight:600">Select products from the catalog</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="text" id="sku-search" placeholder="Search catalog..." oninput="filterCatalog(this.value)" style="border:1px solid var(--border);border-radius:4px;padding:5px 9px;font-size:12px;font-family:var(--font);width:200px">
+                <span id="sku-selected-count" style="font-size:11.5px;color:var(--text-secondary)">0 selected</span>
+              </div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:5px;overflow:hidden">
+              <table class="pgrid" id="catalog-table">
+                <thead><tr><th><input type="checkbox" id="catalog-select-all" onchange="toggleAllCatalog(this)"></th><th>Product Description</th><th>Product Category</th><th>Product Platform</th><th>Internal Code</th><th>Ext. Customer Code</th><th>Unit Packaging</th><th>UoM</th></tr></thead>
+                <tbody id="catalog-tbody">
+                  <tr data-desc="Instant Coffee Powder – Dark Roast"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Instant Coffee Powder – Dark Roast</td><td>Coffee</td><td>F&amp;B Solutions</td><td>GF-CP-001</td><td>—</td><td>25kg Bag</td><td>KG</td></tr>
+                  <tr data-desc="Chocolate Chips – Semi Sweet"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Chocolate Chips – Semi Sweet</td><td>Cocoa</td><td>F&amp;B Solutions</td><td>GF-CH-214</td><td>—</td><td>10kg Bag</td><td>KG</td></tr>
+                  <tr data-desc="Cocoa Powder – Natural Process"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Cocoa Powder – Natural Process</td><td>Cocoa</td><td>F&amp;B Solutions</td><td>GF-CP-089</td><td>—</td><td>25kg Bag</td><td>KG</td></tr>
+                  <tr data-desc="Turkey Gravy Mix 0.87oz"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Turkey Gravy Mix 0.87oz</td><td>Spice &amp; Seasoning</td><td>Spices</td><td>GF-TG-307</td><td>GF-EXT-307</td><td>0.87oz Pack</td><td>OZ</td></tr>
+                  <tr data-desc="Black Pepper Ground 100g"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Black Pepper Ground 100g</td><td>Spice &amp; Seasoning</td><td>Spices</td><td>GF-BP-112</td><td>—</td><td>100g Can</td><td>G</td></tr>
+                  <tr data-desc="Vanilla Extract Pure 4oz"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Vanilla Extract Pure 4oz</td><td>Bakery</td><td>F&amp;B Solutions</td><td>GF-VE-203</td><td>GF-EXT-203</td><td>4oz Bottle</td><td>OZ</td></tr>
+                  <tr data-desc="Organic Cinnamon Sticks 2oz"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Organic Cinnamon Sticks 2oz</td><td>Spice &amp; Seasoning</td><td>Spices</td><td>GF-CS-418</td><td>—</td><td>2oz Pack</td><td>OZ</td></tr>
+                  <tr data-desc="Cocoa Low Fat Powder Premium"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Cocoa Low Fat Powder Premium</td><td>Cocoa</td><td>F&amp;B Solutions</td><td>GF-CL-501</td><td>AE0002</td><td>25kg Bag</td><td>KG</td></tr>
+                  <tr data-desc="Seasoned Cashews 6 SKU Pack"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Seasoned Cashews 6 SKU Pack</td><td>Snacks</td><td>Edible Nuts</td><td>GF-SC-622</td><td>GF-EXT-622</td><td>Retail Box</td><td>G</td></tr>
+                  <tr data-desc="Hazelnut Spread 400g"><td><input type="checkbox" class="catalog-cb" onchange="updateSkuCount()"></td><td>Hazelnut Spread 400g</td><td>Spreads</td><td>F&amp;B Solutions</td><td>GF-HS-710</td><td>—</td><td>400g Jar</td><td>G</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- NEW PRODUCTS VIA UPLOAD -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="background:#B45309;color:white;border-radius:3px;padding:2px 7px;font-size:11px">New Products</span>
+                <span style="font-size:12.5px;font-weight:600">Upload new product specs (triggers NPD)</span>
+              </div>
+              <button class="btn-p" style="font-size:11.5px" onclick="openUploadModal()">⬆ Import from Excel</button>
+            </div>
+            <!-- Empty state — shown before upload -->
+            <div id="new-products-empty" style="border:2px dashed var(--border);border-radius:5px;padding:28px;text-align:center;color:var(--text-secondary)">
+              <div style="font-size:22px;margin-bottom:6px">📋</div>
+              <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">No new products added yet</div>
+              <div style="font-size:11.5px">Download the template, fill in your product data, then import it above to populate this table.</div>
+            </div>
+            <!-- Populated table — shown after upload -->
+            <div id="new-products-table" style="display:none;overflow-x:auto;border:1px solid var(--border);border-radius:5px">
+              <table class="pgrid" style="min-width:2200px">
+                <thead><tr>
+                  <th>☐</th>
+                  <th>* Product Description</th>
+                  <th>Recipe</th>
+                  <th>Ofi Internal Code</th>
+                  <th>External Customer Code</th>
+                  <th>Packaging Number</th>
+                  <th>Cap Number</th>
+                  <th>Box/Tray Material #</th>
+                  <th>RM &amp; Pkg Combo #</th>
+                  <th>Target Net Weight</th>
+                  <th>UOM</th>
+                  <th>MOQ</th>
+                  <th>Plant</th>
+                  <th>Case Pack</th>
+                  <th>Secondary Packaging</th>
+                  <th>Pallet Requirements</th>
+                  <th>Certification/Claims</th>
+                  <th>Annual Vol (Cases)</th>
+                  <th>Annual Vol (Units)</th>
+                  <th>Limited Time Offer</th>
+                  <th>Incremental Revenue</th>
+                  <th>Target Retail Price</th>
+                  <th>Sales Price/Unit</th>
+                  <th>Size of Prize</th>
+                  <th>Competitor Brand</th>
+                  <th>Project Type</th>
+                  <th>PL/ofi Brand/Copacker</th>
+                  <th>Graphic Change Cutover</th>
+                  <th>Target Retail Margin</th>
+                  <th>Target ofi Margin</th>
+                  <th>Target Launch Date</th>
+                  <th>Team Member Email</th>
+                </tr></thead>
+                <tbody id="new-products-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="ws3" style="display:none">
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px">Product Project Data</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">These details auto-create Projects and trigger the NPD process.</div>
+          <div style="background:#F8F9FA;border:1px solid var(--border);border-radius:5px;padding:12px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+            <div class="form-field" style="flex:1;min-width:120px"><label class="form-lbl">PL / Brand / Copacker</label><input class="form-input" placeholder="Private Label"></div>
+            <div class="form-field" style="flex:1;min-width:120px"><label class="form-lbl">Graphic Change Cutover</label><select class="form-sel"><option>Soft Transition</option><option>Hard Transition</option></select></div>
+            <div class="form-field" style="flex:1;min-width:100px"><label class="form-lbl">Target Retail Margin %</label><input class="form-input" placeholder="30"></div>
+            <div class="form-field" style="flex:1;min-width:100px"><label class="form-lbl">Target GFIC Margin %</label><input class="form-input" placeholder="18"></div>
+            <div class="form-field" style="flex:1;min-width:100px"><label class="form-lbl">Team Member</label><input class="form-input" placeholder="Search Users..."></div>
+            <div class="form-field" style="flex:1;min-width:120px"><label class="form-lbl">Country Project Developed</label><select class="form-sel"><option>USA</option><option>Germany</option></select></div>
+            <div class="form-field" style="flex:1;min-width:100px"><label class="form-lbl">Innovation Team</label><select class="form-sel"><option>IEC</option><option>Private Label</option></select></div>
+            <button class="btn-p" style="flex-shrink:0">Update</button>
+          </div>
+          <table class="pgrid"><thead><tr><th>☐</th><th>Description</th><th>Internal Code</th><th>isBundle</th><th>PL/Brand</th><th>Graphic Cutover</th><th>Retail Margin %</th><th>GFIC Margin %</th></tr></thead><tbody>
+            <tr><td><input type="checkbox"></td><td>Instant Coffee Powder – Dark Roast</td><td>GF-CP-001</td><td>☐</td><td>GFIC Brand</td><td>Soft Transition</td><td>30</td><td>18</td></tr>
+            <tr><td><input type="checkbox"></td><td>Chocolate Chips – Semi Sweet</td><td>GF-CH-214</td><td>☐</td><td>PL</td><td>Hard Transition</td><td>25</td><td>15</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="wiz-footer">
+      <div style="display:flex;gap:8px"><button class="btn-s">Save and Exit</button><button class="btn-s" onclick="closeWizard()">Cancel</button></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" id="wiz-prev" onclick="wizPrev()" style="display:none">← Previous</button>
+        <button class="btn-p" id="wiz-next" onclick="wizNext()">Add Products →</button>
+        <button class="btn-p" id="wiz-finish" onclick="closeWizard();switchScreen('opportunity')" style="display:none">Finish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div id="upload-modal" class="modal-overlay hidden">
+  <div class="upload-box">
+    <div class="modal-hd"><div class="modal-title">Upload New Products</div><button class="modal-close" onclick="document.getElementById('upload-modal').classList.add('hidden')">×</button></div>
+    <div style="padding:14px">
+      <div class="info-banner" style="margin-bottom:12px">ℹ️ Download the template, fill in your product data, then upload the completed file to add new products to this opportunity.</div>
+      <button class="btn-p" style="margin-bottom:12px" onclick="downloadTemplate()">⬇ Download Excel Template</button>
+      <div id="upload-zone-area" class="upload-zone" onclick="document.getElementById('file-input-hidden').click()">
+        <div style="font-size:26px;margin-bottom:8px">⬆</div>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center"><button class="btn-s" style="font-size:12px" onclick="event.stopPropagation();document.getElementById('file-input-hidden').click()">Upload Files</button><span style="font-size:12.5px;color:var(--text-secondary)">Or drop files here</span></div>
+        <div id="upload-file-name" style="margin-top:8px;font-size:11.5px;color:var(--accent);font-weight:600;display:none"></div>
+      </div>
+      <input type="file" id="file-input-hidden" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileSelect(this)">
+      <div style="text-align:right;margin-top:10px"><button class="btn-s" onclick="document.getElementById('upload-modal').classList.add('hidden')">Cancel</button> <button class="btn-p" id="import-btn" onclick="simulateImport()" style="margin-left:6px">Import</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- APPROVAL MODAL -->
+<div id="approval-modal" class="modal-overlay hidden">
+  <div class="approval-popup">
+    <div class="approval-popup-hd">
+      <div style="font-size:14px;font-weight:700">Submit for Approval</div>
+      <button class="modal-close" onclick="document.getElementById('approval-modal').classList.add('hidden')">×</button>
+    </div>
+    <div id="approval-body" class="approval-popup-body">
+      <div class="approval-stage-badge">✅ <span id="approval-stage-text">Ideation Stage Complete</span></div>
+      <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px">All tasks in the current stage are complete. Select an approver to proceed to the next stage.</div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">Select Approver</div>
+      <div id="approver-list"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+        <button class="btn-s" onclick="document.getElementById('approval-modal').classList.add('hidden')">Cancel</button>
+        <button class="btn-p" id="submit-approval-confirm" onclick="confirmApproval()" style="opacity:0.4;pointer-events:none">Submit for Approval</button>
+      </div>
+    </div>
+    <div id="approval-success-body" style="display:none" class="approval-success">
+      <div class="approval-success-icon">✅</div>
+      <div style="font-size:14px;font-weight:700;color:#15803D;margin-bottom:6px">Approval Submitted!</div>
+      <div id="approval-success-text" style="font-size:12.5px;color:#166534;margin-bottom:12px"></div>
+      <button class="btn-p" onclick="document.getElementById('approval-modal').classList.add('hidden');document.getElementById('approval-success-body').style.display='none';document.getElementById('approval-body').style.display='block'">Close</button>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ===== TASK DATA — 23 TASKS across 6 stages =====
+const STAGES = [
+  { name:'1 – Ideation', dates:'3/9/2025', datee:'3/9/2025' },
+  { name:'2 – Feasibility', dates:'4/9/2025', datee:'9/9/2025' },
+  { name:'3 – Development', dates:'10/9/2025', datee:'13/1/2026' },
+  { name:'4 – Commercialization', dates:'14/1/2026', datee:'20/1/2026' },
+  { name:'5 – Launch', dates:'21/1/2026', datee:'22/1/2026' },
+  { name:'6 – Post Launch', dates:'23/1/2026', datee:'18/8/2026' }
+];
+const TASKS = [
+  // Stage 0 — Ideation (5)
+  { stage:0, name:'Create NPD', assignee:'Maria Zarate', team:'Innovation', due:'3/9/2025', overdue:true },
+  { stage:0, name:'Project Evaluation – Preparation of Stage Gate for project approval', assignee:'Maria Zarate', team:'Innovation', due:'5/9/2025', overdue:true },
+  { stage:0, name:'Cross-Functional Feasibility Assessment & confirm potential manufacturing site', assignee:'Erica Morales', team:'Quality & FS', due:'9/9/2025', overdue:true },
+  { stage:0, name:'Define project scope and innovation team kickoff', assignee:'John Carney', team:'Innovation', due:'9/9/2025', overdue:true },
+  { stage:0, name:'Initial market and competitor analysis', assignee:'Erica Morales', team:'PLM-F&B', due:'9/9/2025', overdue:true },
+  // Stage 1 — Feasibility (4)
+  { stage:1, name:'Cross-functional feasibility review with all teams', assignee:'Erica Morales', team:'Quality & FS', due:'10/9/2025', overdue:true },
+  { stage:1, name:'Confirm potential manufacturing site', assignee:'James Carney', team:'PLM-F&B', due:'12/9/2025', overdue:true },
+  { stage:1, name:'Develop preliminary formula process / solution', assignee:'Maria Zarate', team:'Innovation', due:'15/9/2025', overdue:true },
+  { stage:1, name:'Cost estimation and financial feasibility', assignee:'Erica Morales', team:'PLM-F&B', due:'18/9/2025', overdue:true },
+  // Stage 2 — Development (5)
+  { stage:2, name:'Develop ingredient / Formula Process / Solution', assignee:'Maria Zarate', team:'Innovation', due:'30/9/2025', overdue:true },
+  { stage:2, name:'Oversee Development of packaging solution with Packaging CoE', assignee:'James Carney', team:'Packaging CoE', due:'2/10/2025', overdue:true },
+  { stage:2, name:'Oversee sensory testing', assignee:'James Carney', team:'Quality & FS', due:'13/10/2025', overdue:true },
+  { stage:2, name:'Conduct Pilot Plant Trial', assignee:'Maria Zarate', team:'Innovation', due:'8/12/2025', overdue:true },
+  { stage:2, name:'Perform industrial sample', assignee:'Erica Morales', team:'Innovation', due:'29/12/2025', overdue:true },
+  // Stage 3 — Commercialization (4)
+  { stage:3, name:'Cost calculation and confirm with sale and SCM', assignee:'Erica Morales', team:'PLM-F&B', due:'29/10/2025', overdue:true },
+  { stage:3, name:'Confirm Customer Sample Approval', assignee:'James Carney', team:'Customer', due:'31/10/2025', overdue:true },
+  { stage:3, name:'Preliminary product spec, label design', assignee:'Maria Zarate', team:'Sci & Reg', due:'5/11/2025', overdue:true },
+  { stage:3, name:'Perform Quality Assessment – check RA for application, vendor', assignee:'Erica Morales', team:'Quality & FS', due:'12/11/2025', overdue:true },
+  // Stage 4 — Launch (3)
+  { stage:4, name:'Process Specs/PID', assignee:'James Carney', team:'PLM-F&B', due:'17/11/2025', overdue:true },
+  { stage:4, name:'Final FG Specs – label and packaging', assignee:'Maria Zarate', team:'Packaging CoE', due:'15/1/2026', overdue:true },
+  { stage:4, name:'Customer Approval', assignee:'Erica Morales', team:'Customer', due:'16/1/2026', overdue:true },
+  // Stage 5 — Post Launch (2)
+  { stage:5, name:'Oversee manufacturing shelf life study', assignee:'James Carney', team:'Quality & FS', due:'20/1/2026', overdue:true },
+  { stage:5, name:'Successful Launch confirmation', assignee:'Maria Zarate', team:'Innovation', due:'18/8/2026', overdue:false }
+];
+
+// Track which tasks are checked
+const taskDone = new Array(TASKS.length).fill(false);
+let currentActiveStage = 0;
+
+const TEAM_COLORS = {
+  'Innovation': 'b-green',
+  'Quality & FS': 'b-blue',
+  'PLM-F&B': 'b-purple',
+  'Packaging CoE': 'b-orange',
+  'Sci & Reg': 'b-grey',
+  'Customer': 'b-red'
+};
+
+function getStageTaskIndices(stageIdx) {
+  return TASKS.map((t,i) => t.stage === stageIdx ? i : -1).filter(i => i !== -1);
+}
+function getStageProgress(stageIdx) {
+  const indices = getStageTaskIndices(stageIdx);
+  if (!indices.length) return { done:0, total:0, pct:0 };
+  const done = indices.filter(i => taskDone[i]).length;
+  return { done, total: indices.length, pct: Math.round(done/indices.length*100) };
+}
+function isStageComplete(stageIdx) {
+  const p = getStageProgress(stageIdx);
+  return p.total > 0 && p.done === p.total;
+}
+
+function renderTaskDashboard() {
+  const container = document.getElementById('task-dashboard-content');
+  if (!container) return;
+  let html = '';
+  for (let s = 0; s < 6; s++) {
+    const indices = getStageTaskIndices(s);
+    const prog = getStageProgress(s);
+    const complete = isStageComplete(s);
+    const fillClass = complete ? 'sp-fill' : 'sp-fill';
+    const fillColor = complete ? '#15803D' : '#7C1461';
+    html += `<div class="task-stage-block">
+      <div class="task-stage-hd">
+        <div class="task-stage-title">
+          ${complete ? '✅' : '📌'} ${STAGES[s].name}
+          <span class="badge ${s === currentActiveStage ? 'b-pink' : (complete ? 'b-green' : 'b-grey')}">${s === currentActiveStage ? 'Current Stage' : (complete ? 'Complete' : 'Pending')}</span>
+        </div>
+        <div class="stage-progress-pill">
+          <span class="stage-pct" style="color:${complete ? '#15803D' : '#374151'}">${prog.done}/${prog.total} · ${prog.pct}%</span>
+          <div class="stage-mini-bar"><div style="width:${prog.pct}%;height:100%;background:${fillColor};border-radius:4px;transition:width 0.4s"></div></div>
+          ${complete ? '<span style="font-size:11.5px;font-weight:700;color:#15803D">✅ Stage Complete</span>' : ''}
+        </div>
+      </div>`;
+    indices.forEach(i => {
+      const t = TASKS[i];
+      html += `<div class="task-row">
+        <input type="checkbox" class="task-cb" ${taskDone[i]?'checked':''} onchange="toggleTask(${i},this)" id="tcb-${i}">
+        <div class="task-name ${taskDone[i]?'done':''}" id="tname-${i}">${t.name}</div>
+        <div class="task-assignee">${t.assignee}</div>
+        <div class="task-flat-team"><span class="badge ${TEAM_COLORS[t.team]||'b-grey'}">${t.team}</span></div>
+        <div class="task-due ${t.overdue&&!taskDone[i]?'ov':'ok'}" id="tdue-${i}">${t.due}</div>
+        ${taskDone[i]?'<div class="task-complete-icon">✅</div>':'<div style="width:18px"></div>'}
+      </div>`;
+    });
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function toggleTask(idx, cb) {
+  taskDone[idx] = cb.checked;
+  // Update name styling
+  const nameEl = document.getElementById('tname-'+idx);
+  if (nameEl) nameEl.className = 'task-name'+(taskDone[idx]?' done':'');
+  updateAllProgress();
+}
+
+function updateAllProgress() {
+  // Find current active stage (first incomplete stage)
+  for (let s = 0; s < 6; s++) {
+    if (!isStageComplete(s)) { currentActiveStage = s; break; }
+    if (s === 5 && isStageComplete(5)) currentActiveStage = 6;
+  }
+  document.getElementById('current-stage-label').textContent = currentActiveStage < 6 ? STAGES[currentActiveStage].name : 'All Complete';
+
+  // Re-render task dashboard
+  renderTaskDashboard();
+
+  // Update summary line
+  const doneCount = taskDone.filter(Boolean).length;
+  const overdueCount = TASKS.filter((t,i) => t.overdue && !taskDone[i]).length;
+  document.getElementById('task-summary-line').textContent = `23 tasks total · ${doneCount} complete · ${overdueCount} overdue`;
+
+  // Update sidebar donut
+  const pct = Math.round(doneCount/23*100);
+  const circ = 2*Math.PI*22;
+  const arc = circ * pct / 100;
+  document.getElementById('donut-arc').setAttribute('stroke-dasharray', `${arc} ${circ-arc}`);
+  document.getElementById('rsb-holding-count').textContent = (23-doneCount)+' Holding';
+  document.getElementById('rsb-overdue-count').textContent = overdueCount+' overdue';
+  const badge = document.getElementById('rsb-pct-badge');
+  badge.textContent = pct+'% complete';
+  badge.className = 'badge '+(pct===100?'b-green':'b-grey');
+
+  // Update stage progress bars in sidebar
+  renderStageBars();
+  // Update todo list
+  renderTodoList();
+
+  // Update NPD stage path
+  updateNpdStagePath();
+
+  // Check if current stage is complete — enable submit button
+  const approveBtn = document.getElementById('submit-approval-btn');
+  if (currentActiveStage > 0 || isStageComplete(0)) {
+    approveBtn.classList.add('ready');
+  } else {
+    approveBtn.classList.remove('ready');
+  }
+}
+
+function updateNpdStagePath() {
+  for (let s = 0; s < 7; s++) {
+    const el = document.getElementById('npd-stage-'+s);
+    if (!el) continue;
+    el.className = 'stage-item';
+    if (s < currentActiveStage) el.classList.add('s-done');
+    else if (s === currentActiveStage) el.classList.add('s-active');
+  }
+}
+
+function renderStageBars() {
+  const container = document.getElementById('stage-progress-bars');
+  if (!container) return;
+  const total = getStageProgress(0).total+getStageProgress(1).total+getStageProgress(2).total+getStageProgress(3).total+getStageProgress(4).total+getStageProgress(5).total;
+  const totalDone = taskDone.filter(Boolean).length;
+  const totalPct = Math.round(totalDone/total*100);
+  let html = `<div class="sp-item"><div class="sp-labels"><span class="sp-lbl">3/9/2025</span><span class="sp-lbl">18/8/2026</span></div><div style="font-size:10.5px;font-weight:700;color:var(--text-secondary);margin-bottom:3px">All Stages</div><div class="sp-bar"><div class="sp-fill" style="width:${totalPct}%;background:${totalPct===100?'#15803D':'#7C1461'}"></div></div></div>`;
+  STAGES.forEach((stage, s) => {
+    const p = getStageProgress(s);
+    const color = p.pct===100?'#15803D':'#7C1461';
+    html += `<div class="sp-item">
+      <div class="sp-labels"><span class="sp-lbl">${stage.name}</span><span class="sp-pct" style="color:${color}">${p.pct}%</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);margin-bottom:3px"><span>${stage.dates}</span><span>${stage.datee}</span></div>
+      <div class="sp-bar"><div class="sp-fill" style="width:${p.pct}%;background:${color}"></div></div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function renderTodoList() {
+  const container = document.getElementById('rsb-todo-list');
+  if (!container) return;
+  const undone = TASKS.map((t,i)=>({...t,i})).filter(t=>!taskDone[t.i]);
+  document.getElementById('rsb-todo-count').textContent = undone.length;
+  if (!undone.length) {
+    container.innerHTML = '<div style="text-align:center;padding:12px;font-size:12px;color:#15803D;font-weight:700">🎉 All tasks complete!</div>';
+    return;
+  }
+  container.innerHTML = undone.slice(0,15).map(t => `
+    <div class="todo-item">
+      <input type="checkbox" class="todo-cb" onchange="toggleTask(${t.i},this)">
+      <div class="todo-text">${t.name} <div><span class="npd-owner-badge">NPD OWNER</span></div></div>
+      <div class="todo-due">${t.due}</div>
+    </div>`).join('');
+}
+
+// ===== TAB METADATA =====
+const TAB_META = {
+  account:    { icon:'🏢', label:'GlobalFood Inc.',         permanent: true  },
+  opportunity:{ icon:'📋', label:'OPP-2024-0126'            },
+  project:    { icon:'📁', label:'Project – Instant Coffee' },
+  npd:        { icon:'🧪', label:'NPD-00821 – Turkey Gravy' },
+  initiate:   { icon:'⚡', label:'Initiate NPD'             }
+};
+
+// ===== SCREEN SWITCHING =====
+function switchScreen(name) {
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));
+  document.getElementById('screen-' + name).classList.add('visible');
+
+  const bar = document.getElementById('open-tabs-bar');
+
+  // Check if tab already exists
+  let tab = bar.querySelector(`.open-tab[data-screen="${name}"]`);
+
+  if (!tab) {
+    // Create new tab
+    const meta = TAB_META[name] || { icon:'📄', label: name };
+    tab = document.createElement('div');
+    tab.className = 'open-tab';
+    tab.setAttribute('data-screen', name);
+
+    const closeBtn = meta.permanent ? '' :
+      `<span class="tab-close" onclick="closeTab(event,'${name}')">×</span>`;
+
+    tab.innerHTML = `${meta.icon} ${meta.label}${closeBtn}`;
+    tab.addEventListener('click', function(e) {
+      if (!e.target.classList.contains('tab-close')) switchScreen(name);
+    });
+    bar.appendChild(tab);
+  }
+
+  // Mark active
+  bar.querySelectorAll('.open-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+
+  // Update nav dropdown label
+  document.getElementById('obj-dd-label').textContent = OBJ_NAMES[name] || name;
+}
+
+function closeTab(e, name) {
+  e.stopPropagation();
+  const bar = document.getElementById('open-tabs-bar');
+  const tab = bar.querySelector(`.open-tab[data-screen="${name}"]`);
+  const wasActive = tab && tab.classList.contains('active');
+  if (tab) tab.remove();
+  // If we closed the active tab, go back to account
+  if (wasActive) switchScreen('account');
+}
+
+// Navigate from dropdown
+function navToScreen(name, label) {
+  switchScreen(name);
+  document.getElementById('obj-dropdown-menu').classList.remove('open');
+}
+
+// Wire the permanent account tab click
+document.querySelector('.open-tab[data-screen="account"]').addEventListener('click', function() {
+  switchScreen('account');
+});
+
+// ===== OBJECT NAMES MAP =====
+const OBJ_NAMES = { account:'Accounts', opportunity:'Opportunities', project:'Projects', npd:'NPD Records', initiate:'Initiate NPD' };
+
+// Toggle dropdown
+function toggleObjDropdown() {
+  document.getElementById('obj-dropdown-menu').classList.toggle('open');
+}
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.obj-dropdown-wrap')) {
+    document.getElementById('obj-dropdown-menu').classList.remove('open');
+  }
+});
+
+// ===== TAB SWITCHING =====
+function switchTab(btn, show, ...hide) {
+  const parent = btn.closest('.rec-header').nextElementSibling;
+  btn.closest('.tab-row').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(show).style.display='block';
+  hide.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+}
+function switchNPDTab(btn, show, ...hide) {
+  btn.closest('.tab-row').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(show).style.display='block';
+  hide.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  if (show === 'npd-taskdash-pane') renderTaskDashboard();
+}
+function switchRsbTab(btn, show, ...hide) {
+  btn.closest('.rsb-tabs').querySelectorAll('.rsb-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(show).style.display='block';
+  hide.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+}
+
+// ===== WIZARD =====
+let wizStep = 1;
+function openWizard() { document.getElementById('wizard-modal').classList.remove('hidden'); goWiz(1); }
+function closeWizard() { document.getElementById('wizard-modal').classList.add('hidden'); }
+function goWiz(s) {
+  wizStep = s;
+  [1,2,3].forEach(n => {
+    document.getElementById('ws'+n).style.display = n===s?'block':'none';
+    const c = document.getElementById('wc'+n), l = document.getElementById('wl'+n);
+    if (n<s) { c.className='wiz-circle done'; c.textContent='✓'; l.className='wiz-lbl'; }
+    else if (n===s) { c.className='wiz-circle current'; c.textContent=n; l.className='wiz-lbl current'; }
+    else { c.className='wiz-circle pending'; c.textContent=n; l.className='wiz-lbl'; }
+  });
+  document.getElementById('wiz-prev').style.display = s>1?'block':'none';
+  document.getElementById('wiz-next').style.display = s<3?'block':'none';
+  document.getElementById('wiz-finish').style.display = s===3?'block':'none';
+  const labels = ['','Add Products →','Product Project Data →'];
+  document.getElementById('wiz-next').textContent = labels[s]||'Next →';
+}
+function wizNext() { if (wizStep<3) goWiz(wizStep+1); }
+function wizPrev() { if (wizStep>1) goWiz(wizStep-1); }
+function openUploadModal() { document.getElementById('upload-modal').classList.remove('hidden'); }
+
+// ===== CONTACT LOOKUP =====
+const CONTACTS = [
+  { name:'James Carter', role:'Procurement', company:'GlobalFood Inc.' },
+  { name:'Maria Schmidt', role:'R&D', company:'GlobalFood Inc.' },
+  { name:'Robert Klein', role:'Quality Manager', company:'GlobalFood Inc.' },
+  { name:'Sophie Andersen', role:'Supply Chain', company:'GlobalFood Inc.' },
+  { name:'Lena Brauer', role:'Finance', company:'GlobalFood Inc.' },
+  { name:'Thomas Müller', role:'CEO', company:'GlobalFood Inc.' },
+];
+function showContactDropdown() {
+  filterContacts('');
+  document.getElementById('contact-lookup-dd').style.display = 'block';
+  document.addEventListener('mousedown', hideContactDropdown, { once: false });
+}
+function hideContactDropdown(e) {
+  const dd = document.getElementById('contact-lookup-dd');
+  const inp = document.getElementById('contact-lookup-input');
+  if (!dd.contains(e.target) && e.target !== inp) {
+    dd.style.display = 'none';
+  }
+}
+function filterContacts(val) {
+  const q = val.toLowerCase();
+  const matches = CONTACTS.filter(c => c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q));
+  const list = document.getElementById('contact-lookup-list');
+  if (!matches.length) {
+    list.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:var(--text-secondary)">No contacts found</div>';
+    return;
+  }
+  list.innerHTML = matches.map(c => `
+    <div onclick="selectContact('${c.name}')" style="display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='#F8F2F7'" onmouseout="this.style.background='white'">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;flex-shrink:0">${c.name.split(' ').map(x=>x[0]).join('')}</div>
+      <div><div style="font-size:12.5px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--text-secondary)">${c.role} · ${c.company}</div></div>
+    </div>`).join('');
+  document.getElementById('contact-lookup-dd').style.display = 'block';
+}
+function selectContact(name) {
+  document.getElementById('contact-lookup-input').value = name;
+  document.getElementById('contact-lookup-dd').style.display = 'none';
+}
+document.addEventListener('mousedown', function(e) {
+  const dd = document.getElementById('contact-lookup-dd');
+  const inp = document.getElementById('contact-lookup-input');
+  if (dd && inp && !dd.contains(e.target) && e.target !== inp) {
+    dd.style.display = 'none';
+  }
+});
+
+// ===== PRODUCT CATALOG FILTER =====
+function filterCatalog(val) {
+  const q = val.toLowerCase();
+  document.querySelectorAll('#catalog-tbody tr').forEach(row => {
+    const desc = row.getAttribute('data-desc') || '';
+    row.style.display = desc.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+function toggleAllCatalog(cb) {
+  document.querySelectorAll('.catalog-cb').forEach(c => { c.checked = cb.checked; });
+  updateSkuCount();
+}
+function updateSkuCount() {
+  const total = document.querySelectorAll('.catalog-cb:checked').length;
+  document.getElementById('sku-selected-count').textContent = total + ' selected';
+}
+
+// ===== FILE UPLOAD & PARSING =====
+let uploadedRows = []; // Holds rows parsed from the user's actual file
+
+function handleFileSelect(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const nameEl = document.getElementById('upload-file-name');
+  nameEl.textContent = '📎 ' + file.name;
+  nameEl.style.display = 'block';
+  uploadedRows = [];
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    const reader = new FileReader();
+    reader.onload = function(e) { uploadedRows = parseCSV(e.target.result); };
+    reader.readAsText(file);
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      uploadedRows = parseSheetRows(raw);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    alert('Please upload a .csv, .xlsx or .xls file.');
+  }
+}
+
+// Parse a CSV string into array of {colName: value} objects
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 1) return [];
+  const headers = splitCSVLine(lines[0]).map(stripValidation);
+  if (lines.length < 2) return [];
+  return lines.slice(1)
+    .filter(l => l.trim())
+    .map(line => {
+      const vals = splitCSVLine(line);
+      const row = {};
+      headers.forEach((h, i) => { row[h] = (vals[i] || '').trim().replace(/^"|"$/g, ''); });
+      return row;
+    });
+}
+
+// Parse rows from SheetJS (array-of-arrays)
+function parseSheetRows(rows) {
+  if (rows.length < 1) return [];
+  const headers = rows[0].map(h => stripValidation(String(h || '')));
+  return rows.slice(1)
+    .filter(r => r.some(v => v !== ''))
+    .map(vals => {
+      const row = {};
+      headers.forEach((h, i) => { row[h] = String(vals[i] !== undefined ? vals[i] : ''); });
+      return row;
+    });
+}
+
+// Strip the " - validation description" suffix from header names
+function stripValidation(raw) {
+  return raw.split(' - ')[0].trim().replace(/^"|"$/g, '');
+}
+
+// Robust CSV line splitter (handles quoted commas)
+function splitCSVLine(line) {
+  const res = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { res.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  res.push(cur);
+  return res;
+}
+
+// ===== IMPORT — render whatever was parsed from the file =====
+function simulateImport() {
+  if (!uploadedRows.length) {
+    alert('No data found. Please upload a filled-in template file first.');
+    return;
+  }
+  renderProductRows(uploadedRows);
+  document.getElementById('upload-modal').classList.add('hidden');
+}
+
+function renderProductRows(rows) {
+  document.getElementById('new-products-empty').style.display = 'none';
+  document.getElementById('new-products-table').style.display = 'block';
+  const tbody = document.getElementById('new-products-tbody');
+  const g = (row, key) => row[key] !== undefined ? row[key] : '';
+
+  tbody.innerHTML = rows.map(p => `
+    <tr>
+      <td><input type="checkbox" checked></td>
+      <td><input class="inline-input" value="${esc(g(p,'Product Description'))}" style="min-width:180px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Recipe'))}" style="min-width:110px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Ofi Internal Code'))}" style="min-width:100px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'External Customer Code'))}" style="min-width:100px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Packaging Number'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Cap Number'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Box or Tray Material Number'))}" style="min-width:90px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Raw Material and Packaging Combination Number'))}" style="min-width:90px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Target Net Weight'))}" style="min-width:70px"></td>
+      <td><select class="inline-sel" style="min-width:70px">${uomOpts(g(p,'UOM'))}</select></td>
+      <td><input class="inline-input" value="${esc(g(p,'MOQ'))}" style="min-width:65px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Plant'))}" style="min-width:100px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Case Pack'))}" style="min-width:70px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Secondary Packaging'))}" style="min-width:120px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Pallet Requirements'))}" style="min-width:110px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Certification and/or Claims'))}" style="min-width:100px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Annual Volume (Cases)'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Annual Volume (Units)'))}" style="min-width:80px"></td>
+      <td><select class="inline-sel" style="min-width:70px">${yesNoOpts(g(p,'Limited Time Offer'))}</select></td>
+      <td><select class="inline-sel" style="min-width:70px">${yesNoOpts(g(p,'Incremental Revenue'))}</select></td>
+      <td><input class="inline-input" value="${esc(g(p,'Target Retail Price'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Sales Price Per Unit'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Size of Prize'))}" style="min-width:85px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Competitor Brand'))}" style="min-width:110px"></td>
+      <td><select class="inline-sel" style="min-width:130px"><option selected>Customer Project</option></select></td>
+      <td><input class="inline-input" value="${esc(g(p,'PL/ofi Brand/Copacker'))}" style="min-width:110px"></td>
+      <td><select class="inline-sel" style="min-width:130px">${cutoverOpts(g(p,'Graphic Change Cutover'))}</select></td>
+      <td><input class="inline-input" value="${esc(g(p,'Target Retail Margin'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Target ofi Margin'))}" style="min-width:80px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Target Launch Date'))}" style="min-width:100px"></td>
+      <td><input class="inline-input" value="${esc(g(p,'Team Member Email'))}" style="min-width:180px"></td>
+    </tr>`).join('');
+}
+
+// ===== RENDER HELPERS =====
+function esc(v) {
+  return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function norm(s) { return String(s || '').toLowerCase().trim(); }
+function uomOpts(val) {
+  return ['KG','MT','LB','Pods','Cases','Each']
+    .map(o => `<option${norm(o)===norm(val)?' selected':''}>${o}</option>`).join('');
+}
+function yesNoOpts(val) {
+  const v = norm(val);
+  const isYes = v==='yes'||v==='true';
+  const isNo  = v==='no' ||v==='false';
+  return `<option${isYes?' selected':''}>Yes</option><option${isNo?' selected':''}>No</option>`;
+}
+function cutoverOpts(val) {
+  return ['Soft Transition','Hard Transition','Not Applicable']
+    .map(o => `<option${norm(o)===norm(val)?' selected':''}>${o}</option>`).join('');
+}
+
+// ===== DOWNLOAD TEMPLATE =====
+function downloadTemplate() {
+  const header = `Product Description - All formats accepted, Recipe - All formats accepted, Ofi Internal Code - All formats accepted,External Customer Code - Enter Unique Product Specification Code here , Packaging Number - All formats accepted, Cap Number - All formats accepted, Box or Tray Material Number - All formats accepted, Raw Material and Packaging Combination Number - All formats accepted, Target Net Weight - Positive/negative and zero values accepted (up to 2 decimal places), UOM - MT/LB/KG/Pods/Cases/Each(case-insensitive) are the only Accepted Values, MOQ - All positive numbers including 0 accepted, Plant - Code or business area description of the plant location accepted, Case Pack - All numeric formats accepted (positive/negative or zero), Secondary Packaging - All formats accepted, Pallet Requirements - All formats accepted, Certification and/or Claims - All formats accepted, Annual Volume (Cases) - Positive/negative and zero values accepted (up to 2 decimal places), Annual Volume (Units) - Positive/negative and zero values accepted (up to 2 decimal places), Limited Time Offer - true/false or yes/no (case-insensitive) accepted, Incremental Revenue - true/false or yes/no (case-insensitive) accepted, Target Retail Price - Positive/negative and zero values accepted (up to 2 decimal places), Sales Price Per Unit - Positive/negative and zero values accepted (up to 2 decimal places), Size of Prize - Positive/negative and zero values accepted (up to 2 decimal places), Competitor Brand - All formats accepted, Project Type - Only 'Customer Project' accepted, PL/ofi Brand/Copacker - All formats accepted, Graphic Change Cutover - Soft Transition/Hard Transition/Not Applicable are the only Accepted Values, Target Retail Margin - Positive/negative and zero values accepted (up to 2 decimal places), Target ofi Margin - Positive/negative and zero values accepted (up to 2 decimal places), Target Launch Date - Date format MM/DD/YY or MM/DD/YYYY accepted, Team Member Email - Valid email format required(e.g. john.doe@example.com)`;
+  const blob = new Blob([header + '\n'], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'Opportunity_Product_Insert.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== APPROVAL POPUP =====
+const APPROVERS = [
+  { name:'Chittaranjan Sahu', role:'Functional Consultant – Mindsprint', color:'#7C1461', initials:'CS' },
+  { name:'Maria Zarate', role:'NPD Owner', color:'#0F766E', initials:'MZ' },
+  { name:'Erica Morales', role:'Commercialization Lead', color:'#B45309', initials:'EM' },
+  { name:'James Carney', role:'Project Manager', color:'#1D4ED8', initials:'JC' },
+  { name:'John Carney', role:'Innovation Head', color:'#6D28D9', initials:'JK' }
+];
+let selectedApprover = null;
+function openApprovalModal() {
+  selectedApprover = null;
+  document.getElementById('approval-body').style.display = 'block';
+  document.getElementById('approval-success-body').style.display = 'none';
+  const completedStage = currentActiveStage > 0 ? currentActiveStage - 1 : 0;
+  const stageName = currentActiveStage <= 5 ? STAGES[currentActiveStage > 0 ? currentActiveStage-1 : 0].name.replace(/^\d+ – /,'') : 'Final';
+  document.getElementById('approval-stage-text').textContent = `${stageName} Stage Complete — Submit for next stage approval`;
+  const list = document.getElementById('approver-list');
+  list.innerHTML = APPROVERS.map((a,i) => `
+    <div class="approver-option" onclick="selectApprover(${i},this)" id="approver-${i}">
+      <div class="approver-avatar" style="background:${a.color}">${a.initials}</div>
+      <div><div class="approver-name">${a.name}</div><div class="approver-role">${a.role}</div></div>
+    </div>`).join('');
+  document.getElementById('submit-approval-confirm').style.opacity='0.4';
+  document.getElementById('submit-approval-confirm').style.pointerEvents='none';
+  document.getElementById('approval-modal').classList.remove('hidden');
+}
+function selectApprover(idx, el) {
+  selectedApprover = idx;
+  document.querySelectorAll('.approver-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('submit-approval-confirm').style.opacity='1';
+  document.getElementById('submit-approval-confirm').style.pointerEvents='auto';
+}
+function confirmApproval() {
+  if (selectedApprover === null) return;
+  const a = APPROVERS[selectedApprover];
+  document.getElementById('approval-body').style.display = 'none';
+  document.getElementById('approval-success-body').style.display = 'block';
+  document.getElementById('approval-success-text').textContent = `Approval request sent to ${a.name} (${a.role}). The NPD will advance to the next stage upon approval.`;
+}
+
+
+// ===== APP LAUNCHER =====
+function toggleAppLauncher() {
+  const panel = document.getElementById('al-panel');
+  const overlay = document.getElementById('al-overlay');
+  const isOpen = panel.style.display !== 'none';
+  closeAll();
+  if (!isOpen) {
+    panel.style.display = 'block';
+    overlay.classList.add('open');
+  }
+}
+function closeAppLauncher() {
+  document.getElementById('al-panel').style.display = 'none';
+  document.getElementById('al-overlay').classList.remove('open');
+}
+
+// ===== SETTINGS =====
+function toggleSettings(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('settings-dd');
+  const isOpen = dd.classList.contains('open');
+  closeAll();
+  if (!isOpen) dd.classList.add('open');
+}
+
+// ===== PROFILE =====
+function toggleProfile(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('profile-dd');
+  const isOpen = dd.classList.contains('open');
+  closeAll();
+  if (!isOpen) dd.classList.add('open');
+}
+
+// ===== CLOSE ALL PANELS =====
+function closeAll(e) {
+  if (e && e.target.closest('.obj-dropdown-wrap')) return;
+  document.getElementById('al-panel').style.display = 'none';
+  document.getElementById('al-overlay').classList.remove('open');
+  document.getElementById('settings-dd').classList.remove('open');
+  document.getElementById('profile-dd').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.app-launcher-panel') &&
+      !e.target.closest('.waffle-btn') &&
+      !e.target.closest('.settings-dropdown') &&
+      !e.target.closest('[title="Setup"]') &&
+      !e.target.closest('.profile-dropdown') &&
+      !e.target.closest('.nav-avatar') &&
+      !e.target.closest('.obj-dropdown-wrap')) {
+    closeAll();
+    document.getElementById('obj-dropdown-menu').classList.remove('open');
+  }
+});
+
+// ===== INIT =====
+renderStageBars();
+renderTodoList();
+updateNpdStagePath();
+</script>
+
+<!-- ===== APP LAUNCHER ===== -->
+<div class="app-launcher-overlay" id="al-overlay" onclick="closeAll(event)">
+</div>
+<div class="app-launcher-panel" id="al-panel" style="display:none">
+  <div class="al-header">
+    App Launcher
+    <button class="al-close" onclick="closeAppLauncher()">×</button>
+  </div>
+  <div class="al-search">
+    <input type="text" placeholder="🔍  Search apps and items...">
+  </div>
+  <div class="al-section-title">Apps</div>
+  <div class="al-apps-grid">
+    <div class="al-app-item">
+      <div class="al-app-icon" style="background:#E8F0FE">🔵</div>
+      <div class="al-app-name">Sales</div>
+    </div>
+    <div class="al-app-item">
+      <div class="al-app-icon" style="background:#E3F2E1">🟢</div>
+      <div class="al-app-name">Sales Leadership</div>
+    </div>
+    <div class="al-app-item">
+      <div class="al-app-icon" style="background:#FDE8E8">🔴</div>
+      <div class="al-app-name">Lead Generation</div>
+    </div>
+    <div class="al-app-item">
+      <div class="al-app-icon" style="background:#EDE9FE">🟣</div>
+      <div class="al-app-name">Sales Operations</div>
+    </div>
+    <div class="al-app-item">
+      <div class="al-app-icon" style="background:#FEF3C7">🟡</div>
+      <div class="al-app-name">Relationship Management</div>
+    </div>
+    <div class="al-app-item" onclick="closeAppLauncher()" style="background:#F5EBF4;border-radius:5px">
+      <div class="al-app-icon" style="background:#F0D8EB">🟤</div>
+      <div class="al-app-name" style="color:var(--accent);font-weight:700">GFIC Console</div>
+    </div>
+    <div class="al-app-item">
+      <div class="al-app-icon" style="background:#E0F2FE">🔷</div>
+      <div class="al-app-name">Bolt Solutions</div>
+    </div>
+  </div>
+  <div class="al-view-all"><a href="#">View All</a></div>
+</div>
+
+<!-- ===== SETTINGS DROPDOWN ===== -->
+<div class="settings-dropdown" id="settings-dd">
+  <div class="sd-section">
+    <div class="sd-title">Setup</div>
+    <div class="sd-item">⚙ &nbsp;Setup</div>
+    <div class="sd-item">🔧 &nbsp;Developer Console</div>
+    <div class="sd-item">📝 &nbsp;Edit Page</div>
+  </div>
+  <div class="sd-divider"></div>
+  <div class="sd-section">
+    <div class="sd-title">Service</div>
+    <div class="sd-item">💬 &nbsp;Give Feedback</div>
+    <div class="sd-item">❓ &nbsp;Help & Training</div>
+  </div>
+</div>
+
+<!-- ===== PROFILE DROPDOWN ===== -->
+<div class="profile-dropdown" id="profile-dd">
+  <div class="pd-header">
+    <div class="pd-avatar-lg">CS</div>
+    <div>
+      <div class="pd-name">Chittaranjan Sahu</div>
+      <div class="pd-role">Functional Consultant · Mindsprint</div>
+    </div>
+  </div>
+  <div class="pd-body">
+    <div class="pd-item">👤 &nbsp;My Profile</div>
+    <div class="pd-item">⚙ &nbsp;My Settings</div>
+    <div class="pd-item">🌐 &nbsp;Switch to Salesforce Classic</div>
+    <div class="pd-divider"></div>
+    <div class="pd-item" style="font-size:11.5

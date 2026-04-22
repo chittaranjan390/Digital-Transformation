@@ -1061,8 +1061,8 @@ a{color:var(--blue2);text-decoration:none}
       </div>
       <div style="background:var(--navy);border-radius:var(--radius2);padding:16px 22px;text-align:center;flex-shrink:0">
         <div style="font-size:11px;font-weight:600;color:var(--steel);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Quote Expires In</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:#fff;line-height:1" id="quote-timer">3:58:22</div>
-        <div style="font-size:11px;color:var(--steel);margin-top:4px" id="quote-validity-label">Valid 4 hours · Based on order value</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:#fff;line-height:1" id="quote-timer">23:58:22</div>
+        <div style="font-size:11px;color:var(--steel);margin-top:4px" id="quote-validity-label">Valid 24 hours · Based on order value</div>
       </div>
     </div>
     <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius2);padding:14px 20px;margin-bottom:22px;display:flex;gap:28px;flex-wrap:wrap">
@@ -2005,7 +2005,7 @@ async function confirmAllQuotes(){
 function startQuoteTimer(cartItems){
   if(quoteTimerInterval)clearInterval(quoteTimerInterval);
   const sub=cartItems.reduce((s,i)=>s+i.qty*(i.price||60000),0);
-  let validMinutes = sub<300000?120:sub<2000000?240:480;
+  let validMinutes = 1440;
   document.getElementById('quote-validity-label').textContent=`Valid ${validMinutes/60} hours · Based on order value`;
   let remaining=validMinutes*60;
   function tick(){
